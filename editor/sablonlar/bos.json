@@ -1,0 +1,51 @@
+{
+    "pages":[
+        {
+            "id":"hale",
+            "order":1,
+            "w":600,
+            "h":700,
+            "bgColor":"#fff",
+            "bgImage":"images/FTS1245.png",
+            "objects":[
+                {
+                    "id":"obj0",
+                    "type":"Textbox",
+                    "left":100,
+                    "top":150,
+                    "zIndex":0,
+                    "width":400,
+                    "height":100,
+                    "angle":0,
+                    "fill":"#000000",
+                    "fontSize":30,
+                    "fontFamily":"Arial",
+                    "textAlign":"center",
+                    "strokeWidth":2,
+                    "stroke": "#D81B60",
+                    "defaultText":"Yazı Alanı",
+                    "userText":"",
+                    "charLimit":25,
+                    "lineLimit":2,
+                    "fixedWidth":true,
+                    "fixedFontSize":true
+                },
+                {
+                    "id":"obj3",
+                    "type":"CropArea",
+                    "left":200,
+                    "top":200,
+                    "zIndex":0,
+                    "width":200,
+                    "height":300,
+                    "angle":0,
+                    "fill":"#000000",
+                    "bgColor":"#cccccc",
+                    "targetImage":"",
+                    "cropArea":{"x1":0,"y1":0,"x2":0,"y2":0}
+                }
+            ]
+        }
+         
+    ]
+}

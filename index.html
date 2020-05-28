@@ -3,10 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>agEditor</title>
-    <script src="dist/ageditor.js"></script>
+    <title>agEditor</title> 
+
+    <script src="editor/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="editor/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link   rel="stylesheet" type="text/css" href="editor/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="editor/lib/fabric.min.js"></script>
+    <script src="editor/ageditor.js"></script>
+    <link rel="stylesheet" type="text/css" href="editor/ag.css">
+    <script src="editor/ag.js"></script>
+    <script src="editor/node_modules/@fortawesome/fontawesome-free/js/all.js"></script>
+    <link rel="stylesheet" type="text/css" href="editor/node_modules/@fortawesome/fontawesome-free/css/all.css">
+    
 </head>
 <body>
+
+    <!-- =========================================  TOP MENU    =====================  -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" id="ag-yeni" href="#">Yeni</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" id="bg-ekle" href="#"><i class="fas fa-stroopwafel"></i></a>
+            <a class="nav-item nav-link" href="#"><i class="fab fa-tumblr-square"></i></a>
+            <a class="nav-item nav-link" href="#"><i class="fas fa-image"></i></a>
+            <a class="nav-item nav-link" href="#"><i class="fas fa-eye"></i></a>
+          </div>
+        </div>
+    </nav>
+    <!-- END-->
+
+    <!-- =========================================  AGEDİTÖR MENU    =====================  -->
+    <div id="ageditor">
+
+    </div>
+    <!-- END-->
+
+    <!-- =========================================  RIGHT PANEL    =====================  -->
+    <div id="right-panel">
+
+    </div>
+    <!-- END-->
+
+
+
+
+
+
+
+
+
+
+
+    <!-- =========================================  MODAL ŞABLON SEÇ    =====================  -->
+    <div class="modal" tabindex="-1" id="modal-yeni" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Şablon Seç</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+                <div   class="sablon" data-sablon-adi="bos">
+                  Boş
+                </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+    <!-- =========================================  MODAL KÜTÜPHANE SEÇ    =====================  -->
+    <div class="modal" tabindex="-1" id="modal-kutuphane" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Resimler</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+
+
     
 </body>
+
 </html>
