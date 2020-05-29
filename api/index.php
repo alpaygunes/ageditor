@@ -19,7 +19,10 @@ if($command == "getBgImages"){
             if(is_dir($path)){
                 $list[] = ['type'=>'folder' ,'path'=>$path  ,'name'=>$fval];
             }else{
-                $list[] = ['type'=>'file'   ,'path'=>$path  ,'name'=>$fval];
+                $ext = pathinfo($fval, PATHINFO_EXTENSION);
+                if(in_array($ext,['jpg','png','svg','jpeg'])){
+                    $list[] = ['type'=>'file'   ,'path'=>$path  ,'name'=>$fval];
+                }
             }
         }
     }

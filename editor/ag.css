@@ -1,24 +1,25 @@
-html{
+html {
     margin-top: 64px;
 }
-body{
+
+body {
     min-width: 1000px;
     margin: 0px;
-    background-color:darkgrey;
+    background-color: darkgrey;
 }
- 
 
-.clear{
+
+.clear {
     height: 10px;
     width: 100%;
     display: block;
     background-color: darkgrey;
 }
 
-#right-panel{
+#right-panel {
     margin: 10px;
-    right: 0px; 
-    top:64px;
+    right: 0px;
+    top: 64px;
     position: fixed;
     width: 300px;
     height: 88%;
@@ -29,22 +30,22 @@ body{
     overflow-y: auto;
 }
 
-#ageditor{
-    position: relative;   
+#ageditor {
+    position: relative;
     margin: 10px;
 }
 
-.sablon{
+.sablon {
     height: 96px;
     width: 64px;
     border: 1px;
-    margin: 10px; 
+    margin: 10px;
     background-color: bisque;
     cursor: pointer;
 }
 
-.img-thumbnail{
-    max-width: 64px!important;
+.img-thumbnail {
+    max-width: 64px !important;
     height: 96px;
     width: 64px;
     margin: 10px;
@@ -52,19 +53,19 @@ body{
     position: relative;
 }
 
-.img-thumbnail:hover{
+.img-thumbnail:hover {
     background-color: aliceblue;
 }
 
-.img-thumbnail img{
+.img-thumbnail img {
     display: block;
-    padding: 2px!important;
+    padding: 2px !important;
     border: 1px solid #ccc;
     max-height: 120px;
     width: 100%;
 }
 
-.img-thumbnail .file-name{
+.img-thumbnail .file-name {
     display: block;
     width: 95%;
     font-size: 8px;
