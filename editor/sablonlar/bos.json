@@ -1,7 +1,7 @@
 {
     "pages":[
         {
-            "id":"hale",
+            "id":"10000",
             "order":1,
             "w":600,
             "h":700,
@@ -9,7 +9,7 @@
             "bgImage":"",
             "objects":[
                 {
-                    "id":"obj0",
+                    "id":10001,
                     "type":"Textbox",
                     "left":100,
                     "top":150,
@@ -31,15 +31,15 @@
                     "fixedFontSize":true
                 },
                 {
-                    "id":"obj3",
-                    "type":"CropArea",
+                    "id":10002,
+                    "type":"CropBox",
                     "left":200,
                     "top":200,
                     "zIndex":0,
                     "width":200,
                     "height":300,
                     "angle":0,
-                    "fill":"#000000",
+                    "fill":"rgba(200,200,200,0.5)",
                     "bgColor":"#cccccc",
                     "targetImage":"",
                     "cropArea":{"x1":0,"y1":0,"x2":0,"y2":0}
@@ -47,7 +47,7 @@
             ]
         },
         {
-            "id":"hales",
+            "id":"20000",
             "order":1,
             "w":600,
             "h":700,
@@ -55,7 +55,7 @@
             "bgImage":"",
             "objects":[
                 {
-                    "id":"obj0",
+                    "id":20001,
                     "type":"Textbox",
                     "left":100,
                     "top":150,
@@ -77,15 +77,15 @@
                     "fixedFontSize":true
                 },
                 {
-                    "id":"obj3",
-                    "type":"CropArea",
+                    "id":20002,
+                    "type":"CropBox",
                     "left":200,
                     "top":200,
                     "zIndex":0,
                     "width":200,
                     "height":300,
                     "angle":0,
-                    "fill":"#000000",
+                    "fill":"rgba(200,200,200,0.5)",
                     "bgColor":"#cccccc",
                     "targetImage":"",
                     "cropArea":{"x1":0,"y1":0,"x2":0,"y2":0}

@@ -1,28 +1,49 @@
 $('document').ready(function(){
     var agEditor = new AgEditor();
+    var gorev = '' // bg-ekle | logo-ekle
     
     $('#ag-yeni').click(function(){
         $('#modal-yeni').modal();
     })
 
     $('#bg-ekle').click(function(){
-        getBigImages('/');
+        gorev = 'bg-ekle'
+        openImageBrowser('/');
     })
 
     $('#textarea-ekle').click(function(){
         agEditor.addTextArea();
     })
 
+    $('#croparea-ekle').click(function(){
+        agEditor.addCropArea();
+    })
+
+    $('#logo-ekle').click(function(){
+        gorev = 'logo-ekle'
+        openImageBrowser('/');
+    })
+
+    $('#canvas-ekle').click(function(){
+        agEditor.addCanvas();
+    })
+
+    
+
     $('.modal-body').on('click','.img-thumbnail',function(){
         folder = $(this).attr('data-path')
         if(folder != undefined){
-            getBigImages(folder);
+            openImageBrowser(folder);
         }else{
             imgElm = $(this).find('img');
-            agEditor.setPageBgImage(imgElm);
+            if(gorev == "bg-ekle"){
+                agEditor.setPageBgImage(imgElm);
+            }else if(gorev == "logo-ekle"){
+                agEditor.addLogo(imgElm);
+            }
         }
-                
     })
+
  
     $('.sablon').click(function(){
         sablon_adi  = $(this).attr('data-sablon-adi');
@@ -36,7 +57,7 @@ $('document').ready(function(){
 })//end documenar ready
 
 
-function getBigImages(folder){
+function openImageBrowser(folder){
     url = "api/?command=getBgImages&folder="+folder
     $.get(url,function(files){
         $('#modal-kutuphane .modal-body').empty();

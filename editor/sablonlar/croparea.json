@@ -1,0 +1,13 @@
+{
+    "id":"obj3",
+    "type":"CropBox",
+    "left":200,
+    "top":200,
+    "zIndex":0,
+    "width":200,
+    "height":300,
+    "angle":0,
+    "fill":"rgba(200,200,200,0.5)",
+    "targetImage":"",
+    "cropArea":{"x1":0,"y1":0,"x2":0,"y2":0}
+}
