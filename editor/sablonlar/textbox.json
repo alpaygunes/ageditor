@@ -18,5 +18,5 @@
     "charLimit":25,
     "lineLimit":2,
     "fixedWidth":true,
-    "fixedFontSize":true
+    "fixedFontSize":false
 }

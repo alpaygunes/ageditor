@@ -2,6 +2,8 @@ $('document').ready(function(){
     var agEditor = new AgEditor();
     var gorev = '' // bg-ekle | logo-ekle
     
+    $('.navbar-nav .nav-link').hide();
+    
     $('#ag-yeni').click(function(){
         $('#modal-yeni').modal();
     })
@@ -28,7 +30,9 @@ $('document').ready(function(){
         agEditor.addCanvas();
     })
 
-    
+    $('#obje-sil').click(function(){
+        agEditor.removeObject();
+    })
 
     $('.modal-body').on('click','.img-thumbnail',function(){
         folder = $(this).attr('data-path')
@@ -44,7 +48,6 @@ $('document').ready(function(){
         }
     })
 
- 
     $('.sablon').click(function(){
         sablon_adi  = $(this).attr('data-sablon-adi');
         url         = "editor/sablonlar/"+sablon_adi+'.json'
@@ -52,6 +55,12 @@ $('document').ready(function(){
             agEditor.empty();
             agEditor.createPages(agdocument); 
         });
+    })
+
+    $('body').on('change','.form-control',function(){
+        prop_name   = $(this).attr('data-prop-name');
+        value       = $(this).val();
+        agEditor.setObjectProperties(prop_name,value);
     })
 
 })//end documenar ready

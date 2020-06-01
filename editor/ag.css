@@ -24,9 +24,7 @@ body {
     width: 300px;
     height: 88%;
     min-height: 500px;
-    display: block;
-    background-color: aliceblue;
-    box-shadow: 1px 2px #ccc;
+    display: block; 
     overflow-y: auto;
 }
 
@@ -73,4 +71,33 @@ body {
     bottom: 0;
     text-align: center;
     word-wrap: break-word;
+}
+
+.properties{
+    width: 100%!important;
+    margin-left: auto!important;
+    margin-right: auto!important;
+}
+
+.table tr td{
+    margin: 0!important;
+    padding: 2px!important;
+    font-size: 12px!important;
+    padding-left: 12px!important;
+}
+
+.form-control{ 
+    height: fit-content!important;
+    padding: 1px!important;
+    border-radius: 0!important;
+    font-size: 12px!important;
+    padding-left: 5px!important;
+}
+
+.card{
+    border-radius: 0px!important;
+}
+.card-header {
+    padding: 0.5rem 1.25rem;   
+    font-size: 16px;
 }

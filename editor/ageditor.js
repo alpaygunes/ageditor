@@ -12,6 +12,14 @@ class AgEditor {
         this._loadTextBoxJson();
         this._loadCropBoxJson();
         this._loadLogoBoxJson();
+        this.fonts               = {arial:"Arial"}
+        this.align               = {"Left":"left"
+                                    ,"Center":"center"
+                                    ,"Right":"right"
+                                    ,"Justify":"justify"
+                                    ,"Justify Left":"justify-left"
+                                    ,"Justify Center":"justify-center"
+                                    ,"Justify Right":"justify-right"}
     }
 
     async createPages(agdocument){
@@ -26,17 +34,10 @@ class AgEditor {
     }
 
     async setPageBgImage(imgElm){
-        if(this.activeCanvas){
-            let BU = this;
-            let wrapper_id = $(this.activeCanvas.getElement()).attr('id');
-            $.each(this.agdocument.pages,function(i,page){
-                if(page.id == wrapper_id){
-                    page.bgImage = $(imgElm).attr('src');
-                    return;
-                }
-            })
-            BU.activeCanvas.setHeight($(imgElm).get(0).naturalHeight);
-            BU.activeCanvas.setWidth($(imgElm).get(0).naturalWidth);
+        let BU = this;
+        if(this.activeCanvas){  
+            this.activeCanvas.setHeight($(imgElm).get(0).naturalHeight);
+            this.activeCanvas.setWidth($(imgElm).get(0).naturalWidth);
             fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
                 oImg.lockMovementX = oImg.lockMovementY = true;
                 oImg.hasControls = false
@@ -51,109 +52,116 @@ class AgEditor {
 
     async addTextArea(){
         if(this.activeCanvas){
-            let BU = this;
-            let wrapper_id = $(this.activeCanvas.getElement()).attr('id');
-            $.each(this.agdocument.pages, async function(i,page){
-                if(page.id == wrapper_id){
-                    BU.textBoxJson      = fabric.util.object.clone(BU.textBoxJson)
-                    BU.textBoxJson.id   = Math.floor(Math.random() * 100000) + 1
-                    page.objects.push(BU.textBoxJson)
-                    let textBoxFabricInstance = await BU.getTextBoxFabricInstance();
-                    textBoxFabricInstance.top = (Math.floor(Math.random() * 300) + 1)
-                    BU.activeCanvas.add(textBoxFabricInstance);
-                }
-            }) 
+            let textBoxFabricInstance = await this.getTextBoxFabricInstance();
+            textBoxFabricInstance.top = (Math.floor(Math.random() * 300) + 1)
+            textBoxFabricInstance.setControlVisible('tl',false)
+            textBoxFabricInstance.setControlVisible('mt',false)
+            textBoxFabricInstance.setControlVisible('tr',false)
+            textBoxFabricInstance.setControlVisible('bl',false)
+            textBoxFabricInstance.setControlVisible('mb',false)
+            textBoxFabricInstance.setControlVisible('br',false)
+            textBoxFabricInstance.agKarakterLimiti = 30
+            this.activeCanvas.add(textBoxFabricInstance);
         }else{
             alert("Sayfa seçin")
         }
     }
 
     async addCropArea(){
-        if(this.activeCanvas){
-            let BU = this;
-            let wrapper_id = $(this.activeCanvas.getElement()).attr('id');
-            $.each(this.agdocument.pages,async function(i,page){
-                if(page.id == wrapper_id){
-                    BU.cropBoxJson = fabric.util.object.clone(BU.cropBoxJson)
-                    BU.cropBoxJson.id = Math.floor(Math.random() * 100000) + 1
-                    page.objects.push(BU.cropBoxJson)
-                    let cropBoxFabricInstance   = await BU.getCropBoxFabricInstance();
-                    cropBoxFabricInstance.top   = (Math.floor(Math.random() * 300) + 1)
-                    BU.activeCanvas.add(cropBoxFabricInstance);
-                }
-            }) 
+        if(this.activeCanvas){  
+            let cropBoxFabricInstance   = await this.getCropBoxFabricInstance();
+            cropBoxFabricInstance.top   = (Math.floor(Math.random() * 300) + 1)
+            this.activeCanvas.add(cropBoxFabricInstance);
         }else{
             alert("Sayfa seçin")
         }
     }
 
     async addLogo(imgElm){
-        if(this.activeCanvas){
-            let BU = this;
-            let wrapper_id = $(this.activeCanvas.getElement()).attr('id');
-            $.each(this.agdocument.pages,async function(i,page){
-                if(page.id == wrapper_id){
-                    BU.logoBoxJson      = fabric.util.object.clone(BU.logoBoxJson)
-                    BU.logoBoxJson.id   = Math.floor(Math.random() * 100000) + 1
-                    page.objects.push(BU.logoBoxJson)
-                    await BU.getLogoBoxFabricInstance(imgElm);
-                }
-            })
- 
+        if(this.activeCanvas){ 
+            await this.getLogoBoxFabricInstance(imgElm); 
         }else{
             alert("Sayfa seçin")
         } 
     }
 
-    async addCanvas(){
-        let id = Math.floor(Math.random() * 100000) + 1;
-        let w  = 600;
-        let h  = 700;
-        let bgColor = "#ffffff"
+    async addCanvas(page){
+        let BU = this;
+        return new Promise(async (resolve,reject)=> {
+            if(!page){
+                page    = {id:Math.floor(Math.random() * 100000) + 1,w:600,h:700,bgColor:"#ffffff"}
+            }
+            let id      = page.id;
+            let w       = page.w;
+            let h       = page.h;
+            let bgColor = page.bgColor;
 
-        $(this.target_html_element).append('<canvas id="'
-                                            +id+'" width="'
-                                            +w*this.scale+'"  height="'
-                                            +h*this.scale+'"></canvas>');
-        $(this.target_html_element).append('<div class="clear"></div'); 
-        let canvas  = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
-        canvas.on("mouse:down", (opt)=>{
-                                    if(this.activeCanvas){
-                                        $(this.activeCanvas.wrapperEl).css('outline','none');
-                                    }
-                                    this.activeCanvas = canvas;
-                                    console.log("CANVAS______\n", canvas)
-                                    console.log("active object______\n", this.activeCanvas.getActiveObject())
-                                    $('#'+id).parent().css('outline','thick solid aqua');
-                                });
-        this.fabricCanvases[id] = canvas;
+            $(BU.target_html_element).append('<canvas id="'
+                                                + id + '" width="'
+                                                + w  * BU.scale + '"  height="'
+                                                + h  * BU.scale + '"></canvas>');
+            $(BU.target_html_element).append('<div class="clear"></div'); 
+
+            let canvas  = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
+
+            canvas.on("mouse:down", (e)=>{
+                    if(BU.activeCanvas){
+                        $(BU.activeCanvas.wrapperEl).css('outline','none');
+                    }
+                    BU.activeCanvas = canvas;
+                    $('#'+id).parent().css('outline','thick solid aqua');
+                    if(!e.target){
+                        BU.refreshMenu();
+                        BU.refreshInputPanel(canvas); 
+                    }else{
+                        BU.refreshMenu();
+                        BU.refreshInputPanel(e.target); 
+                        console.log(e.target)
+                    }
+                });
+            
+            canvas.BU = this
+            canvas.on({
+                'object:moving': this.updateControls,
+                'object:scaling': this.updateControls,
+                'object:resizing': this.updateControls,
+                'object:rotating': this.updateControls
+                });
+
+            BU.fabricCanvases[id] = canvas; 
+            if(BU.activeCanvas){
+                $(BU.activeCanvas.wrapperEl).css('outline','none');
+            }
+            BU.activeCanvas = canvas;
+            resolve();
+        })
+    }
+
+    removeObject(){
+        if(this.activeCanvas.getActiveObject()){
+            this.activeCanvas.remove(this.activeCanvas.getActiveObject());
+        }else if(this.activeCanvas){
+            let canvas_id = $(this.activeCanvas.lowerCanvasEl).attr('id');
+            $(this.activeCanvas.wrapperEl).remove();
+            this.fabricCanvases[canvas_id];
+            BU.activeCanvas = null;
+        }
+    }
+
+    updateControls(e){
+        this.BU.refreshInputPanel(e.target);
     }
 
     async _createCanvas(index){
         let BU = this
         if(this.agdocument.pages.hasOwnProperty(index)){
             let page = this.agdocument.pages[index];
-            return new Promise(async function(resolve,reject) {  
-                $(BU.target_html_element).append('<canvas id="'
-                                                    +page.id+'" width="'
-                                                    +page.w*BU.scale+'"  height="'
-                                                    +page.h*BU.scale+'"></canvas>');
-                $(BU.target_html_element).append('<div class="clear"></div');
+            return new Promise(async (resolve,reject)=> {
+                await BU.addCanvas(page,index);
+                await BU.createObjects(page);
                 index++;
                 await BU._createCanvas(index);
-                let canvas  = new fabric.Canvas(page.id,{backgroundColor:page.bgColor});
-                canvas.on("mouse:down", function(opt){
-                                            if(BU.activeCanvas){
-                                                $(BU.activeCanvas.wrapperEl).css('outline','none');
-                                            }
-                                            BU.activeCanvas = canvas;
-                                            console.log("CANVAS______\n", canvas)
-                                            console.log("active object______\n", BU.activeCanvas.getActiveObject())
-                                            $('#'+page.id).parent().css('outline','thick solid aqua');
-                                        });
-                BU.fabricCanvases[page.id] = canvas;                
-                await BU.createObjects(page)
-                resolve()
+                resolve();
             })
         }
     }
@@ -166,45 +174,12 @@ class AgEditor {
         let BU = this
         if(page.objects.hasOwnProperty(index)){
             return new Promise(async function(resolve,reject) {  
-                let obje = page.objects[index];
-                let fbrkObj;
+                let obje = page.objects[index]; 
                 if(obje.type == 'Textbox'){ 
-                    fbrkObj = new fabric.Textbox(obje.defaultText, 
-                                    {
-                                        id:   obje.id,
-                                        fontFamily: obje.fontFamily,
-                                        left:       obje.left*BU.scale,
-                                        top:        obje.top*BU.scale, 
-                                        width:      obje.width*BU.scale,
-                                        height:     obje.height*BU.scale,
-                                        fixedWidth: obje.fixedWidth,   
-                                        fixedFontSize: obje.fixedFontSize,
-                                        fontSize:   obje.fontSize*BU.scale,
-                                        fill:       obje.fill,
-                                        textAlign:  obje.textAlign,
-                                        stroke:     obje.stroke,
-                                        centeredRotation: true,
-                                        angle:      obje.angle
-                                    });
+                    BU.addTextArea();
                 }else if(obje.type == 'CropBox'){
-                    fbrkObj = new fabric.Rect({
-                                        id:   obje.id,
-                                        left: obje.left*BU.scale,
-                                        top:  obje.top*BU.scale, 
-                                        fill: obje.fill,
-                                        width:obje.width*BU.scale,
-                                        height:obje.height*BU.scale,
-                                        objectCaching: false,
-                                        stroke: 'lightgreen',
-                                        strokeWidth: 1,
-                                    });
+                    BU.addCropArea();
                 }
-
-                if(fbrkObj){
-                    BU.fabricCanvases[page.id].add(fbrkObj) 
-                    BU.fabricCanvases[page.id].centerObjectH(fbrkObj)  
-                }
-                  
                 index++;
                 await BU._createObject(page,index);
                 resolve('OK');
@@ -288,5 +263,87 @@ class AgEditor {
                 resolve();
             });
         })
+    }
+
+    refreshMenu () { 
+        if(this.activeCanvas==null){
+            $('.navbar-nav .nav-link').hide();
+        }else{
+            $('.navbar-nav .nav-link').show();
+        }
+    }
+
+    refreshInputPanel(object){
+        let TR              = null;
+        let panel           = $('#right-panel');
+        let object_type     = object.get('type')
+        // -----------------------------------------------eğer obje bir image text yada rect ise
+        if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
+            
+            if(object_type == 'textbox'){
+                TR    += this._rightPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
+                TR    += this._rightPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fonts)
+                TR    += this._rightPanelTR('fontSize','Font Size','number',object.fontSize)
+                TR    += this._rightPanelTR('textLines','Satir Limiti','number',object.textLines.length)
+                TR    += this._rightPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
+            }else if(object_type == 'rect'){
+                TR    += this._rightPanelTR('height','Height','number',object.height)
+            }
+
+            TR    += this._rightPanelTR('width','Width','number',object.width)
+            TR    += this._rightPanelTR('top','Top','number',object.top)
+            TR    += this._rightPanelTR('left','Left','number',object.left)
+            TR    += this._rightPanelTR('angle','Angle','number',object.angle)
+
+
+            $(panel).find('table').empty();
+            $(panel).find('table').append(TR);
+        // ------------------------------------------------Eğer obje Canvas ise
+        }else if(object instanceof fabric.Canvas){
+            let TR = this._rightPanelTR('width','Width','number',object.width)
+            $(panel).find('.properties').empty();
+            $(panel).find('.properties').append(TR);
+        }
+    }
+
+    _rightPanelTR(prop_name,label,type,value,data=null){
+        let tr = null;
+        if(type == 'number'){
+            tr = '<tr>'
+                +'  <td >'+label+'</td>'
+                +'  <td>'
+                +'      <input class="form-control" type='+type+' value='+value+' data-prop-name="'+prop_name+'">'
+                +'  </td>'
+                +'</tr>';
+        }else if(type == 'select'){
+            tr = '<tr>'
+                +'<td>'+label+'</td>'
+                +'  <td>'
+                +'      <select class="form-control" data-prop-name="'+prop_name+'">'
+            $.each(data,function (i,fv) {  
+                tr +='      <option value="'+fv+'">'+i+'</option>'; 
+            }) 
+            tr +='      </select>'
+                +'  </td>'
+                +'</tr>'
+        }
+        return tr
+    }
+
+    setObjectProperties(prop_name,value){
+        if($.isNumeric(value)){
+            value = parseFloat(value);
+        }
+
+        if(prop_name == 'textLines'){
+            let text='Satir 0';
+            for(let satir = 0;satir<value-1;satir++){
+                text += '\nSatir '+ (satir + 1)
+            }
+            this.activeCanvas.getActiveObject().text = text
+        }
+
+        this.activeCanvas.getActiveObject()[prop_name]=value;
+        this.activeCanvas.requestRenderAll();
     }
 }
