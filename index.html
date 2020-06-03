@@ -6,7 +6,7 @@
     <title>agEditor</title> 
 
     <script src="editor/node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="editor/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="editor/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <link   rel="stylesheet" type="text/css" href="editor/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <script src="editor/lib/fabric.min.js"></script>
     <script src="editor/ageditor.js"></script>
@@ -26,13 +26,53 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
-            <div class="nav-item nav-link" id="bg-ekle" href="#"><i class="fas fa-stroopwafel"></i></div>
-            <div class="nav-item nav-link" id="textarea-ekle" href="#"><i class="fab fa-tumblr-square"></i></div>
-            <div class="nav-item nav-link" id="croparea-ekle" href="#"><i class="fas fa-image"></i></div>
-            <div class="nav-item nav-link" id="logo-ekle" href="#"><i class="fas fa-icons"></i></div>
-            <div class="nav-item nav-link" id="canvas-ekle" href="#"><i class="fas fa-file"></i></div>
-            <div class="nav-item nav-link" id="onizleme"href="#"><i class="fas fa-eye"></i></div>
-            <div class="nav-item nav-link" id="obje-sil"href="#"><i class="fas fa-trash"></i></div>
+            <div class="nav-item nav-link" 
+            data-toggle="tooltip" data-placement="top" title="Zemin Resmi"
+            id="bg-ekle" href="#"><i class="fas fa-stroopwafel"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Metin Kutusu"
+            id="textarea-ekle" href="#"><i class="fab fa-tumblr-square"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Resim Alanı"
+            id="croparea-ekle" href="#"><i class="fas fa-image"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Logo / Serbest Resim"
+            id="logo-ekle" href="#"><i class="fas fa-icons"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Yeni Sayfa"
+            id="canvas-ekle" href="#"><i class="fas fa-file"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Sunum Moduna Geç"
+            id="onizleme"href="#"><i class="fas fa-eye"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Sil"
+            id="obje-sil"href="#"><i class="fas fa-trash"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bilgisayara Kaydet"
+            id="saveJsonToLocal"href="#"><i class="fas fa-file-download"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bilgisayarımdan Aç"
+            id="openJsonFromLocal"href="#"><i class="fas fa-folder-open"></i></div>
+            
+
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bir Alta Gönder"
+            id="sendBackwards"href="#">
+              <svg class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+              </svg>
+            </div>
+            
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bir Öne Getir"
+            id="bringForward"href="#">
+              <svg style="transform: rotate(180deg);" class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+              </svg>
+            </div>
+
           </div>
         </div>
     </nav>

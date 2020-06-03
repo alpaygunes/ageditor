@@ -1,7 +1,7 @@
 $('document').ready(function(){
     var agEditor = new AgEditor();
     var gorev = '' // bg-ekle | logo-ekle
-    
+    $('[data-toggle="tooltip"]').tooltip()
     $('.navbar-nav .nav-link').hide();
     
     $('#ag-yeni').click(function(){
@@ -34,6 +34,26 @@ $('document').ready(function(){
         agEditor.removeObject();
     })
 
+    $('#saveJsonToLocal').click(function(){
+        agEditor.saveJsonToLocal();
+    })
+
+    $('#openJsonFromLocal').click(function(){
+        agEditor.openJsonFromLocal();
+    })
+
+    $('#sendBackwards').click(function(){ 
+        let index = agEditor.activeCanvas.getObjects().indexOf(agEditor.activeCanvas.getActiveObject())
+        if(index>1){
+            agEditor.activeCanvas.sendBackwards(agEditor.activeCanvas.getActiveObject())
+        }
+    })
+    
+    $('#bringForward').click(function(){ 
+        agEditor.activeCanvas.bringForward(agEditor.activeCanvas.getActiveObject())
+    })
+    
+
     $('.modal-body').on('click','.img-thumbnail',function(){
         folder = $(this).attr('data-path')
         if(folder != undefined){
@@ -60,6 +80,12 @@ $('document').ready(function(){
     $('body').on('change','.form-control',function(){
         prop_name   = $(this).attr('data-prop-name');
         value       = $(this).val();
+        agEditor.setObjectProperties(prop_name,value);
+    })
+
+    $('body').on('click','.ag-checkbox',function(){ 
+        prop_name   = $(this).attr('data-prop-name');
+        value       = $(this).is(':checked')?1:0;
         agEditor.setObjectProperties(prop_name,value);
     })
 

@@ -1,0 +1,6 @@
+0 - Menü öğeleri actif objeye göre görünür olsun
+1 - "Yeni" ye tıklayınca kayıtlı json dan açılsın. manuel json a gerek kalmadı
+2 - "Sunum Modu" hazırlansın
+3 - CurveText ve güzel yazı sanatı araştırılsın. (WordArt)
+4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
+5 - Baskı için PDF hazırlansın

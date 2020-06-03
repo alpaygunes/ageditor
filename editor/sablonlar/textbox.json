@@ -13,6 +13,7 @@
     "textAlign":"center",
     "strokeWidth":0,
     "stroke": "#000000",
+    "strokeLineJoin":"round",
     "defaultText":"Yazı Alanı",
     "userText":"",
     "charLimit":25,

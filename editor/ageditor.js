@@ -13,6 +13,8 @@ class AgEditor {
         this._loadCropBoxJson();
         this._loadLogoBoxJson();
         this.fonts               = {arial:"Arial"}
+        this.bolds               = {normal:"Normal",bold:"Bold"}
+        this.italics             = {normal:"Normal",italic:"Italic"}
         this.align               = {"Left":"left"
                                     ,"Center":"center"
                                     ,"Right":"right"
@@ -35,6 +37,7 @@ class AgEditor {
 
     async setPageBgImage(imgElm){
         let BU = this;
+        
         if(this.activeCanvas){  
             this.activeCanvas.setHeight($(imgElm).get(0).naturalHeight);
             this.activeCanvas.setWidth($(imgElm).get(0).naturalWidth);
@@ -42,8 +45,9 @@ class AgEditor {
                 oImg.lockMovementX = oImg.lockMovementY = true;
                 oImg.hasControls = false
                 oImg.evented = false
+                oImg.agSablonResmi = true; 
                 BU.activeCanvas.add(oImg);
-                BU.activeCanvas.moveTo(oImg, 0)
+                BU.activeCanvas.moveTo(oImg, 0) 
             }); 
         }else{
             alert("Sayfa seçin")
@@ -60,7 +64,8 @@ class AgEditor {
             textBoxFabricInstance.setControlVisible('bl',false)
             textBoxFabricInstance.setControlVisible('mb',false)
             textBoxFabricInstance.setControlVisible('br',false)
-            textBoxFabricInstance.agKarakterLimiti = 30
+            textBoxFabricInstance.agKarakterLimiti  = 30
+            textBoxFabricInstance.kutuyaSigdir      = 1
             this.activeCanvas.add(textBoxFabricInstance);
         }else{
             alert("Sayfa seçin")
@@ -100,10 +105,12 @@ class AgEditor {
                                                 + id + '" width="'
                                                 + w  * BU.scale + '"  height="'
                                                 + h  * BU.scale + '"></canvas>');
-            $(BU.target_html_element).append('<div class="clear"></div'); 
-
-            let canvas  = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
-
+            $(BU.target_html_element).append('<div class="clear"></div');
+            let canvas      = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
+            canvas.width    = w  * BU.scale;
+            canvas.height   = h  * BU.scale;
+            canvas.id       = id;
+            canvas.selection = false
             canvas.on("mouse:down", (e)=>{
                     if(BU.activeCanvas){
                         $(BU.activeCanvas.wrapperEl).css('outline','none');
@@ -111,11 +118,11 @@ class AgEditor {
                     BU.activeCanvas = canvas;
                     $('#'+id).parent().css('outline','thick solid aqua');
                     if(!e.target){
-                        BU.refreshMenu();
-                        BU.refreshInputPanel(canvas); 
+                        BU._refreshMenu();
+                        BU._refreshInputPanel(canvas); 
                     }else{
-                        BU.refreshMenu();
-                        BU.refreshInputPanel(e.target); 
+                        BU._refreshMenu();
+                        BU._refreshInputPanel(e.target); 
                         console.log(e.target)
                     }
                 });
@@ -143,13 +150,13 @@ class AgEditor {
         }else if(this.activeCanvas){
             let canvas_id = $(this.activeCanvas.lowerCanvasEl).attr('id');
             $(this.activeCanvas.wrapperEl).remove();
-            this.fabricCanvases[canvas_id];
-            BU.activeCanvas = null;
+            delete this.fabricCanvases[canvas_id];
+            this.activeCanvas = null;
         }
     }
 
     updateControls(e){
-        this.BU.refreshInputPanel(e.target);
+        this.BU._refreshInputPanel(e.target);
     }
 
     async _createCanvas(index){
@@ -210,6 +217,8 @@ class AgEditor {
                     fill:           this.textBoxJson.fill,
                     textAlign:      this.textBoxJson.textAlign,
                     stroke:         this.textBoxJson.stroke,
+                    strokeWidth:    this.textBoxJson.strokeWidth,
+                    strokeLineJoin: this.textBoxJson.strokeLineJoin,
                     centeredRotation: true,
                     angle:          this.textBoxJson.angle
                 });  
@@ -238,7 +247,7 @@ class AgEditor {
                     fixedFontSize: this.cropBoxJson.fixedFontSize,
                     fontSize:   this.cropBoxJson.fontSize*this.scale,
                     fill:       this.cropBoxJson.fill,
-                    cropAlign:  this.cropBoxJson.cropAlign,
+                    cropArea:   this.cropBoxJson.cropArea,
                     stroke:     this.cropBoxJson.stroke,
                     centeredRotation: true,
                     angle:      this.cropBoxJson.angle
@@ -265,7 +274,7 @@ class AgEditor {
         })
     }
 
-    refreshMenu () { 
+    _refreshMenu () { 
         if(this.activeCanvas==null){
             $('.navbar-nav .nav-link').hide();
         }else{
@@ -273,7 +282,7 @@ class AgEditor {
         }
     }
 
-    refreshInputPanel(object){
+    _refreshInputPanel(object){
         let TR              = null;
         let panel           = $('#right-panel');
         let object_type     = object.get('type')
@@ -281,38 +290,57 @@ class AgEditor {
         if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
             
             if(object_type == 'textbox'){
-                TR    += this._rightPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
-                TR    += this._rightPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fonts)
-                TR    += this._rightPanelTR('fontSize','Font Size','number',object.fontSize)
-                TR    += this._rightPanelTR('textLines','Satir Limiti','number',object.textLines.length)
-                TR    += this._rightPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
+                TR    += this._inputPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
+                TR    += this._inputPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fonts)
+                TR    += this._inputPanelTR('fontSize','Font Size','number',object.fontSize)
+                TR    += this._inputPanelTR('fontWeight','Font Weight','select',object.fontWeight,this.bolds)
+                TR    += this._inputPanelTR('fontStyle','Italic','select',object.fontStyle,this.italics)
+                TR    += this._inputPanelTR('fill','Fill','color',object.fill)
+                TR    += this._inputPanelTR('stroke','Stroke','color',object.stroke)
+                TR    += this._inputPanelTR('strokeWidth','Stroke Width','number',object.strokeWidth)
+                TR    += this._inputPanelTR('textLines','Satır Limiti','number',object.textLines.length)
+                TR    += this._inputPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
+                TR    += this._inputPanelTR('kutuyaSigdir','Kutuya Sığdır','checkbox',object.kutuyaSigdir)
             }else if(object_type == 'rect'){
-                TR    += this._rightPanelTR('height','Height','number',object.height)
+                TR    += this._inputPanelTR('height','Height','number',object.height)
             }
 
-            TR    += this._rightPanelTR('width','Width','number',object.width)
-            TR    += this._rightPanelTR('top','Top','number',object.top)
-            TR    += this._rightPanelTR('left','Left','number',object.left)
-            TR    += this._rightPanelTR('angle','Angle','number',object.angle)
+            TR    += this._inputPanelTR('width','Width','number',object.width)
+            TR    += this._inputPanelTR('top','Top','number',object.top)
+            TR    += this._inputPanelTR('left','Left','number',object.left)
+            TR    += this._inputPanelTR('angle','Angle','number',object.angle)
 
 
             $(panel).find('table').empty();
             $(panel).find('table').append(TR);
         // ------------------------------------------------Eğer obje Canvas ise
         }else if(object instanceof fabric.Canvas){
-            let TR = this._rightPanelTR('width','Width','number',object.width)
+            let TR = null;
+            TR      += this._inputPanelTR('width','Width','number',object.width)
+            TR      += this._inputPanelTR('height','Height','number',object.height)
             $(panel).find('.properties').empty();
             $(panel).find('.properties').append(TR);
         }
     }
 
-    _rightPanelTR(prop_name,label,type,value,data=null){
+    _inputPanelTR(prop_name,label,type,value,data=null){
         let tr = null;
         if(type == 'number'){
             tr = '<tr>'
                 +'  <td >'+label+'</td>'
                 +'  <td>'
-                +'      <input class="form-control" type='+type+' value='+value+' data-prop-name="'+prop_name+'">'
+                +'      <input class="form-control" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
+                +'  </td>'
+                +'</tr>';
+        }else if(type == 'checkbox'){
+            let checked = null
+            if(value){
+                checked ="checked"
+            }
+            tr = '<tr>'
+                +'  <td >'+label+'</td>'
+                +'  <td>'
+                +'      <input class="ag-checkbox" type="'+type+'" '+checked+' value="'+value+'" data-prop-name="'+prop_name+'">'
                 +'  </td>'
                 +'</tr>';
         }else if(type == 'select'){
@@ -326,6 +354,13 @@ class AgEditor {
             tr +='      </select>'
                 +'  </td>'
                 +'</tr>'
+        }else if(type == 'color'){
+            tr = '<tr>'
+                +'  <td >'+label+'</td>'
+                +'  <td>'
+                +'      <input class="form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
+                +'  </td>'
+                +'</tr>';
         }
         return tr
     }
@@ -342,8 +377,74 @@ class AgEditor {
             }
             this.activeCanvas.getActiveObject().text = text
         }
+        if(!this.activeCanvas.getActiveObject() && this.activeCanvas){
+            if(prop_name=="width"){
+                this.activeCanvas.setDimensions({width:value, height:this.activeCanvas.height});
+            }else if(prop_name=="height"){
+                this.activeCanvas.setDimensions({width:this.activeCanvas.width, height:value});
+            }
+            
+        }else{
+            this.activeCanvas.getActiveObject().set(prop_name, value);
+            this.activeCanvas.renderAll();            
+        }
+    }
 
-        this.activeCanvas.getActiveObject()[prop_name]=value;
-        this.activeCanvas.requestRenderAll();
+    saveJsonToLocal(){
+        let BU = this
+        let allCanvasesArr=[];
+        for (var key in BU.fabricCanvases) {
+            if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
+            let canvas = BU.fabricCanvases[key];
+            let serialized = JSON.stringify(canvas.toJSON(["agSablonResmi",
+                                                            "agKarakterLimiti",
+                                                            "evented",
+                                                            "hasControls",
+                                                            "height",
+                                                            "width",
+                                                            "id"
+                                                        ]));
+            allCanvasesArr.push(serialized) 
+        }
+        console.log(allCanvasesArr); 
+
+        let a       = document.createElement('a');
+        a.href      = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allCanvasesArr));
+        a.download  = 'data.json';
+        a.innerHTML = 'download JSON';
+        a.click(); 
+    }
+
+    openJsonFromLocal(){
+        let BU          = this;
+        let fileslct    = document.createElement("INPUT");
+        fileslct.setAttribute("type", "file");
+        fileslct.click();
+        $(fileslct).change(function(){
+            let file        = $(this)[0].files[0]
+            let reader      = new FileReader();
+            reader.readAsText(file);
+            reader.onload   = function() {
+                BU._fromJSON(reader.result);
+            };
+            reader.onerror  = function() {
+                console.log(reader.error);
+            };
+        })
+    } 
+
+    _fromJSON(stringFile){
+        let BU              = this;
+        let jsonFile        = JSON.parse(stringFile);
+        $(this.target_html_element).empty();
+        this.fabricCanvases = [];
+        $.each(jsonFile,(i,val)=>{
+            let obj = JSON.parse(val)
+            let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
+            BU.addCanvas(page);
+            BU.activeCanvas.loadFromJSON(val)
+            BU.activeCanvas.renderAll.bind( BU.activeCanvas);
+
+        })
     }
 }
