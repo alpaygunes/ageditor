@@ -38,8 +38,10 @@ $('document').ready(function(){
         agEditor.saveJsonToLocal();
     })
 
-    $('#openJsonFromLocal').click(function(){
-        agEditor.openJsonFromLocal();
+    $('#openJsonFromLocal').click(async function(){
+        await agEditor.openJsonFromLocal();
+        agEditor.agPresentation.presentMode = true;// orada tersi olacak
+        agEditor.agPresentation.prewiev();
     })
 
     $('#sendBackwards').click(function(){ 
@@ -51,6 +53,11 @@ $('document').ready(function(){
     
     $('#bringForward').click(function(){ 
         agEditor.activeCanvas.bringForward(agEditor.activeCanvas.getActiveObject())
+    })
+
+    
+    $('#sunumuBaslat').click(function(){
+        agEditor.sunumuBaslat();
     })
     
 
@@ -80,6 +87,10 @@ $('document').ready(function(){
     $('body').on('change','.form-control',function(){
         prop_name   = $(this).attr('data-prop-name');
         value       = $(this).val();
+        if(prop_name == "fontFamily"){
+            let name = $(this).find('option:selected').text();
+            value = {"name":name,"font_file":value}
+        }
         agEditor.setObjectProperties(prop_name,value);
     })
 
@@ -87,6 +98,12 @@ $('document').ready(function(){
         prop_name   = $(this).attr('data-prop-name');
         value       = $(this).is(':checked')?1:0;
         agEditor.setObjectProperties(prop_name,value);
+    })
+
+    $(document).on('keyup','.ag-textbox',function(){
+        let target_id   = $(this).attr('data-target-id')
+        let text        = $(this).val();
+        agEditor.writeToText(target_id,text)
     })
 
 })//end documenar ready

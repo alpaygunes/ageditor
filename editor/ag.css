@@ -16,7 +16,7 @@ body {
     background-color: darkgrey;
 }
 
-#right-panel {
+#properties-panel {
     margin: 10px;
     right: 0px;
     top: 64px;
@@ -26,6 +26,19 @@ body {
     min-height: 500px;
     display: block; 
     overflow-y: auto;
+}
+
+#preview-input-panel{
+    margin: 10px;
+    right: 0px;
+    top: 64px;
+    position: fixed;
+    width: 300px;
+    height: 88%;
+    min-height: 500px;
+    display: block; 
+    overflow-y: auto;
+    z-index: 999;
 }
 
 #ageditor {

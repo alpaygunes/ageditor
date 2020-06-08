@@ -1,18 +1,23 @@
 class AgEditor {
 
     constructor(){
+        this.agPresentation      = new AgPresentation(this);
         this.scale               = 1;
         this.agdocument          = null;
         this.target_html_element = $('#ageditor');
+        this.target_properties_panel= $('#properties-panel');
         this.fabricCanvases      = [];
         this.activeCanvas        = null;
         this.textBoxJson         = null;
         this.logoBoxJson         = null;
         this.cropBoxJson         = null;
+        this.presentMode         = true;
+        this.fontsJson           = null;
         this._loadTextBoxJson();
         this._loadCropBoxJson();
         this._loadLogoBoxJson();
-        this.fonts               = {arial:"Arial"}
+        this._loadfonts();
+        //this.fonts               = {arial:"Arial"}
         this.bolds               = {normal:"Normal",bold:"Bold"}
         this.italics             = {normal:"Normal",italic:"Italic"}
         this.align               = {"Left":"left"
@@ -25,10 +30,9 @@ class AgEditor {
     }
 
     async createPages(agdocument){
-        this.fabricCanvases      = []
-        let BU                   = this;
+        this.fabricCanvases      = [] 
         this.agdocument          = agdocument;
-        await BU._createCanvas(0); 
+        await this._createCanvas(0); 
     }
 
     async empty() { 
@@ -55,8 +59,10 @@ class AgEditor {
     }
 
     async addTextArea(){
+        let BU = this;
         if(this.activeCanvas){
             let textBoxFabricInstance = await this.getTextBoxFabricInstance();
+            await this.loadFont(textBoxFabricInstance.fontFamily);
             textBoxFabricInstance.top = (Math.floor(Math.random() * 300) + 1)
             textBoxFabricInstance.setControlVisible('tl',false)
             textBoxFabricInstance.setControlVisible('mt',false)
@@ -66,10 +72,24 @@ class AgEditor {
             textBoxFabricInstance.setControlVisible('br',false)
             textBoxFabricInstance.agKarakterLimiti  = 30
             textBoxFabricInstance.kutuyaSigdir      = 1
-            this.activeCanvas.add(textBoxFabricInstance);
+            BU.activeCanvas.add(textBoxFabricInstance);
+            BU.activeCanvas.requestRenderAll();
+            
         }else{
             alert("Sayfa seçin")
         }
+    }
+
+    async loadFont(font_name){ 
+        let junction_font = new FontFace(font_name, 'url(editor/fonts/'+font_name+'.ttf)');
+       return  new Promise((resolve,reject)=>{
+            junction_font.load().then((loaded_face)=>{
+                document.fonts.add(loaded_face)
+                resolve(loaded_face);
+            }).catch((error)=> { 
+                resolve(error);
+            });
+        })
     }
 
     async addCropArea(){
@@ -112,20 +132,20 @@ class AgEditor {
             canvas.id       = id;
             canvas.selection = false
             canvas.on("mouse:down", (e)=>{
-                    if(BU.activeCanvas){
-                        $(BU.activeCanvas.wrapperEl).css('outline','none');
-                    }
-                    BU.activeCanvas = canvas;
-                    $('#'+id).parent().css('outline','thick solid aqua');
-                    if(!e.target){
-                        BU._refreshMenu();
-                        BU._refreshInputPanel(canvas); 
-                    }else{
-                        BU._refreshMenu();
-                        BU._refreshInputPanel(e.target); 
-                        console.log(e.target)
-                    }
-                });
+                BU.agPresentation.createInputPanel(canvas);
+                if(BU.activeCanvas){
+                    $(BU.activeCanvas.wrapperEl).css('outline','none');
+                }
+                BU.activeCanvas = canvas;
+                $('#'+id).parent().css('outline','thick solid aqua');
+                if(!e.target){
+                    BU._refreshMenu();
+                    BU._refreshInputPanel(canvas); 
+                }else{
+                    BU._refreshMenu();
+                    BU._refreshInputPanel(e.target);
+                }
+            });
             
             canvas.BU = this
             canvas.on({
@@ -183,9 +203,9 @@ class AgEditor {
             return new Promise(async function(resolve,reject) {  
                 let obje = page.objects[index]; 
                 if(obje.type == 'Textbox'){ 
-                    BU.addTextArea();
+                    await BU.addTextArea();
                 }else if(obje.type == 'CropBox'){
-                    BU.addCropArea();
+                    await BU.addCropArea();
                 }
                 index++;
                 await BU._createObject(page,index);
@@ -263,6 +283,13 @@ class AgEditor {
         });
     }
 
+    async _loadfonts(){
+        let BU = this;
+        $.get( "editor/sablonlar/fonts.json", (fonts) =>{  
+            this.fontsJson = fonts;
+        });
+    }
+
     async getLogoBoxFabricInstance(imgElm){
         return new Promise((resolve,reject)=>{
             let BU = this
@@ -283,15 +310,14 @@ class AgEditor {
     }
 
     _refreshInputPanel(object){
-        let TR              = null;
-        let panel           = $('#right-panel');
-        let object_type     = object.get('type')
+        let TR              = null; 
+        let object_type     = object.get('type');
         // -----------------------------------------------eğer obje bir image text yada rect ise
         if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
             
             if(object_type == 'textbox'){
                 TR    += this._inputPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
-                TR    += this._inputPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fonts)
+                TR    += this._inputPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fontsJson)
                 TR    += this._inputPanelTR('fontSize','Font Size','number',object.fontSize)
                 TR    += this._inputPanelTR('fontWeight','Font Weight','select',object.fontWeight,this.bolds)
                 TR    += this._inputPanelTR('fontStyle','Italic','select',object.fontStyle,this.italics)
@@ -311,15 +337,15 @@ class AgEditor {
             TR    += this._inputPanelTR('angle','Angle','number',object.angle)
 
 
-            $(panel).find('table').empty();
-            $(panel).find('table').append(TR);
+            $(this.target_properties_panel).find('table').empty();
+            $(this.target_properties_panel).find('table').append(TR);
         // ------------------------------------------------Eğer obje Canvas ise
         }else if(object instanceof fabric.Canvas){
             let TR = null;
             TR      += this._inputPanelTR('width','Width','number',object.width)
             TR      += this._inputPanelTR('height','Height','number',object.height)
-            $(panel).find('.properties').empty();
-            $(panel).find('.properties').append(TR);
+            $(this.target_properties_panel).find('.properties').empty();
+            $(this.target_properties_panel).find('.properties').append(TR);
         }
     }
 
@@ -348,8 +374,9 @@ class AgEditor {
                 +'<td>'+label+'</td>'
                 +'  <td>'
                 +'      <select class="form-control" data-prop-name="'+prop_name+'">'
-            $.each(data,function (i,fv) {  
-                tr +='      <option value="'+fv+'">'+i+'</option>'; 
+            $.each(data,function (i,fv) {    
+                let selected = fv==value?"selected":null;
+                tr +='      <option '+selected+' value="'+fv+'">'+i+'</option>'; 
             }) 
             tr +='      </select>'
                 +'  </td>'
@@ -365,7 +392,7 @@ class AgEditor {
         return tr
     }
 
-    setObjectProperties(prop_name,value){
+    async setObjectProperties(prop_name,value){
         if($.isNumeric(value)){
             value = parseFloat(value);
         }
@@ -376,7 +403,21 @@ class AgEditor {
                 text += '\nSatir '+ (satir + 1)
             }
             this.activeCanvas.getActiveObject().text = text
+        }else if(prop_name == 'fontFamily'){
+            let loadfont = new Promise((resolve,reject)=>{
+                let junction_font = new FontFace(value.name, 'url(editor/fonts/'+value.font_file+'.ttf)');
+                junction_font.load().then(function(loaded_face) {
+                    document.fonts.add(loaded_face)
+                    resolve();
+                }).catch(function(error) {
+                    alert(error)
+                    reject();
+                });
+            })
+            await loadfont;
+            value = value.name
         }
+
         if(!this.activeCanvas.getActiveObject() && this.activeCanvas){
             if(prop_name=="width"){
                 this.activeCanvas.setDimensions({width:value, height:this.activeCanvas.height});
@@ -386,7 +427,7 @@ class AgEditor {
             
         }else{
             this.activeCanvas.getActiveObject().set(prop_name, value);
-            this.activeCanvas.renderAll();            
+            this.activeCanvas.requestRenderAll();            
         }
     }
 
@@ -415,36 +456,151 @@ class AgEditor {
         a.click(); 
     }
 
-    openJsonFromLocal(){
+    async openJsonFromLocal(){
         let BU          = this;
         let fileslct    = document.createElement("INPUT");
         fileslct.setAttribute("type", "file");
         fileslct.click();
-        $(fileslct).change(function(){
-            let file        = $(this)[0].files[0]
-            let reader      = new FileReader();
-            reader.readAsText(file);
-            reader.onload   = function() {
-                BU._fromJSON(reader.result);
-            };
-            reader.onerror  = function() {
-                console.log(reader.error);
-            };
+        return new Promise((resolve,reject)=>{
+            $(fileslct).change(function(){
+                let file        = $(this)[0].files[0]
+                let reader      = new FileReader();
+                reader.readAsText(file);
+                reader.onload   = function() {
+                    BU._fromJSON(reader.result);
+                    resolve();
+                };
+                reader.onerror  = function() {
+                    console.log(reader.error);
+                    reject();
+                };
+            })
         })
     } 
 
-    _fromJSON(stringFile){
+    async _fromJSON(stringFile){
         let BU              = this;
         let jsonFile        = JSON.parse(stringFile);
         $(this.target_html_element).empty();
         this.fabricCanvases = [];
-        $.each(jsonFile,(i,val)=>{
+        $.each(jsonFile,async (i,val)=>{
             let obj = JSON.parse(val)
             let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            BU.addCanvas(page);
-            BU.activeCanvas.loadFromJSON(val)
-            BU.activeCanvas.renderAll.bind( BU.activeCanvas);
+            await BU.addCanvas(page);
+            
+            $.each(obj.objects,async function(a,obj){
+                if(obj.fontFamily){
+                    await BU.loadFont(obj.fontFamily);
+                    //BU.activeCanvas.loadFromJSON(val)
+                    //BU.activeCanvas.renderAll.bind(BU.activeCanvas); 
+                }
+            })
+ 
+            //if(!obj.fontFamily){
+                BU.activeCanvas.loadFromJSON(val)
+                BU.activeCanvas.renderAll.bind(BU.activeCanvas); 
+            //}
+        })
+    }
 
+    getObjectByID(target_id){
+        let objects = this.activeCanvas.getObjects();
+        let obj = null;
+        $.each(objects,function(i,o){
+            if(o.id.toString() == target_id.toString()){
+                obj = o;
+                return;
+            }
+        })
+        return obj;
+    }
+
+    writeToText(target_id,text){
+        let o   = this.getObjectByID(target_id);
+        o.text  = text ;
+        this.activeCanvas.renderAll();
+    }
+
+    async sunumuBaslat(){
+        this.agPresentation.prewiev();
+    }
+}
+
+
+class AgPresentation{
+    constructor(ageditor){
+        this.ageditor            = ageditor; 
+        this.preview_input_panel = $('#preview-input-panel');
+        this.presentMode         = false;
+    }
+
+    prewiev() {
+        this.presentMode = !this.presentMode
+        let BU = this;
+        if(!Object.keys(this.ageditor.fabricCanvases).length){
+            alert("Gösterilecek döküman yok")
+            return;
+        }
+
+        this.presentMode?$(BU.preview_input_panel).show():$(BU.preview_input_panel).hide();
+        this.presentMode?$(BU.ageditor.target_properties_panel).hide():$(BU.ageditor.target_properties_panel).show();
+
+        for (var key in BU.ageditor.fabricCanvases) {
+            if (!BU.ageditor.fabricCanvases.hasOwnProperty(key)) continue;
+            let canvas      = BU.ageditor.fabricCanvases[key];
+            let objects     = canvas.getObjects();
+            $.each(objects,(i,o)=>{
+                if(o instanceof fabric.Textbox){
+                    o.editable = !BU.presentMode;
+                }
+                o.lockMovementX = o.lockMovementY = BU.presentMode;
+                o.hasControls = !BU.presentMode;
+            })
+        }
+
+    }
+
+    createInputPanel(canvas){
+        let BU = this;
+        if(!this.presentMode){
+            return;
+        }
+
+        $(BU.preview_input_panel).find('.inputs').empty();
+        let objects     = canvas.getObjects();
+
+        let rect_count = 0;
+        $.each(objects,(i,o)=>{
+            if(o instanceof fabric.Textbox){  
+                let style        = "font-family:"+o.fontFamily+";";
+                style           += "text-align:"+o.textAlign+";";
+                if(o.textLines.length==1){
+                    $(BU.preview_input_panel).find('.inputs')
+                    .append('<tr>'
+                        +'  <td>'
+                        +'      <input type="text" style="'+style+'" class="form-control ag-textbox" data-target-id="'+o.id+'" maxlength="'+o.agKarakterLimiti+'" value="'+o.text+'" >'
+                        +'  </td>'
+                        +'</tr>')
+                }else{
+                    $(BU.preview_input_panel).find('.inputs')
+                    .append('<tr>'
+                        +'  <td>'
+                        +'      <textarea rows="'+o.textLines.length+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
+                        +'  </td>'
+                        +'</tr>')
+                }
+
+            }
+
+            if(o instanceof fabric.Rect){
+                rect_count++;
+                $(BU.preview_input_panel).find('.inputs')
+                .append('<tr>'
+                    +'  <td>'
+                    +'      <input type="button" class="btn btn-primary ag-resimekle-btn" data-target-id="'+o.id+'"  value="Resim Ekle ' + rect_count +'" >'
+                    +'  </td>'
+                    +'</tr>')
+            }
         })
     }
 }
