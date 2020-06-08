@@ -9,15 +9,8 @@ class AgEditor {
         this.fabricCanvases      = [];
         this.activeCanvas        = null;
         this.textBoxJson         = null;
-        this.logoBoxJson         = null;
-        this.cropBoxJson         = null;
         this.presentMode         = true;
         this.fontsJson           = null;
-        this._loadTextBoxJson();
-        this._loadCropBoxJson();
-        this._loadLogoBoxJson();
-        this._loadfonts();
-        //this.fonts               = {arial:"Arial"}
         this.bolds               = {normal:"Normal",bold:"Bold"}
         this.italics             = {normal:"Normal",italic:"Italic"}
         this.align               = {"Left":"left"
@@ -27,12 +20,8 @@ class AgEditor {
                                     ,"Justify Left":"justify-left"
                                     ,"Justify Center":"justify-center"
                                     ,"Justify Right":"justify-right"}
-    }
-
-    async createPages(agdocument){
-        this.fabricCanvases      = [] 
-        this.agdocument          = agdocument;
-        await this._createCanvas(0); 
+        this.fabricCanvases      = [];
+        this._loadfonts();
     }
 
     async empty() { 
@@ -61,17 +50,32 @@ class AgEditor {
     async addTextArea(){
         let BU = this;
         if(this.activeCanvas){
-            let textBoxFabricInstance = await this.getTextBoxFabricInstance();
+            let textBoxFabricInstance =   new fabric.Textbox('Yazı Alanı', 
+            {
+                id:             Math.floor(Math.random() * 100000) + 1,
+                fontFamily:     "arial",
+                left:           100,
+                top:            100, 
+                width:          200,
+                fontSize:       24*this.scale,
+                fill:           "#000000",
+                textAlign:      "left",
+                stroke:         "#ffffff",
+                strokeWidth:    0,
+                strokeLineJoin: "round",
+                textAlign:      "center",
+                centeredRotation: true,
+                angle:          0
+            });
             await this.loadFont(textBoxFabricInstance.fontFamily);
-            textBoxFabricInstance.top = (Math.floor(Math.random() * 300) + 1)
-            textBoxFabricInstance.setControlVisible('tl',false)
+            /*textBoxFabricInstance.setControlVisible('tl',false)
             textBoxFabricInstance.setControlVisible('mt',false)
             textBoxFabricInstance.setControlVisible('tr',false)
             textBoxFabricInstance.setControlVisible('bl',false)
             textBoxFabricInstance.setControlVisible('mb',false)
-            textBoxFabricInstance.setControlVisible('br',false)
+            textBoxFabricInstance.setControlVisible('br',false)*/
             textBoxFabricInstance.agKarakterLimiti  = 30
-            textBoxFabricInstance.kutuyaSigdir      = 1
+            textBoxFabricInstance.agKutuyaSigdir      = 1
             BU.activeCanvas.add(textBoxFabricInstance);
             BU.activeCanvas.requestRenderAll();
             
@@ -80,22 +84,36 @@ class AgEditor {
         }
     }
 
-    async loadFont(font_name){ 
+    async loadFont(font_name){  
         let junction_font = new FontFace(font_name, 'url(editor/fonts/'+font_name+'.ttf)');
-       return  new Promise((resolve,reject)=>{
-            junction_font.load().then((loaded_face)=>{
-                document.fonts.add(loaded_face)
-                resolve(loaded_face);
-            }).catch((error)=> { 
-                resolve(error);
-            });
-        })
+        return  new Promise((resolve,reject)=>{
+                        let fnt = junction_font.load() 
+                        fnt.then((loaded_face)=>{
+                            document.fonts.add(loaded_face)
+                            console.log("Font yüklendi " + font_name);
+                            resolve()
+                        }).catch((err)=>{
+                            console.log("Font yüklenemedi------------ \n"+err)
+                            reject(err);
+                        })
+                    })
     }
 
+
     async addCropArea(){
-        if(this.activeCanvas){  
-            let cropBoxFabricInstance   = await this.getCropBoxFabricInstance();
-            cropBoxFabricInstance.top   = (Math.floor(Math.random() * 300) + 1)
+        if(this.activeCanvas){   
+            let cropBoxFabricInstance = new fabric.Rect( 
+                {
+                    id:         Math.floor(Math.random() * 100000) + 1,
+                    left:       100,
+                    top:        100, 
+                    width:      200,
+                    height:     300,
+                    fill:       "rgba(150,150,150,0.5)",
+                    cropArea:   {"x1":0,"y1":0,"x2":0,"y2":0}, 
+                    centeredRotation: true,
+                    angle:      0
+                }); 
             this.activeCanvas.add(cropBoxFabricInstance);
         }else{
             alert("Sayfa seçin")
@@ -103,8 +121,12 @@ class AgEditor {
     }
 
     async addLogo(imgElm){
+        let BU = this;
         if(this.activeCanvas){ 
-            await this.getLogoBoxFabricInstance(imgElm); 
+            fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
+                oImg.id = Math.floor(Math.random() * 100000) + 1
+                BU.activeCanvas.add(oImg); 
+            });
         }else{
             alert("Sayfa seçin")
         } 
@@ -139,10 +161,10 @@ class AgEditor {
                 BU.activeCanvas = canvas;
                 $('#'+id).parent().css('outline','thick solid aqua');
                 if(!e.target){
-                    BU._refreshMenu();
+                    //BU._refreshMenu();
                     BU._refreshInputPanel(canvas); 
                 }else{
-                    BU._refreshMenu();
+                    //BU._refreshMenu();
                     BU._refreshInputPanel(e.target);
                 }
             });
@@ -179,20 +201,6 @@ class AgEditor {
         this.BU._refreshInputPanel(e.target);
     }
 
-    async _createCanvas(index){
-        let BU = this
-        if(this.agdocument.pages.hasOwnProperty(index)){
-            let page = this.agdocument.pages[index];
-            return new Promise(async (resolve,reject)=> {
-                await BU.addCanvas(page,index);
-                await BU.createObjects(page);
-                index++;
-                await BU._createCanvas(index);
-                resolve();
-            })
-        }
-    }
-
     async createObjects(page){
          await this._createObject(page,0)
     }
@@ -214,99 +222,11 @@ class AgEditor {
         }
     }
 
-    async _loadTextBoxJson(){
-        let BU = this;
-        $.get( "editor/sablonlar/textbox.json", (textbox) =>{  
-            this.textBoxJson = textbox;
-        });
-    }
-
-    async getTextBoxFabricInstance(){
-        return new Promise((resolve,reject)=>{
-            let txt =   new fabric.Textbox(this.textBoxJson.defaultText, 
-                {
-                    id:             this.textBoxJson.id,
-                    fontFamily:     this.textBoxJson.fontFamily,
-                    left:           this.textBoxJson.left*this.scale,
-                    top:            this.textBoxJson.top*this.scale, 
-                    width:          this.textBoxJson.width*this.scale,
-                    height:         this.textBoxJson.height*this.scale,
-                    fixedWidth:     this.textBoxJson.fixedWidth,   
-                    fixedFontSize:  this.textBoxJson.fixedFontSize,
-                    fontSize:       this.textBoxJson.fontSize*this.scale,
-                    fill:           this.textBoxJson.fill,
-                    textAlign:      this.textBoxJson.textAlign,
-                    stroke:         this.textBoxJson.stroke,
-                    strokeWidth:    this.textBoxJson.strokeWidth,
-                    strokeLineJoin: this.textBoxJson.strokeLineJoin,
-                    centeredRotation: true,
-                    angle:          this.textBoxJson.angle
-                });  
-                resolve(txt);  
-        })        
-    }
-
-    async _loadCropBoxJson(){
-        let BU = this;
-        $.get( "editor/sablonlar/croparea.json", (cropbox) =>{  
-            this.cropBoxJson = cropbox;
-        });
-    }
-
-    async getCropBoxFabricInstance(){
-        return new Promise((resolve,reject)=>{
-            let box = new fabric.Rect( 
-                {
-                    id:         this.cropBoxJson.id,
-                    fontFamily: this.cropBoxJson.fontFamily,
-                    left:       this.cropBoxJson.left*this.scale,
-                    top:        this.cropBoxJson.top*this.scale, 
-                    width:      this.cropBoxJson.width*this.scale,
-                    height:     this.cropBoxJson.height*this.scale,
-                    fixedWidth: this.cropBoxJson.fixedWidth,   
-                    fixedFontSize: this.cropBoxJson.fixedFontSize,
-                    fontSize:   this.cropBoxJson.fontSize*this.scale,
-                    fill:       this.cropBoxJson.fill,
-                    cropArea:   this.cropBoxJson.cropArea,
-                    stroke:     this.cropBoxJson.stroke,
-                    centeredRotation: true,
-                    angle:      this.cropBoxJson.angle
-                });
-            resolve(box)
-        })
-    }
-
-    async _loadLogoBoxJson(){
-        let BU = this;
-        $.get( "editor/sablonlar/logobox.json", (logobox) =>{  
-            this.logoBoxJson = logobox;
-        });
-    }
-
     async _loadfonts(){
         let BU = this;
-        $.get( "editor/sablonlar/fonts.json", (fonts) =>{  
+        $.get( "editor/fonts/fonts.json", (fonts) =>{  
             this.fontsJson = fonts;
         });
-    }
-
-    async getLogoBoxFabricInstance(imgElm){
-        return new Promise((resolve,reject)=>{
-            let BU = this
-            fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
-                oImg.id = Math.floor(Math.random() * 100000) + 1
-                BU.activeCanvas.add(oImg);
-                resolve();
-            });
-        })
-    }
-
-    _refreshMenu () { 
-        if(this.activeCanvas==null){
-            $('.navbar-nav .nav-link').hide();
-        }else{
-            $('.navbar-nav .nav-link').show();
-        }
     }
 
     _refreshInputPanel(object){
@@ -326,7 +246,7 @@ class AgEditor {
                 TR    += this._inputPanelTR('strokeWidth','Stroke Width','number',object.strokeWidth)
                 TR    += this._inputPanelTR('textLines','Satır Limiti','number',object.textLines.length)
                 TR    += this._inputPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
-                TR    += this._inputPanelTR('kutuyaSigdir','Kutuya Sığdır','checkbox',object.kutuyaSigdir)
+                TR    += this._inputPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
             }else if(object_type == 'rect'){
                 TR    += this._inputPanelTR('height','Height','number',object.height)
             }
@@ -404,17 +324,7 @@ class AgEditor {
             }
             this.activeCanvas.getActiveObject().text = text
         }else if(prop_name == 'fontFamily'){
-            let loadfont = new Promise((resolve,reject)=>{
-                let junction_font = new FontFace(value.name, 'url(editor/fonts/'+value.font_file+'.ttf)');
-                junction_font.load().then(function(loaded_face) {
-                    document.fonts.add(loaded_face)
-                    resolve();
-                }).catch(function(error) {
-                    alert(error)
-                    reject();
-                });
-            })
-            await loadfont;
+            await this.loadFont(value.name);
             value = value.name
         }
 
@@ -439,6 +349,7 @@ class AgEditor {
             let canvas = BU.fabricCanvases[key];
             let serialized = JSON.stringify(canvas.toJSON(["agSablonResmi",
                                                             "agKarakterLimiti",
+                                                            "agKutuyaSigdir",
                                                             "evented",
                                                             "hasControls",
                                                             "height",
@@ -466,8 +377,8 @@ class AgEditor {
                 let file        = $(this)[0].files[0]
                 let reader      = new FileReader();
                 reader.readAsText(file);
-                reader.onload   = function() {
-                    BU._fromJSON(reader.result);
+                reader.onload   = async function() {
+                    await BU._fromJSON(reader.result);
                     resolve();
                 };
                 reader.onerror  = function() {
@@ -485,21 +396,24 @@ class AgEditor {
         this.fabricCanvases = [];
         $.each(jsonFile,async (i,val)=>{
             let obj = JSON.parse(val)
+            console.log(obj)
             let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            await BU.addCanvas(page);
-            
-            $.each(obj.objects,async function(a,obj){
-                if(obj.fontFamily){
-                    await BU.loadFont(obj.fontFamily);
-                    //BU.activeCanvas.loadFromJSON(val)
-                    //BU.activeCanvas.renderAll.bind(BU.activeCanvas); 
-                }
-            })
- 
-            //if(!obj.fontFamily){
-                BU.activeCanvas.loadFromJSON(val)
-                BU.activeCanvas.renderAll.bind(BU.activeCanvas); 
-            //}
+            BU.addCanvas(page);
+            BU.activeCanvas.loadFromJSON(val,async function() {
+                let cnv     = BU.activeCanvas;
+                let objects = cnv.getObjects();
+                $.each(objects,async function(j,obj){
+                    if(obj instanceof fabric.Textbox){
+                        await BU.loadFont(obj.fontFamily).then(()=>{
+                            let txt = obj.text
+                            obj.text=" ";
+                            cnv.renderAll()
+                            obj.text=txt;
+                            cnv.renderAll()
+                        });
+                    }
+                })
+            })            
         })
     }
 
@@ -507,9 +421,11 @@ class AgEditor {
         let objects = this.activeCanvas.getObjects();
         let obj = null;
         $.each(objects,function(i,o){
-            if(o.id.toString() == target_id.toString()){
-                obj = o;
-                return;
+            if(o.id != undefined){
+                if(o.id.toString() == target_id.toString()){
+                    obj = o;
+                    return;
+                }
             }
         })
         return obj;
@@ -522,7 +438,14 @@ class AgEditor {
     }
 
     async sunumuBaslat(){
-        this.agPresentation.prewiev();
+        await this.agPresentation.prewiev();
+        // ilk sayfayı hemen sunalım
+        for (var key in this.fabricCanvases) {
+            if (!this.fabricCanvases.hasOwnProperty(key)) continue;
+            this.agPresentation.createInputPanel(this.fabricCanvases[key])
+            break;
+        }
+        
     }
 }
 
@@ -534,7 +457,7 @@ class AgPresentation{
         this.presentMode         = false;
     }
 
-    prewiev() {
+    async prewiev() {
         this.presentMode = !this.presentMode
         let BU = this;
         if(!Object.keys(this.ageditor.fabricCanvases).length){
@@ -561,14 +484,15 @@ class AgPresentation{
     }
 
     createInputPanel(canvas){
+
         let BU = this;
         if(!this.presentMode){
             return;
         }
 
         $(BU.preview_input_panel).find('.inputs').empty();
+        //$(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
         let objects     = canvas.getObjects();
-
         let rect_count = 0;
         $.each(objects,(i,o)=>{
             if(o instanceof fabric.Textbox){  

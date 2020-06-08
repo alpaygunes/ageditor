@@ -2,7 +2,7 @@ $('document').ready(function(){
     var agEditor = new AgEditor();
     var gorev = '' // bg-ekle | logo-ekle
     $('[data-toggle="tooltip"]').tooltip()
-    $('.navbar-nav .nav-link').hide();
+    //$('.navbar-nav .nav-link').hide();
     
     $('#ag-yeni').click(function(){
         $('#modal-yeni').modal();
@@ -41,17 +41,19 @@ $('document').ready(function(){
     $('#openJsonFromLocal').click(async function(){
         await agEditor.openJsonFromLocal();
         agEditor.agPresentation.presentMode = true;// orada tersi olacak
-        agEditor.agPresentation.prewiev();
+        agEditor.agPresentation.prewiev(); 
     })
 
     $('#sendBackwards').click(function(){ 
+        if(!agEditor.activeCanvas)return;
         let index = agEditor.activeCanvas.getObjects().indexOf(agEditor.activeCanvas.getActiveObject())
-        if(index>1){
+        if(index>0){
             agEditor.activeCanvas.sendBackwards(agEditor.activeCanvas.getActiveObject())
         }
     })
     
     $('#bringForward').click(function(){ 
+        if(!agEditor.activeCanvas)return;
         agEditor.activeCanvas.bringForward(agEditor.activeCanvas.getActiveObject())
     })
 
@@ -73,15 +75,6 @@ $('document').ready(function(){
                 agEditor.addLogo(imgElm);
             }
         }
-    })
-
-    $('.sablon').click(function(){
-        sablon_adi  = $(this).attr('data-sablon-adi');
-        url         = "editor/sablonlar/"+sablon_adi+'.json'
-        $.get( url, function(agdocument) { 
-            agEditor.empty();
-            agEditor.createPages(agdocument); 
-        });
     })
 
     $('body').on('change','.form-control',function(){
