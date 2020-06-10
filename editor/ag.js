@@ -99,7 +99,78 @@ $('document').ready(function(){
         agEditor.writeToText(target_id,text)
     })
 
-})//end documenar ready
+    $(document).on('click','.ag-resimekle-btn',function(){
+        let target_id   = $(this).attr('data-target-id')
+        agEditor.agCropper.target_id = target_id
+        agEditor.agCropper.show()
+    })
+
+    $(document).on('click','.ag-crop-resim-resimlerim',function(){ 
+        agEditor.agCropper.showMyImages()
+    })
+
+    $('.ag-crop-resim-yukle').click(()=>{
+        let formData = new FormData();
+        let file_input  = document.createElement("INPUT");
+        file_input.setAttribute("type", "file");
+        file_input.setAttribute("accept", "image/x-png,image/gif,image/jpeg");
+        
+        $(file_input).on('change',(inpt)=>{
+            let file = $(inpt)[0].currentTarget.files[0];
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function() {
+                agEditor.agCropper.imageBase64Data = reader.result; 
+                agEditor.agCropper.showImage();
+            };
+            reader.onerror = function() {
+                console.error(reader.error);
+            };
+
+            formData.append('userimage', file); 
+            $.ajax({
+                url: 'api/?command=uploadUserImage',
+                data: formData,
+                type: 'POST',
+                contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
+                processData: false, // NEEDED, DON'T OMIT THIS
+                success:function(data){
+                    const index = agEditor.agCropper.awaitingUploads.indexOf(agEditor.agCropper.target_id);
+                    if (index > -1) {
+                        agEditor.agCropper.awaitingUploads.splice(index, 1);
+                    }
+                    if(data.url){
+                        agEditor.agCropper.imageUrl = data.url;
+                    }else if(data.messages){
+                        alert(data.messages);
+                    }
+                },
+                beforeSend: function(){
+                    agEditor.agCropper.awaitingUploads.push(agEditor.agCropper.target_id);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Resim gönderilirken sistem hatası : "+xhr.status);
+                    $(agEditor.agCropper.modal_element).find('.modal-body').empty();
+                }
+            });
+        })
+        file_input.click();
+    })
+
+    
+
+})//End document ready
+
+
+
+
+
+
+
+
+
+
+
 
 
 function openImageBrowser(folder){

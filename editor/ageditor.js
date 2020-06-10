@@ -2,6 +2,7 @@ class AgEditor {
 
     constructor(){
         this.agPresentation      = new AgPresentation(this);
+        this.agCropper           = new AgCropper();
         this.scale               = 1;
         this.agdocument          = null;
         this.target_html_element = $('#ageditor');
@@ -24,9 +25,9 @@ class AgEditor {
         this._loadfonts();
     }
 
-    async empty() { 
+    /*async empty() { 
         $(this.target_html_element).empty();
-    }
+    }*/
 
     async setPageBgImage(imgElm){
         let BU = this;
@@ -90,10 +91,9 @@ class AgEditor {
                         let fnt = junction_font.load() 
                         fnt.then((loaded_face)=>{
                             document.fonts.add(loaded_face)
-                            console.log("Font yüklendi " + font_name);
                             resolve()
                         }).catch((err)=>{
-                            console.log("Font yüklenemedi------------ \n"+err)
+                            console.error("Font yüklenemedi------------ \n"+err)
                             reject(err);
                         })
                     })
@@ -182,7 +182,7 @@ class AgEditor {
                 $(BU.activeCanvas.wrapperEl).css('outline','none');
             }
             BU.activeCanvas = canvas;
-            resolve();
+            resolve(canvas);
         })
     }
 
@@ -358,7 +358,6 @@ class AgEditor {
                                                         ]));
             allCanvasesArr.push(serialized) 
         }
-        console.log(allCanvasesArr); 
 
         let a       = document.createElement('a');
         a.href      = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allCanvasesArr));
@@ -382,7 +381,7 @@ class AgEditor {
                     resolve();
                 };
                 reader.onerror  = function() {
-                    console.log(reader.error);
+                    console.error(reader.error);
                     reject();
                 };
             })
@@ -395,12 +394,11 @@ class AgEditor {
         $(this.target_html_element).empty();
         this.fabricCanvases = [];
         $.each(jsonFile,async (i,val)=>{
-            let obj = JSON.parse(val)
-            console.log(obj)
+            let obj     = JSON.parse(val)
             let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            BU.addCanvas(page);
-            BU.activeCanvas.loadFromJSON(val,async function() {
-                let cnv     = BU.activeCanvas;
+            let cnvs    = await BU.addCanvas(page);
+            cnvs.loadFromJSON(val,async function() {
+                let cnv     = cnvs;
                 let objects = cnv.getObjects();
                 $.each(objects,async function(j,obj){
                     if(obj instanceof fabric.Textbox){
@@ -440,19 +438,20 @@ class AgEditor {
     async sunumuBaslat(){
         await this.agPresentation.prewiev();
         // ilk sayfayı hemen sunalım
-        for (var key in this.fabricCanvases) {
+        /*for (var key in this.fabricCanvases) {
             if (!this.fabricCanvases.hasOwnProperty(key)) continue;
             this.agPresentation.createInputPanel(this.fabricCanvases[key])
+            this.activeCanvas = this.fabricCanvases[key];
             break;
-        }
-        
+        }   */    
     }
 }
 
 
+////////////////////////////////////////  AGPRESENTATION /////////////////////////////////////
 class AgPresentation{
-    constructor(ageditor){
-        this.ageditor            = ageditor; 
+    constructor(editor){
+        this.editor            = editor; 
         this.preview_input_panel = $('#preview-input-panel');
         this.presentMode         = false;
     }
@@ -460,17 +459,17 @@ class AgPresentation{
     async prewiev() {
         this.presentMode = !this.presentMode
         let BU = this;
-        if(!Object.keys(this.ageditor.fabricCanvases).length){
+        if(!Object.keys(this.editor.fabricCanvases).length){
             alert("Gösterilecek döküman yok")
             return;
         }
 
         this.presentMode?$(BU.preview_input_panel).show():$(BU.preview_input_panel).hide();
-        this.presentMode?$(BU.ageditor.target_properties_panel).hide():$(BU.ageditor.target_properties_panel).show();
+        this.presentMode?$(BU.editor.target_properties_panel).hide():$(BU.editor.target_properties_panel).show();
 
-        for (var key in BU.ageditor.fabricCanvases) {
-            if (!BU.ageditor.fabricCanvases.hasOwnProperty(key)) continue;
-            let canvas      = BU.ageditor.fabricCanvases[key];
+        for (var key in BU.editor.fabricCanvases) {
+            if (!BU.editor.fabricCanvases.hasOwnProperty(key)) continue;
+            let canvas      = BU.editor.fabricCanvases[key];
             let objects     = canvas.getObjects();
             $.each(objects,(i,o)=>{
                 if(o instanceof fabric.Textbox){
@@ -490,8 +489,11 @@ class AgPresentation{
             return;
         }
 
+        let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
+        if(data_canvas_id==canvas.id)return;
+
         $(BU.preview_input_panel).find('.inputs').empty();
-        //$(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
+        $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
         let objects     = canvas.getObjects();
         let rect_count = 0;
         $.each(objects,(i,o)=>{
@@ -526,5 +528,44 @@ class AgPresentation{
                     +'</tr>')
             }
         })
+    }
+}
+
+
+
+
+///////////////////////////////////////   AGCROPPER  ////////////////////////////////////////
+class AgCropper{
+    constructor(editor){
+        this.awaitingUploads    = [];
+        this.modal_element      =$('#modal-agcropper');
+        this.target_id          = null;
+        this.editor             = editor; 
+        this.currentCropArea    = {x0:0,y0:0,x1:0,y1:0};
+        this.imageUrl           = null;
+        this.imageBase64Data    = null;
+    }
+
+    async show(){
+        $(this.modal_element).modal();
+    }
+
+    async showImage(){
+        let userImage = document.createElement("img");
+        userImage.setAttribute('style', "width:100%;height:auto");
+        if(this.imageBase64Data){
+            userImage.setAttribute('src', this.imageBase64Data);
+        }else{
+            userImage.setAttribute('src', this.imageUrl);
+        }
+
+        $(this.modal_element).find('.modal-body').empty();
+        $(this.modal_element).find('.modal-body').append(userImage);
+
+    }
+
+    async showMyImages(){
+        $(this.modal_element).find('.modal-body').empty();
+        $(this.modal_element).find('.modal-body').append("<div> Resimlerim burada listelenecek </div>");
     }
 }

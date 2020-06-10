@@ -114,34 +114,6 @@
 
 
 
-
-
-
-
-
-    <!-- =========================================  MODAL ŞABLON SEÇ    =====================  -->
-    <div class="modal" tabindex="-1" id="modal-yeni" role="dialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Şablon Seç</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body"> 
-                <div   class="sablon" data-sablon-adi="bos">
-                  Boş
-                </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button> 
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- END-->
-
     <!-- =========================================  MODAL KÜTÜPHANE SEÇ    =====================  -->
     <div class="modal" tabindex="-1" id="modal-kutuphane" role="dialog">
       <div class="modal-dialog">
@@ -155,7 +127,33 @@
           <div class="modal-body"> 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+    <!-- =========================================  MODAL AGCROPPER   =====================  -->
+    <div class="modal" tabindex="-1" id="modal-agcropper" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Resimlerim</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+              <div style="width: 100%;text-align: center;padding: 50px;">
+                <p style="display: block;">Henüz hiç resminiz yok.</p>
+                <div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-link ag-crop-resim-resimlerim">Resimlerim</button>
+            <button type="button" class="btn btn-link ag-crop-resim-yukle">Yükle</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
           </div>
         </div>
       </div>
