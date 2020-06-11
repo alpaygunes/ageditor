@@ -65,7 +65,7 @@ function uploadUserImage(){
         echo json_encode(['messages'=>$messages]);
     } else {
         if (move_uploaded_file($_FILES["userimage"]["tmp_name"], $target_file)) {
-            echo json_encode(['url'=>$target_file]);
+            echo json_encode(['url'=>'api/'.$target_file]);
         } else {
             echo json_encode(['error'=>"Sorry, there was an error uploading your file."]);
         }

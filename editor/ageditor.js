@@ -2,7 +2,7 @@ class AgEditor {
 
     constructor(){
         this.agPresentation      = new AgPresentation(this);
-        this.agCropper           = new AgCropper();
+        this.agCropper           = new AgCropper(this);
         this.scale               = 1;
         this.agdocument          = null;
         this.target_html_element = $('#ageditor');
@@ -24,10 +24,6 @@ class AgEditor {
         this.fabricCanvases      = [];
         this._loadfonts();
     }
-
-    /*async empty() { 
-        $(this.target_html_element).empty();
-    }*/
 
     async setPageBgImage(imgElm){
         let BU = this;
@@ -69,14 +65,8 @@ class AgEditor {
                 angle:          0
             });
             await this.loadFont(textBoxFabricInstance.fontFamily);
-            /*textBoxFabricInstance.setControlVisible('tl',false)
-            textBoxFabricInstance.setControlVisible('mt',false)
-            textBoxFabricInstance.setControlVisible('tr',false)
-            textBoxFabricInstance.setControlVisible('bl',false)
-            textBoxFabricInstance.setControlVisible('mb',false)
-            textBoxFabricInstance.setControlVisible('br',false)*/
-            textBoxFabricInstance.agKarakterLimiti  = 30
-            textBoxFabricInstance.agKutuyaSigdir      = 1
+            textBoxFabricInstance.agKarakterLimiti      = 30
+            textBoxFabricInstance.agKutuyaSigdir        = 1
             BU.activeCanvas.add(textBoxFabricInstance);
             BU.activeCanvas.requestRenderAll();
             
@@ -110,7 +100,6 @@ class AgEditor {
                     width:      200,
                     height:     300,
                     fill:       "rgba(150,150,150,0.5)",
-                    cropArea:   {"x1":0,"y1":0,"x2":0,"y2":0}, 
                     centeredRotation: true,
                     angle:      0
                 }); 
@@ -536,36 +525,91 @@ class AgPresentation{
 
 ///////////////////////////////////////   AGCROPPER  ////////////////////////////////////////
 class AgCropper{
+
     constructor(editor){
         this.awaitingUploads    = [];
         this.modal_element      =$('#modal-agcropper');
-        this.target_id          = null;
-        this.editor             = editor; 
-        this.currentCropArea    = {x0:0,y0:0,x1:0,y1:0};
+        this.targetObj          = null;
+        this.editor             = editor;
         this.imageUrl           = null;
         this.imageBase64Data    = null;
+        this.cropper            = null;
     }
 
     async show(){
         $(this.modal_element).modal();
+        $(this.modal_element).find(".crop-menu-item").hide();
     }
 
-    async showImage(){
-        let userImage = document.createElement("img");
-        userImage.setAttribute('style', "width:100%;height:auto");
+    async openForCrop(){
+        $(this.modal_element).find(".crop-menu-item").show();
+        const userImage = document.createElement("img"); 
         if(this.imageBase64Data){
             userImage.setAttribute('src', this.imageBase64Data);
         }else{
             userImage.setAttribute('src', this.imageUrl);
         }
-
+        userImage.setAttribute('style', "max-height:100%;position:absolute");
         $(this.modal_element).find('.modal-body').empty();
         $(this.modal_element).find('.modal-body').append(userImage);
 
+        const options   ={
+                            aspectRatio: this.targetObj.getScaledWidth()  / this.targetObj.getScaledHeight(),
+                            viewMode:1
+                        }
+        this.cropper   = new Cropper(userImage,options); 
     }
 
     async showMyImages(){
         $(this.modal_element).find('.modal-body').empty();
-        $(this.modal_element).find('.modal-body').append("<div> Resimlerim burada listelenecek </div>");
+        $(this.modal_element).find('.modal-body').append(
+                                                            '<div style="width: 100%;text-align: center;padding: 50px;">'+
+                                                                '<p style="display: block;">Henüz hiç resminiz yok.</p>'+
+                                                                '<div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
+                                                            '</div>'
+                                                        );
+
+        if(window.localStorage.getItem('localresimlerim')){
+            let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
+            $(this.modal_element).find('.modal-body').empty();
+            $.each(localresimlerim,(i,resim)=>{
+                let img = document.createElement("img");
+                img.setAttribute('src',resim.url)
+                img.className ="user-image";
+                $(this.modal_element).find('.modal-body').append(img);
+            });
+        }
+    }
+
+    async rotateLeft(){
+        this.cropper.rotate(-90)
+    }
+
+    async rotateRight(){
+        this.cropper.rotate(90)
+    }
+
+    async crop(){
+        let BU = this;
+        let data = this.cropper.getData();
+        console.log(data);
+        let base64 = this.cropper.getCroppedCanvas({
+            width: BU.targetObj.getScaledWidth(),
+            height: BU.targetObj.getScaledHeight(),
+            imageSmoothingEnabled: false,
+            imageSmoothingQuality: 'high',
+          }).toDataURL();       
+        var oImg = new Image();
+        oImg.onload = function() {
+            let fimage = new fabric.Image(oImg,{
+                left: BU.targetObj.left,
+                top: BU.targetObj.top,
+                width:BU.targetObj.getScaledWidth(),
+                height:BU.targetObj.getScaledHeight(),
+                angle:BU.targetObj.angle
+              });
+            BU.editor.activeCanvas.add(fimage)
+        }
+        oImg.src = base64
     }
 }

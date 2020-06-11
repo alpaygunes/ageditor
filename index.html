@@ -14,6 +14,11 @@
     <script src="editor/ag.js"></script>
     <script src="editor/node_modules/@fortawesome/fontawesome-free/js/all.js"></script>
     <link rel="stylesheet" type="text/css" href="editor/node_modules/@fortawesome/fontawesome-free/css/all.css">
+
+    <!--  CROPPERJS -->
+    <script src="editor/lib/cropper.js"></script>
+    <link   rel="stylesheet" type="text/css" href="editor/lib/cropper.css">
+    <!--  END       -->
     
 </head>
 <body>
@@ -78,24 +83,30 @@
     </nav>
     <!-- END-->
 
-    <!-- =========================================  AGEDİTÖR MENU    =====================  -->
-    <div id="ageditor">
+    <div class="container">
+        <!-- =========================================  AGEDİTÖR MENU    =====================  -->
+        <div id="ageditor" class="col-sm-8 col-lg-9 col-xl-9">
 
-    </div>
-    <!-- END-->
-
-    <!-- =========================================  PROPERTIES PANEL    =====================  -->
-    <div id="properties-panel">
-      <div class="card">
-        <h5 class="card-header">Özellikler</h5>
-        <div class="card-body">
-          <table class="table table-borderless properties">
-        
-          </table>
         </div>
-      </div>
-    </div>
-    <!-- END-->
+        <!-- END-->
+
+        <!-- =========================================  PROPERTIES PANEL    =====================  -->
+        <div id="properties-panel" class="col-sm-4 col-lg-3 col-xl-3">
+          <div class="card">
+            <h5 class="card-header">Özellikler</h5>
+            <div class="card-body">
+              <table class="table table-borderless properties">
+            
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- END-->
+  </div><!-- End container -->
+
+
+
+
 
 
   <!-- =========================================  PREVIEW PANEL    =====================  -->
@@ -134,25 +145,24 @@
     </div>
     <!-- END-->
 
-    <!-- =========================================  MODAL AGCROPPER   =====================  -->
-    <div class="modal" tabindex="-1" id="modal-agcropper" role="dialog">
+    <!-- =========================================  MODAL RESİMLERİM   =====================  -->
+    <div class="modal modal-fullscreen" tabindex="-1" id="modal-agcropper" role="dialog">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Resimlerim</h5>
+            <button type="button" class="btn btn-link ag-crop-resim-resimlerim"><i class="fas fa-images"></i> Resimlerim </button>
+            <button type="button" class="btn btn-link ag-crop-resim-yukle"><i class="fas fa-upload"></i> Yükle </button>
+            <button type="button" class="btn btn-link ag-crop-resim-rotate-left crop-menu-item"><i class="fas fa-undo"></i></i></button>
+            <button type="button" class="btn btn-link ag-crop-resim-rotate-right crop-menu-item"><i class="fas fa-redo"></i></button>
+            <button type="button" class="btn btn-link ag-crop-resim-crop crop-menu-item"><i class="fas fa-crop"></i> Kırp </button>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body"> 
-              <div style="width: 100%;text-align: center;padding: 50px;">
-                <p style="display: block;">Henüz hiç resminiz yok.</p>
-                <div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>
-            </div>
+              
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-link ag-crop-resim-resimlerim">Resimlerim</button>
-            <button type="button" class="btn btn-link ag-crop-resim-yukle">Yükle</button>
+          <div class="modal-footer"> 
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
           </div>
         </div>

@@ -100,16 +100,18 @@ $('document').ready(function(){
     })
 
     $(document).on('click','.ag-resimekle-btn',function(){
-        let target_id   = $(this).attr('data-target-id')
-        agEditor.agCropper.target_id = target_id
+        let target_id                   = $(this).attr('data-target-id')
+        agEditor.agCropper.targetObj    = agEditor.getObjectByID(target_id)
         agEditor.agCropper.show()
+        agEditor.agCropper.showMyImages()
     })
 
     $(document).on('click','.ag-crop-resim-resimlerim',function(){ 
         agEditor.agCropper.showMyImages()
+        $(agEditor.agCropper.modal_element).find(".crop-menu-item").hide();
     })
 
-    $('.ag-crop-resim-yukle').click(()=>{
+    $(document).on('click','.ag-crop-resim-yukle',()=>{
         let formData = new FormData();
         let file_input  = document.createElement("INPUT");
         file_input.setAttribute("type", "file");
@@ -121,7 +123,7 @@ $('document').ready(function(){
             reader.readAsDataURL(file);
             reader.onload = function() {
                 agEditor.agCropper.imageBase64Data = reader.result; 
-                agEditor.agCropper.showImage();
+                agEditor.agCropper.openForCrop();
             };
             reader.onerror = function() {
                 console.error(reader.error);
@@ -135,12 +137,21 @@ $('document').ready(function(){
                 contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
                 processData: false, // NEEDED, DON'T OMIT THIS
                 success:function(data){
+                    let localresimlerim = [];
                     const index = agEditor.agCropper.awaitingUploads.indexOf(agEditor.agCropper.target_id);
                     if (index > -1) {
                         agEditor.agCropper.awaitingUploads.splice(index, 1);
                     }
                     if(data.url){
-                        agEditor.agCropper.imageUrl = data.url;
+                        agEditor.agCropper.imageUrl = data.url; 
+                        resim           = {"url":data.url}
+                        if(window.localStorage.getItem("localresimlerim")){
+                            localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
+                            localresimlerim.push(resim);
+                        }else{
+                            localresimlerim.push(resim);
+                        }
+                        window.localStorage.setItem("localresimlerim",JSON.stringify(localresimlerim))
                     }else if(data.messages){
                         alert(data.messages);
                     }
@@ -156,6 +167,26 @@ $('document').ready(function(){
         })
         file_input.click();
     })
+
+    $(document).on('click','.user-image',function(){ 
+        agEditor.agCropper.imageUrl = $(this).attr("src");
+        agEditor.agCropper.imageBase64Data = null;
+        agEditor.agCropper.openForCrop();
+    })
+
+    $(document).on('click','.ag-crop-resim-rotate-left',function(){
+        agEditor.agCropper.rotateLeft();
+    })
+
+    $(document).on('click','.ag-crop-resim-rotate-right',function(){
+        agEditor.agCropper.rotateRight();
+    })
+
+    $(document).on('click','.ag-crop-resim-crop',function(){
+        agEditor.agCropper.crop();
+    })
+
+    
 
     
 
