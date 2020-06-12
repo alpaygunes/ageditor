@@ -9,8 +9,8 @@ class AgEditor {
         this.target_properties_panel= $('#properties-panel');
         this.fabricCanvases      = [];
         this.activeCanvas        = null;
-        this.textBoxJson         = null;
-        this.presentMode         = true;
+        //this.textBoxJson         = null;
+        this.presentMode         = false;
         this.fontsJson           = null;
         this.bolds               = {normal:"Normal",bold:"Bold"}
         this.italics             = {normal:"Normal",italic:"Italic"}
@@ -27,15 +27,14 @@ class AgEditor {
 
     async setPageBgImage(imgElm){
         let BU = this;
-        
         if(this.activeCanvas){  
             this.activeCanvas.setHeight($(imgElm).get(0).naturalHeight);
             this.activeCanvas.setWidth($(imgElm).get(0).naturalWidth);
             fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
-                oImg.lockMovementX = oImg.lockMovementY = true;
-                oImg.hasControls = false
-                oImg.evented = false
-                oImg.agSablonResmi = true; 
+                oImg.lockMovementX  = oImg.lockMovementY = true;
+                oImg.hasControls    = false
+                oImg.evented        = false
+                oImg.agSablonResmi  = true  
                 BU.activeCanvas.add(oImg);
                 BU.activeCanvas.moveTo(oImg, 0) 
             }); 
@@ -89,21 +88,17 @@ class AgEditor {
                     })
     }
 
-
     async addCropArea(){
+        let BU = this
         if(this.activeCanvas){   
-            let cropBoxFabricInstance = new fabric.Rect( 
-                {
-                    id:         Math.floor(Math.random() * 100000) + 1,
-                    left:       100,
-                    top:        100, 
-                    width:      200,
-                    height:     300,
-                    fill:       "rgba(150,150,150,0.5)",
-                    centeredRotation: true,
-                    angle:      0
-                }); 
-            this.activeCanvas.add(cropBoxFabricInstance);
+             new fabric.Image.fromURL("editor/agblank.png",
+                    function(oImg) {
+                        oImg.id = Math.floor(Math.random() * 100000) + 1
+                        oImg.left = 200
+                        oImg.top = 200
+                        BU.activeCanvas.add(oImg);
+                    }
+                );           
         }else{
             alert("Sayfa seçin")
         }
@@ -150,14 +145,18 @@ class AgEditor {
                 BU.activeCanvas = canvas;
                 $('#'+id).parent().css('outline','thick solid aqua');
                 if(!e.target){
-                    //BU._refreshMenu();
                     BU._refreshInputPanel(canvas); 
                 }else{
-                    //BU._refreshMenu();
                     BU._refreshInputPanel(e.target);
+                    if(BU.presentMode == true && e.target instanceof fabric.Image && !e.target.agSablonResmi){
+                        let target_id           = e.target.id
+                        $(BU.target_properties_panel).hide();
+                        BU.agCropper.targetObj  = BU.getObjectByID(target_id)
+                        BU.agCropper.show()
+                        BU.agCropper.showMyImages()
+                    } 
                 }
             });
-            
             canvas.BU = this
             canvas.on({
                 'object:moving': this.updateControls,
@@ -165,7 +164,6 @@ class AgEditor {
                 'object:resizing': this.updateControls,
                 'object:rotating': this.updateControls
                 });
-
             BU.fabricCanvases[id] = canvas; 
             if(BU.activeCanvas){
                 $(BU.activeCanvas.wrapperEl).css('outline','none');
@@ -221,7 +219,7 @@ class AgEditor {
     _refreshInputPanel(object){
         let TR              = null; 
         let object_type     = object.get('type');
-        // -----------------------------------------------eğer obje bir image text yada rect ise
+        // -----------------------------------------------eğer obje bir image text yada crop ise
         if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
             
             if(object_type == 'textbox'){
@@ -236,11 +234,11 @@ class AgEditor {
                 TR    += this._inputPanelTR('textLines','Satır Limiti','number',object.textLines.length)
                 TR    += this._inputPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
                 TR    += this._inputPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
-            }else if(object_type == 'rect'){
-                TR    += this._inputPanelTR('height','Height','number',object.height)
+            }else if(object_type == 'rect' || object_type == 'image'){
+               /// TR    += this._inputPanelTR('height','Height','number',object.getScaledHeight())
             }
-
-            TR    += this._inputPanelTR('width','Width','number',object.width)
+            TR    += this._inputPanelTR('height','Height','number',object.getScaledHeight())
+            TR    += this._inputPanelTR('width','Width','number',object.getScaledWidth())
             TR    += this._inputPanelTR('top','Top','number',object.top)
             TR    += this._inputPanelTR('left','Left','number',object.left)
             TR    += this._inputPanelTR('angle','Angle','number',object.angle)
@@ -336,15 +334,25 @@ class AgEditor {
         for (var key in BU.fabricCanvases) {
             if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
             let canvas = BU.fabricCanvases[key];
-            let serialized = JSON.stringify(canvas.toJSON(["agSablonResmi",
+            let serialized = JSON.stringify(canvas.toJSON([ "agSablonResmi",
                                                             "agKarakterLimiti",
                                                             "agKutuyaSigdir",
+                                                            "agCropImageData",
+                                                            "agCropData",
+                                                            "agImageUrl",
                                                             "evented",
                                                             "hasControls",
                                                             "height",
                                                             "width",
                                                             "id"
                                                         ]));
+            //let kalip = "/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/g";
+            //serialized.replace(kalip, "------------");            
+            serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\"editor/agblank.png\"")
+
+            
+            
+            console.log(serialized);
             allCanvasesArr.push(serialized) 
         }
 
@@ -353,6 +361,7 @@ class AgEditor {
         a.download  = 'data.json';
         a.innerHTML = 'download JSON';
         a.click(); 
+        //console.log(JSON.stringify(allCanvasesArr));
     }
 
     async openJsonFromLocal(){
@@ -425,14 +434,13 @@ class AgEditor {
     }
 
     async sunumuBaslat(){
+        this.presentMode = !this.presentMode;
         await this.agPresentation.prewiev();
-        // ilk sayfayı hemen sunalım
-        /*for (var key in this.fabricCanvases) {
-            if (!this.fabricCanvases.hasOwnProperty(key)) continue;
+        $(this.agPresentation.preview_input_panel).attr('data-canvas-id','')
+        for (var key in this.fabricCanvases) {
             this.agPresentation.createInputPanel(this.fabricCanvases[key])
-            this.activeCanvas = this.fabricCanvases[key];
             break;
-        }   */    
+        }
     }
 }
 
@@ -440,19 +448,18 @@ class AgEditor {
 ////////////////////////////////////////  AGPRESENTATION /////////////////////////////////////
 class AgPresentation{
     constructor(editor){
-        this.editor            = editor; 
-        this.preview_input_panel = $('#preview-input-panel');
-        this.presentMode         = false;
+        this.editor                 = editor; 
+        this.preview_input_panel    = $('#preview-input-panel');
     }
 
     async prewiev() {
-        this.presentMode = !this.presentMode
         let BU = this;
         if(!Object.keys(this.editor.fabricCanvases).length){
             alert("Gösterilecek döküman yok")
             return;
         }
 
+        this.presentMode            = this.editor.presentMode;
         this.presentMode?$(BU.preview_input_panel).show():$(BU.preview_input_panel).hide();
         this.presentMode?$(BU.editor.target_properties_panel).hide():$(BU.editor.target_properties_panel).show();
 
@@ -462,7 +469,7 @@ class AgPresentation{
             let objects     = canvas.getObjects();
             $.each(objects,(i,o)=>{
                 if(o instanceof fabric.Textbox){
-                    o.editable = !BU.presentMode;
+                    o.editable = BU.presentMode;
                 }
                 o.lockMovementX = o.lockMovementY = BU.presentMode;
                 o.hasControls = !BU.presentMode;
@@ -484,7 +491,7 @@ class AgPresentation{
         $(BU.preview_input_panel).find('.inputs').empty();
         $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
         let objects     = canvas.getObjects();
-        let rect_count = 0;
+        let crop_count = 0;
         $.each(objects,(i,o)=>{
             if(o instanceof fabric.Textbox){  
                 let style        = "font-family:"+o.fontFamily+";";
@@ -507,12 +514,12 @@ class AgPresentation{
 
             }
 
-            if(o instanceof fabric.Rect){
-                rect_count++;
+            if(o instanceof fabric.Image && !o.agSablonResmi){
+                crop_count++;
                 $(BU.preview_input_panel).find('.inputs')
                 .append('<tr>'
                     +'  <td>'
-                    +'      <input type="button" class="btn btn-primary ag-resimekle-btn" data-target-id="'+o.id+'"  value="Resim Ekle ' + rect_count +'" >'
+                    +'      <input type="button" class="btn btn-primary ag-resimekle-btn" data-target-id="'+o.id+'"  value="Resim Ekle ' + crop_count +'" >'
                     +'  </td>'
                     +'</tr>')
             }
@@ -531,13 +538,13 @@ class AgCropper{
         this.modal_element      =$('#modal-agcropper');
         this.targetObj          = null;
         this.editor             = editor;
-        this.imageUrl           = null;
+        this.agImageUrl           = null;
         this.imageBase64Data    = null;
         this.cropper            = null;
     }
 
     async show(){
-        $(this.modal_element).modal();
+        $(this.modal_element).modal('toggle');
         $(this.modal_element).find(".crop-menu-item").hide();
     }
 
@@ -547,7 +554,7 @@ class AgCropper{
         if(this.imageBase64Data){
             userImage.setAttribute('src', this.imageBase64Data);
         }else{
-            userImage.setAttribute('src', this.imageUrl);
+            userImage.setAttribute('src', this.agImageUrl);
         }
         userImage.setAttribute('style', "max-height:100%;position:absolute");
         $(this.modal_element).find('.modal-body').empty();
@@ -555,7 +562,8 @@ class AgCropper{
 
         const options   ={
                             aspectRatio: this.targetObj.getScaledWidth()  / this.targetObj.getScaledHeight(),
-                            viewMode:1
+                            viewMode:1,
+                            zoomable:false,
                         }
         this.cropper   = new Cropper(userImage,options); 
     }
@@ -591,25 +599,25 @@ class AgCropper{
 
     async crop(){
         let BU = this;
-        let data = this.cropper.getData();
-        console.log(data);
         let base64 = this.cropper.getCroppedCanvas({
-            width: BU.targetObj.getScaledWidth(),
-            height: BU.targetObj.getScaledHeight(),
+            width: BU.targetObj.width,
+            height: BU.targetObj.height,
             imageSmoothingEnabled: false,
             imageSmoothingQuality: 'high',
-          }).toDataURL();       
-        var oImg = new Image();
-        oImg.onload = function() {
-            let fimage = new fabric.Image(oImg,{
-                left: BU.targetObj.left,
-                top: BU.targetObj.top,
-                width:BU.targetObj.getScaledWidth(),
-                height:BU.targetObj.getScaledHeight(),
-                angle:BU.targetObj.angle
-              });
-            BU.editor.activeCanvas.add(fimage)
-        }
-        oImg.src = base64
+          }).toDataURL();  
+         
+        let w0 = BU.targetObj.width;
+        let h0 = BU.targetObj.height;
+        BU.targetObj.setSrc(base64  , function(img) {
+            BU.targetObj.width      = w0; 
+            BU.targetObj.height     = h0;
+            BU.editor.activeCanvas.renderAll();
+            $(BU.modal_element).modal('toggle');
+            BU.targetObj.agCropImageData    = BU.cropper.getImageData();
+            BU.targetObj.agCropData         = BU.cropper.getData();
+            BU.targetObj.agImageUrl         = BU.agImageUrl; 
+        });
+ 
     }
+
 }

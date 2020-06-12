@@ -40,7 +40,7 @@ $('document').ready(function(){
 
     $('#openJsonFromLocal').click(async function(){
         await agEditor.openJsonFromLocal();
-        agEditor.agPresentation.presentMode = true;// orada tersi olacak
+        agEditor.presentMode = false;
         agEditor.agPresentation.prewiev(); 
     })
 
@@ -143,7 +143,7 @@ $('document').ready(function(){
                         agEditor.agCropper.awaitingUploads.splice(index, 1);
                     }
                     if(data.url){
-                        agEditor.agCropper.imageUrl = data.url; 
+                        agEditor.agCropper.agImageUrl = data.url; 
                         resim           = {"url":data.url}
                         if(window.localStorage.getItem("localresimlerim")){
                             localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
@@ -169,7 +169,7 @@ $('document').ready(function(){
     })
 
     $(document).on('click','.user-image',function(){ 
-        agEditor.agCropper.imageUrl = $(this).attr("src");
+        agEditor.agCropper.agImageUrl = $(this).attr("src");
         agEditor.agCropper.imageBase64Data = null;
         agEditor.agCropper.openForCrop();
     })
@@ -186,6 +186,11 @@ $('document').ready(function(){
         agEditor.agCropper.crop();
     })
 
+    $(agEditor.agCropper.modal_element).on('hidden.bs.modal', function () {
+        if(agEditor.presentMode == false){
+            $(agEditor.target_properties_panel).show();
+        }
+    })
     
 
     
