@@ -1,8 +1,8 @@
 $('document').ready(function(){
     var agEditor = new AgEditor();
+    agEditor._refreshMainMenu()
     var gorev = '' // bg-ekle | logo-ekle
     $('[data-toggle="tooltip"]').tooltip()
-    //$('.navbar-nav .nav-link').hide();
     
     $('#ag-yeni').click(function(){
         $('#modal-yeni').modal();
@@ -39,9 +39,11 @@ $('document').ready(function(){
     })
 
     $('#openJsonFromLocal').click(async function(){
-        await agEditor.openJsonFromLocal();
-        agEditor.presentMode = false;
-        agEditor.agPresentation.prewiev(); 
+        agEditor = new AgEditor();
+        await agEditor.openJsonFromLocal(); 
+        setTimeout(() => {
+            agEditor.sunumuBaslat(); 
+        }, 50);
     })
 
     $('#sendBackwards').click(function(){ 
@@ -56,11 +58,18 @@ $('document').ready(function(){
         if(!agEditor.activeCanvas)return;
         agEditor.activeCanvas.bringForward(agEditor.activeCanvas.getActiveObject())
     })
-
     
     $('#sunumuBaslat').click(function(){
         agEditor.sunumuBaslat();
-    })
+    })  
+    
+    $('#renderWithBigBGImage').click(function(){
+        agEditor.renderWithBigBGImage();
+    }) 
+
+    $('#downloadBigImage').click(function(){
+        agEditor.downloadBigImage();
+    }) 
     
 
     $('.modal-body').on('click','.img-thumbnail',function(){
@@ -109,6 +118,9 @@ $('document').ready(function(){
     $(document).on('click','.ag-crop-resim-resimlerim',function(){ 
         agEditor.agCropper.showMyImages()
         $(agEditor.agCropper.modal_element).find(".crop-menu-item").hide();
+
+        $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").hide();
+        $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").show();
     })
 
     $(document).on('click','.ag-crop-resim-yukle',()=>{
@@ -161,7 +173,10 @@ $('document').ready(function(){
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     alert("Resim gönderilirken sistem hatası : "+xhr.status);
-                    $(agEditor.agCropper.modal_element).find('.modal-body').empty();
+                    agEditor.agCropper.showMyImages()
+                    $(agEditor.agCropper.modal_element).find(".crop-menu-item").hide();
+                    $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").hide();
+                    $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").show();
                 }
             });
         })
@@ -172,6 +187,8 @@ $('document').ready(function(){
         agEditor.agCropper.agImageUrl = $(this).attr("src");
         agEditor.agCropper.imageBase64Data = null;
         agEditor.agCropper.openForCrop();
+        $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
+        $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
     })
 
     $(document).on('click','.ag-crop-resim-rotate-left',function(){
@@ -190,10 +207,7 @@ $('document').ready(function(){
         if(agEditor.presentMode == false){
             $(agEditor.target_properties_panel).show();
         }
-    })
-    
-
-    
+    })    
 
 })//End document ready
 
