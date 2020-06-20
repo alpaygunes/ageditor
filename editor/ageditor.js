@@ -1,24 +1,27 @@
+//https://jsfiddle.net/jjwilly16/wg53ursd/
+
 class AgEditor {
 
     constructor(){
-        this.agPresentation      = new AgPresentation(this);
-        this.agCropper           = new AgCropper(this);
-        this.target_html_element = $('#ageditor');
-        this.target_properties_panel= $('#properties-panel');
-        this.fabricCanvases      = [];
-        this.activeCanvas        = null;
-        this.presentMode         = false;
-        this.fontsJson           = null;
-        this.bolds               = {normal:"Normal",bold:"Bold"}
-        this.italics             = {normal:"Normal",italic:"Italic"}
-        this.align               = {"Left":"left"
-                                    ,"Center":"center"
-                                    ,"Right":"right"
-                                    ,"Justify":"justify"
-                                    ,"Justify Left":"justify-left"
-                                    ,"Justify Center":"justify-center"
-                                    ,"Justify Right":"justify-right"}
-        this.drawObjectsBordered = false;
+        this.agPresentation             = new AgPresentation(this);
+        this.agCropper                  = new AgCropper(this);
+        this.target_html_element        = $('#ageditor');
+        this.modal_progress             = $('#modal-progress');
+        this.target_properties_panel    = $('#properties-panel');
+        this.fabricCanvases             = [];
+        this.activeCanvas               = null;
+        this.presentMode                = false;
+        this.fontsJson                  = null;
+        this.bolds                      = {normal:"Normal",bold:"Bold"}
+        this.italics                    = {normal:"Normal",italic:"Italic"}
+        this.align                      = {"Left":"left"
+                                            ,"Center":"center"
+                                            ,"Right":"right"
+                                            ,"Justify":"justify"
+                                            ,"Justify Left":"justify-left"
+                                            ,"Justify Center":"justify-center"
+                                            ,"Justify Right":"justify-right"}
+        this.drawObjectsBordered        = false;
         this._loadfonts();
     }
 
@@ -129,28 +132,33 @@ class AgEditor {
                         }
                     } 
                 }
-            });
+            });// end mouse:down
+
             canvas.BU = this
             canvas.on({
                 'object:moving': this.updateControls,
                 'object:scaling': this.updateControls,
                 'object:resizing': this.updateControls,
                 'object:rotating': this.updateControls
-            });
+            });// end 
+
             canvas.on('mouse:over', function(e) {
                 BU.drawObjectsBorder(canvas,true);  
-            });
+            });// end mouse:over
+
             canvas.on('mouse:out', function(e) {
                 BU.drawObjectsBorder(canvas,false);
-            });
+            });// end mouse:out
 
             BU.fabricCanvases[id] = canvas; 
             if(BU.activeCanvas){
                 $(BU.activeCanvas.wrapperEl).css('outline','none');
             }
+
             BU.activeCanvas = canvas;
             BU._refreshMainMenu()
             resolve(canvas);
+
         })
     }
 
@@ -173,11 +181,17 @@ class AgEditor {
                 textAlign:      "center",
                 centeredRotation: true,
                 angle:          0,
-                strokeUniform : true,
-            });
+                strokeUniform   : true,
+                agFontSize      :0,
+                agMaxLines        : 1,
+                agMaxWidth        : 200,
+                agKarakterLimiti: 30,
+                agKutuyaSigdir  : true
+            });        
             await this.loadFont(textBoxFabricInstance.fontFamily);
             textBoxFabricInstance.agKarakterLimiti      = 30
             textBoxFabricInstance.agKutuyaSigdir        = 1
+            textBoxFabricInstance.agMaxLines         = 1
             BU.activeCanvas.add(textBoxFabricInstance);
             BU.activeCanvas.requestRenderAll();
             
@@ -335,7 +349,7 @@ class AgEditor {
                 TR    += this._inputPanelTR('fill','Fill','color',object.fill)
                 TR    += this._inputPanelTR('stroke','Stroke','color',object.stroke)
                 TR    += this._inputPanelTR('strokeWidth','Stroke Width','number',object.strokeWidth)
-                TR    += this._inputPanelTR('textLines','Satır Limiti','number',object.textLines.length)
+                TR    += this._inputPanelTR('agMaxLines','Satır Limiti','number',object.agMaxLines)
                 TR    += this._inputPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
                 TR    += this._inputPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
             }else if(object_type == 'rect' || object_type == 'image'){
@@ -366,7 +380,7 @@ class AgEditor {
             tr = '<tr>'
                 +'  <td >'+label+'</td>'
                 +'  <td>'
-                +'      <input class="form-control" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
+                +'      <input class="form-control prop-form-control" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
                 +'  </td>'
                 +'</tr>';
         }else if(type == 'checkbox'){
@@ -384,7 +398,7 @@ class AgEditor {
             tr = '<tr>'
                 +'<td>'+label+'</td>'
                 +'  <td>'
-                +'      <select class="form-control" data-prop-name="'+prop_name+'">'
+                +'      <select class="form-control prop-form-control" data-prop-name="'+prop_name+'">'
             $.each(data,function (i,fv) {    
                 let selected = fv==value?"selected":null;
                 tr +='      <option '+selected+' value="'+fv+'">'+i+'</option>'; 
@@ -396,7 +410,7 @@ class AgEditor {
             tr = '<tr>'
                 +'  <td >'+label+'</td>'
                 +'  <td>'
-                +'      <input class="form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
+                +'      <input class="form-control prop-form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
                 +'  </td>'
                 +'</tr>';
         }
@@ -408,7 +422,7 @@ class AgEditor {
             value = parseFloat(value);
         }
 
-        if(prop_name == 'textLines'){
+        if(prop_name == 'agMaxLines'){
             let text='Satir 0';
             for(let satir = 0;satir<value-1;satir++){
                 text += '\nSatir '+ (satir + 1)
@@ -441,6 +455,8 @@ class AgEditor {
             let serialized = JSON.stringify(canvas.toJSON([ "agSablonResmi",
                                                             "agKarakterLimiti",
                                                             "agKutuyaSigdir",
+                                                            "agMaxLines",
+                                                            "agMaxWidth",
                                                             "agCropImageData",
                                                             "agCropData",
                                                             "agImageUrl",
@@ -463,9 +479,13 @@ class AgEditor {
     }
 
     async openJsonFromLocal(){
+        $('#tmp_file_input').remove();
         let BU          = this;
         let fileslct    = document.createElement("INPUT");
+        fileslct.id     ="tmp_file_input"
+        fileslct.setAttribute("style","display:none");
         fileslct.setAttribute("type", "file");
+        $('body').append(fileslct);
         fileslct.click();
         return new Promise((resolve,reject)=>{
             $(fileslct).change(function(){
@@ -531,9 +551,9 @@ class AgEditor {
     }
 
     writeToText(target_id,text){
-        let o   = this.getObjectByID(target_id);
-        o.text  = text ;
-        this.activeCanvas.renderAll();
+        let o           = this.getObjectByID(target_id);
+        o.text          = text;
+        this.activeCanvas.renderAll(); 
     }
 
     async sunumuBaslat(){
@@ -561,10 +581,12 @@ class AgEditor {
         }
         
         
-        if(this.activeCanvas){  
+        if(this.activeCanvas){
+            BU.modal_progress.modal('show')
             fabric.Image.fromURL(bigImgSrc, function(oImg) {
+                BU.modal_progress.modal('hide')
                 if (!oImg._element){
-                    alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
+                    alert("Büyük şsnlon resmi bulunamadı. \n"+bigImgSrc)
                     return;
                 }
                 let w0      = BU.activeCanvas.width;
@@ -608,12 +630,14 @@ class AgEditor {
 
 ////////////////////////////////////////  AGPRESENTATION /////////////////////////////////////
 class AgPresentation{
+
     constructor(editor){
         this.editor                 = editor; 
         this.preview_input_panel    = $('#preview-input-panel');
     }
 
     async prewiev() {
+        
         let BU = this;
         if(!Object.keys(this.editor.fabricCanvases).length){
             alert("Gösterilecek döküman yok")
@@ -630,13 +654,13 @@ class AgPresentation{
             let objects     = canvas.getObjects();
             $.each(objects,(i,o)=>{
                 if(o instanceof fabric.Textbox){
-                    o.editable = BU.presentMode;
+                    o.editable = !BU.presentMode;
                 }
                 o.lockMovementX = o.lockMovementY = BU.presentMode;
                 o.hasControls = !BU.presentMode;
             })
         }
-
+        
     }
 
     createInputPanel(canvas){
@@ -647,30 +671,49 @@ class AgPresentation{
         }
 
         let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
-        if(data_canvas_id==canvas.id)return;
+        if(data_canvas_id == canvas.id)return;
 
         $(BU.preview_input_panel).find('.inputs').empty();
         $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
         let objects     = canvas.getObjects();
         let crop_count = 0;
         $.each(objects,(i,o)=>{
-            if(o instanceof fabric.Textbox){  
-                let style        = "font-family:"+o.fontFamily+";";
-                style           += "text-align:"+o.textAlign+";";
-                if(o.textLines.length==1){
+
+            if(o instanceof fabric.Textbox){
+                
+                if(o.agMaxLines==1){
+                    let style        = "font-family:"+o.fontFamily+";"
+                    style           += "font-size:"+o.fontSize+"px!important;"
+                    style           += "text-align:"+o.textAlign+";";
+                    //style           += "width:"+o.getScaledWidth()+"px;"
+                    style           += "padding:0px!important;"
                     $(BU.preview_input_panel).find('.inputs')
-                    .append('<tr>'
-                        +'  <td>'
-                        +'      <input type="text" style="'+style+'" class="form-control ag-textbox" data-target-id="'+o.id+'" maxlength="'+o.agKarakterLimiti+'" value="'+o.text+'" >'
-                        +'  </td>'
-                        +'</tr>')
+                        .append('<tr>'
+                            +'  <td>'
+                            +'      <input type="text"  style="'+style+'"  class="form-control ag-textbox" value="'+o.text+'"  data-target-id="'+o.id+'">'
+                            +'  </td>'
+                            +'</tr>')
+
                 }else{
+                    let style        = "font-family:"+o.fontFamily+";"
+                    style           += "font-size:"+o.fontSize+"px!important;"
+                    style           += "text-align:"+o.textAlign+";";
+                    style           += "width:"+o.getScaledWidth()+"px;"
+                    style           += "height:"+o.getScaledHeight()+"px;"
+                    style           += "padding:0px!important;"
+
+                    let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
+                    let zoomstyle   = '';
+                    if(zoom<1){
+                        zoomstyle   = ";zoom:"+zoom
+                    }
+                    
                     $(BU.preview_input_panel).find('.inputs')
-                    .append('<tr>'
-                        +'  <td>'
-                        +'      <textarea rows="'+o.textLines.length+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
-                        +'  </td>'
-                        +'</tr>')
+                        .append('<tr>'
+                            +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
+                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
+                            +'  </td>'
+                            +'</tr>')
                 }
 
             }
@@ -684,6 +727,7 @@ class AgPresentation{
                     +'  </td>'
                     +'</tr>')
             }
+
         })
     }
 }
@@ -733,21 +777,28 @@ class AgCropper{
     }
 
     async showMyImages(){
+        let BU = this
         $(this.modal_element).find('.modal-body').empty();
         $(this.modal_element).find('.modal-body').append(
-                                                            '<div style="width: 100%;text-align: center;padding: 50px;">'+
-                                                                '<p style="display: block;">Henüz hiç resminiz yok.</p>'+
-                                                                '<div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
-                                                            '</div>'
-                                                        );
+                '<div style="width: 100%;text-align: center;padding: 50px;">'+
+                    '<p style="display: block;">Henüz hiç resminiz yok.</p>'+
+                    '<div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
+                '</div>'
+            );
 
         if(window.localStorage.getItem('localresimlerim')){
+            this.editor.modal_progress.modal('show');
             let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
             $(this.modal_element).find('.modal-body').empty();
             $.each(localresimlerim,(i,resim)=>{
-                let img = document.createElement("img");
+                let img         = document.createElement("img");
                 img.setAttribute('src',resim.url)
-                img.className ="user-image";
+                img.className   ="user-image";
+                img.onload  = function(){
+                    if(i == localresimlerim.length-1){
+                        BU.editor.modal_progress.modal('hide');
+                    }
+                }
                 $(this.modal_element).find('.modal-body').append(img);
             });
         }

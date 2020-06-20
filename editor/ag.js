@@ -86,7 +86,7 @@ $('document').ready(function(){
         }
     })
 
-    $('body').on('change','.form-control',function(){
+    $('body').on('change','.prop-form-control',function(){
         prop_name   = $(this).attr('data-prop-name');
         value       = $(this).val();
         if(prop_name == "fontFamily"){
@@ -100,19 +100,141 @@ $('document').ready(function(){
         prop_name   = $(this).attr('data-prop-name');
         value       = $(this).is(':checked')?1:0;
         agEditor.setObjectProperties(prop_name,value);
+    }) 
+
+
+
+    $(document).on('keypress','.ag-textarea',function(event){
+        let text        = $(this).val();
+        let textarea    = $(this)
+        let numberOfLines = (text.match(/\n/g) || []).length + 1
+        let maxRows = parseInt(textarea.attr('rows'));
+        if (event.which === 13 && numberOfLines === maxRows ) {
+          return false;
+        }
+        if (numberOfLines > maxRows ) {
+            return false;
+          }
+  
+
     })
 
-    $(document).on('keyup','.ag-textbox',function(){
-        let target_id   = $(this).attr('data-target-id')
-        let text        = $(this).val();
+    $(document).on('keyup','.ag-textarea',function(e){
+        let target_id   = $(this).attr('data-target-id') 
+        agEditor.writeToText(target_id,$(this).val())
+
+        /*if(checkTextBoxWidth($(this),target_id)){
+            agEditor.writeToText(target_id,$(this).val())
+        }else{
+            $(this).val(agEditor.getObjectByID(target_id).text);
+        }*/
+    })
+    
+
+
+    function checkTextBoxWidth(txtelm,target_id,e){
+
+        /*
+        let fbTxtObj    = agEditor.getObjectByID(target_id)
+        let yeniIcerik  = guncelSatir = '' 
+        let hepsiArr    = txtelm[0].value.split('')
+
+        if(fbTxtObj.agMaxLines>1){
+            $.each(hepsiArr,(i,harf)=>{ 
+                if(harf=='\n'){
+                    yeniIcerik      += guncelSatir + '\n'
+                    guncelSatir     = ''
+                }else{
+                    guncelSatir += harf;
+                }
+                let satirBoyu = fbTxtObj.getMeasuringContext().measureText(guncelSatir+"m").width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
+                if(satirBoyu>=fbTxtObj.getScaledWidth()){
+                    if(hepsiArr[i+1]!='\n'){
+                        if(e.which!=8){
+                            yeniIcerik      += guncelSatir + '\n'
+                        }else{
+                            yeniIcerik      += guncelSatir.substring(0, guncelSatir.length-1);
+                        }
+                    }else{
+                        yeniIcerik      += guncelSatir 
+                    }
+                    guncelSatir = '';
+                }
+            })
+            txtelm[0].value = yeniIcerik+guncelSatir;
+        }
+        */
+
+
+        let fbTxtObj    = agEditor.getObjectByID(target_id)
+        let chars       = txtelm[0].value
+        let lines       = chars.split("\n");
+        if (fbTxtObj.getScaledWidth()) {
+            let hasLongLine     = true;
+            $.each(lines,(i,line)=>{
+                var stringWidth = fbTxtObj.getMeasuringContext().measureText(line).width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
+                if (stringWidth > fbTxtObj.getScaledWidth()) { 
+                    hasLongLine = false;
+                    return;
+                }
+            })
+            return hasLongLine;    
+        }
+    }
+
+
+
+
+
+
+
+    $(document).on('keydown','.ag-textbox',function(e){
+        let target_id   = $(this).attr('data-target-id') 
+        let fbTxtObj    = agEditor.getObjectByID(target_id)
+        let text        = $(this).val(); 
+
+        if(fbTxtObj.agFontSize==0){
+            fbTxtObj.agFontSize = fbTxtObj.fontSize;
+        }
+
+        let satirBoyu = fbTxtObj.getMeasuringContext().measureText(text+"mm").width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
+        let degisimOrani = fbTxtObj.getScaledWidth()/satirBoyu
+
+        if(satirBoyu >= fbTxtObj.getScaledWidth() && !fbTxtObj.agKutuyaSigdir ){ 
+            text = text.substring(0,text.length-1) 
+        }
+
+        if(fbTxtObj.agKutuyaSigdir){ 
+            fbTxtObj.fontSize *= degisimOrani 
+            if(fbTxtObj.fontSize>fbTxtObj.agFontSize){
+                fbTxtObj.fontSize = fbTxtObj.agFontSize
+            }
+        }
+
+        $(this).val(text)
         agEditor.writeToText(target_id,text)
     })
 
+
+
+
+    
+
+
     $(document).on('click','.ag-resimekle-btn',function(){
+
         let target_id                   = $(this).attr('data-target-id')
         agEditor.agCropper.targetObj    = agEditor.getObjectByID(target_id)
         agEditor.agCropper.show()
         agEditor.agCropper.showMyImages()
+        if(agEditor.agCropper.targetObj.agImageUrl){
+            agEditor.agCropper.agImageUrl = agEditor.agCropper.targetObj.agImageUrl;
+            agEditor.agCropper.imageBase64Data = null;
+            agEditor.agCropper.openForCrop();
+            $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
+            $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
+        }
+
     })
 
     $(document).on('click','.ag-crop-resim-resimlerim',function(){ 
@@ -130,15 +252,18 @@ $('document').ready(function(){
         file_input.setAttribute("accept", "image/x-png,image/gif,image/jpeg");
         
         $(file_input).on('change',(inpt)=>{
+            agEditor.modal_progress.modal('show')
             let file = $(inpt)[0].currentTarget.files[0];
             let reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = function() {
                 agEditor.agCropper.imageBase64Data = reader.result; 
                 agEditor.agCropper.openForCrop();
+                agEditor.modal_progress.modal('hide')
             };
             reader.onerror = function() {
                 console.error(reader.error);
+                agEditor.modal_progress.modal('hide')
             };
 
             formData.append('userimage', file); 
@@ -183,7 +308,7 @@ $('document').ready(function(){
         file_input.click();
     })
 
-    $(document).on('click','.user-image',function(){ 
+    $(document).on('click','.user-image',function(){
         agEditor.agCropper.agImageUrl = $(this).attr("src");
         agEditor.agCropper.imageBase64Data = null;
         agEditor.agCropper.openForCrop();
