@@ -15,6 +15,7 @@ $('document').ready(function(){
 
     $('#textarea-ekle').click(function(){
         agEditor.addTextArea();
+        uploadSmallPageImages(300)
     })
 
     $('#croparea-ekle').click(function(){
@@ -71,7 +72,6 @@ $('document').ready(function(){
         agEditor.downloadBigImage();
     }) 
     
-
     $('.modal-body').on('click','.img-thumbnail',function(){
         folder = $(this).attr('data-path')
         if(folder != undefined){
@@ -102,8 +102,6 @@ $('document').ready(function(){
         agEditor.setObjectProperties(prop_name,value);
     }) 
 
-
-
     $(document).on('keypress','.ag-textarea',function(event){
         let text        = $(this).val();
         let textarea    = $(this)
@@ -122,70 +120,7 @@ $('document').ready(function(){
     $(document).on('keyup','.ag-textarea',function(e){
         let target_id   = $(this).attr('data-target-id') 
         agEditor.writeToText(target_id,$(this).val())
-
-        /*if(checkTextBoxWidth($(this),target_id)){
-            agEditor.writeToText(target_id,$(this).val())
-        }else{
-            $(this).val(agEditor.getObjectByID(target_id).text);
-        }*/
     })
-    
-
-
-    function checkTextBoxWidth(txtelm,target_id,e){
-
-        /*
-        let fbTxtObj    = agEditor.getObjectByID(target_id)
-        let yeniIcerik  = guncelSatir = '' 
-        let hepsiArr    = txtelm[0].value.split('')
-
-        if(fbTxtObj.agMaxLines>1){
-            $.each(hepsiArr,(i,harf)=>{ 
-                if(harf=='\n'){
-                    yeniIcerik      += guncelSatir + '\n'
-                    guncelSatir     = ''
-                }else{
-                    guncelSatir += harf;
-                }
-                let satirBoyu = fbTxtObj.getMeasuringContext().measureText(guncelSatir+"m").width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
-                if(satirBoyu>=fbTxtObj.getScaledWidth()){
-                    if(hepsiArr[i+1]!='\n'){
-                        if(e.which!=8){
-                            yeniIcerik      += guncelSatir + '\n'
-                        }else{
-                            yeniIcerik      += guncelSatir.substring(0, guncelSatir.length-1);
-                        }
-                    }else{
-                        yeniIcerik      += guncelSatir 
-                    }
-                    guncelSatir = '';
-                }
-            })
-            txtelm[0].value = yeniIcerik+guncelSatir;
-        }
-        */
-
-
-        let fbTxtObj    = agEditor.getObjectByID(target_id)
-        let chars       = txtelm[0].value
-        let lines       = chars.split("\n");
-        if (fbTxtObj.getScaledWidth()) {
-            let hasLongLine     = true;
-            $.each(lines,(i,line)=>{
-                var stringWidth = fbTxtObj.getMeasuringContext().measureText(line).width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
-                if (stringWidth > fbTxtObj.getScaledWidth()) { 
-                    hasLongLine = false;
-                    return;
-                }
-            })
-            return hasLongLine;    
-        }
-    }
-
-
-
-
-
 
 
     $(document).on('keydown','.ag-textbox',function(e){
@@ -214,12 +149,6 @@ $('document').ready(function(){
         $(this).val(text)
         agEditor.writeToText(target_id,text)
     })
-
-
-
-
-    
-
 
     $(document).on('click','.ag-resimekle-btn',function(){
 
@@ -334,14 +263,27 @@ $('document').ready(function(){
         }
     })    
 
+    async function uploadSmallPageImages(w = 300){
+        let keys = Object.keys(agEditor.fabricCanvases)
+        let index = 0;
+        await _uploadPageImg(keys,index,w);
+    }
+    
+    async function _uploadPageImg(keys,index,w){
+        let key     = keys[index];
+        let canvas  = agEditor.fabricCanvases[key]; 
+        let img     = await agEditor.getJPEG(w,canvas);
+        console.log(img)
+        // BURADA AJAX POST İŞLEMİ OLACAK
+        if(index<keys.length-1){
+            index++;
+            await _uploadPageImg(keys,index,w)
+        }else{
+            return;
+        }
+    }
+
 })//End document ready
-
-
-
-
-
-
-
 
 
 

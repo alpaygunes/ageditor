@@ -73,7 +73,7 @@ class AgEditor {
                 oImg.agSablonResmi  = true  
                 BU.activeCanvas.add(oImg);
                 BU.activeCanvas.moveTo(oImg, 0) 
-                BU.activeCanvas.setZoom(1);
+                BU.activeCanvas.setZoom(1); 
             }); 
         }else{
             alert("Sayfa seçin")
@@ -624,6 +624,15 @@ class AgEditor {
         });
         indirlink.download = 'canvas.png'
         indirlink.click();
+    }
+
+    async getJPEG(w,canvas){
+        let ratio = w/canvas.width
+        return canvas.toDataURL(
+        {
+            format: 'jpg', 
+            multiplier: ratio,
+        });  
     }
 }
 
