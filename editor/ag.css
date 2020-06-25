@@ -1,14 +1,37 @@
-html {
-    margin-top: 64px;
-    min-width: 1000px;
+.cropper-point{
+    width: 15px!important;
+    height: 15px!important;
+    border: 1px solid #fff;
 }
 
-body {
-    min-width: 1000px;
-    margin: 0px;
+
+#ageditor{
+    margin-top: 25px;
+    float: left;  
+}
+
+.ag-container{ 
     background-color: darkgrey;
+    min-height : 1000px;
+    display: block;
+    position: relative;
+    top: 0;
+    left: 0;
+    padding: 0px;
+    min-width: 1000px;
+    overflow-y: auto;
+    z-index: 1045;
+    width: 1000;
 }
 
+[data-toggle="tooltip"] {
+    position: relative; 
+    z-index: 1045;
+}
+
+.ag-container-fullpage{
+    position: fixed;
+}
 
 .clear {
     height: 10px;
@@ -17,11 +40,19 @@ body {
     background-color: darkgrey;
 }
 
+.ag-container .navbar-nav .nav-link{
+    margin-left: 25px!important;
+    font-size: 2.5rem;
+}
+
+.ag-container .navbar .ag-fullpage{
+    font-size: 24px;
+}
+
 #properties-panel {
-    right: 0px;
-    top: 0;
-    position: fixed;
-    width: 300px;
+    right: 7px;
+    top: 0px;
+    position: relative;
     height: 100%;
     min-height: 500px;
     display: block;
@@ -47,18 +78,18 @@ body {
 }
 
 #preview-input-panel{
-    margin: 10px;
-    right: 0px;
-    top: 64px;
-    position: fixed;
-    width: 300px;
-    height: 88%;
+    right: 7px;
+    top: 0px;
+    position: relative;
+    height: 100%;
     min-height: 500px;
-    display: block; 
+    display: block;
     overflow-y: auto;
-    z-index: 999;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    background-color: #fff;
+    padding: 0px;
 }
-
 
 #ageditor .canvas-container{
     margin-left: auto;
@@ -98,7 +129,7 @@ body {
 .img-thumbnail .file-name {
     display: block;
     width: 95%;
-    font-size: 8px;
+    font-size: 12px;
     position: absolute;
     bottom: 0;
     text-align: center;
@@ -169,11 +200,9 @@ body {
     top: -10px;
 }
 
-
 #modal-agcropper .modal-body .wrap-user-image svg:hover{  
     width: 42px;  
 }
-
 
 #modal-agcropper .modal-dialog {
     width: 100%;
@@ -193,11 +222,11 @@ body {
 #modal-agcropper .crop-menu-item{
     margin-left:10px; 
 }
- 
 
-
-
-
-@media (max-width: 1000px){
-    
+#modal-agcropper .btn-link{
+    font-size: 16px;
 }
+
+
+ 
+ 

@@ -41,8 +41,34 @@ $('document').ready(function(){
     })
 
     $('#openJsonFromLocal').click(async function(){
-        agEditor = new AgEditor();
-        await agEditor.openJsonFromLocal(); 
+
+        $('#tmp_file_input').remove();
+        let fileslct    = document.createElement("INPUT");
+        fileslct.id     ="tmp_file_input";
+        fileslct.setAttribute("style","display:none");
+        fileslct.setAttribute("type", "file");
+        $('body').append(fileslct);
+        fileslct.click();
+
+        return new Promise((resolve,reject)=>{
+            $(fileslct).change(function(){
+                agEditor
+                let file        = $(this)[0].files[0]
+                let reader      = new FileReader();
+                reader.readAsText(file);
+                reader.onload   = async function() {
+                    await agEditor._fromJSON(reader.result);
+                    resolve();
+                };
+                reader.onerror  = function() {
+                    console.error(reader.error);
+                    reject();
+                };
+            })
+        })
+
+        /*agEditor = new AgEditor();
+        await agEditor.openJsonFromLocal(); */
         setTimeout(() => {
             agEditor.sunumuBaslat(); 
         }, 50);
@@ -124,7 +150,7 @@ $('document').ready(function(){
     })
 
 
-    $(document).on('keydown','.ag-textbox',function(e){
+    $(document).on('keyup','.ag-textbox',function(e){
         let target_id   = $(this).attr('data-target-id') 
         let fbTxtObj    = agEditor.getObjectByID(target_id)
         let text        = $(this).val(); 
@@ -210,8 +236,8 @@ $('document').ready(function(){
                         agEditor.agCropper.awaitingUploads.splice(index, 1);
                     }
                     if(data.url){
-                        agEditor.agCropper.agImageUrl = data.url; 
-                        resim           = {"url":data.url}
+                        agEditor.agCropper.agImageUrl = baseURL+'/ageditor/'+data.url; 
+                        resim           = {"url":baseURL+'/ageditor/'+data.url}
                         if(window.localStorage.getItem("localresimlerim")){
                             localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
                             localresimlerim[Object.keys(localresimlerim).length] = resim;
@@ -332,6 +358,36 @@ $('document').ready(function(){
         }
     }
 
+    var fullpage = false
+    $(document).on('click','.ag-fullpage',function(){
+        if(!fullpage){
+            $('.ag-container .navbar-expand-lg').addClass('fixed-top')
+            $('.ag-container').addClass('ag-container-fullpage')
+            $('#ageditor').css('margin-top','75px')
+            $('#properties-panel').css('position','fixed')
+            $('#properties-panel').css('top','68px')
+
+            $('#preview-input-panel').css('position','fixed')
+            $('#preview-input-panel').css('top','68px')
+        }else{
+            $('.ag-container .navbar-expand-lg').removeClass('fixed-top')
+            $('.ag-container').removeClass('ag-container-fullpage')
+            $('#ageditor').css('margin-top','25px')
+            $('#properties-panel').css('position','relative')
+            $('#properties-panel').css('top','0px')
+            $('#preview-input-panel').css('position','relative')
+            $('#preview-input-panel').css('top','0px')
+        }
+        fullpage = !fullpage;
+    })
+
+
+    var agContentHeight = $('body').outerHeight(true );
+    $('.ag-container').css({
+        'height': agContentHeight + 'px'
+    });
+    
+
 })//End document ready
 
 
@@ -358,7 +414,7 @@ function openImageBrowser(folder){
                 $('#modal-kutuphane .modal-body').append(elm);
             })
             if(!$('#modal-kutuphane').hasClass('in')){
-                $('#modal-kutuphane').modal();
+                $('#modal-kutuphane').modal('show');
             }
         }
     })

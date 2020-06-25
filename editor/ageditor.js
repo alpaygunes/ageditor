@@ -202,7 +202,7 @@ class AgEditor {
     }
 
     async loadFont(font_name){  
-        let junction_font = new FontFace(font_name, 'url(editor/fonts/'+font_name+'.ttf)');
+        let junction_font = new FontFace(font_name, 'url('+baseURL+'/ageditor/editor/fonts/'+font_name+'.ttf)');
         return  new Promise((resolve,reject)=>{
                         let fnt = junction_font.load() 
                         fnt.then((loaded_face)=>{
@@ -218,7 +218,7 @@ class AgEditor {
     async addCropArea(){
         let BU = this
         if(this.activeCanvas){   
-             new fabric.Image.fromURL("editor/agblank.png",
+             new fabric.Image.fromURL(baseURL+"/ageditor/editor/agblank.png",
                     function(oImg) {
                         oImg.id = Math.floor(Math.random() * 100000) + 1
                         oImg.left = 200
@@ -330,7 +330,7 @@ class AgEditor {
 
     async _loadfonts(){
         let BU = this;
-        $.get( "editor/fonts/fonts.json", (fonts) =>{  
+        $.get( baseURL+"/ageditor/editor/fonts/fonts.json", (fonts) =>{  
             this.fontsJson = fonts;
         });
     }
@@ -480,11 +480,12 @@ class AgEditor {
         a.click(); 
     }
 
+    /*
     async openJsonFromLocal(){
         $('#tmp_file_input').remove();
         let BU          = this;
         let fileslct    = document.createElement("INPUT");
-        fileslct.id     ="tmp_file_input"
+        fileslct.id     ="tmp_file_input";
         fileslct.setAttribute("style","display:none");
         fileslct.setAttribute("type", "file");
         $('body').append(fileslct);
@@ -505,6 +506,7 @@ class AgEditor {
             })
         })
     } 
+       */
 
     async _fromJSON(stringFile){
         let BU              = this;
@@ -799,16 +801,16 @@ class AgCropper{
 
         if(window.localStorage.getItem('localresimlerim')){
             let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
-            if(localresimlerim && localresimlerim.length){
+            if(localresimlerim && Object.keys(localresimlerim).length){
                 this.editor.modal_progress.modal('show');
+                $(this.modal_element).find('.modal-body').empty();
             }
-            $(this.modal_element).find('.modal-body').empty();
             $.each(localresimlerim,(i,resim)=>{
                 let img         = document.createElement("img");
                 img.setAttribute('src',resim.url)
                 img.className   ="user-image";
                 img.onload  = function(){
-                    if(i == localresimlerim.length-1){
+                    if(i == Object.keys(localresimlerim).length-1){
                         BU.editor.modal_progress.modal('hide');
                     }
                 }
