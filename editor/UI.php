@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>agEditor</title> 
+
+    <script src="editor/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="editor/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link   rel="stylesheet" type="text/css" href="editor/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="editor/lib/fabric.min.js"></script>
+    <script src="editor/ageditor.js"></script>
+    <link rel="stylesheet" type="text/css" href="editor/ag.css">
+    <script src="editor/ag.js"></script>
+    <script src="editor/node_modules/@fortawesome/fontawesome-free/js/all.js"></script>
+    <link rel="stylesheet" type="text/css" href="editor/node_modules/@fortawesome/fontawesome-free/css/all.css">
+
+    <!--  CROPPERJS -->
+    <script src="editor/lib/cropper.js"></script>
+    <link   rel="stylesheet" type="text/css" href="editor/lib/cropper.css">
+    <!--  END       -->
+    
+</head>
+<body>
+
+    <!-- =========================================  TOP MENU    =====================  -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bilgisayarımdan Aç"
+            id="openJsonFromLocal"href="#"><i class="fas fa-folder-open"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Yeni Sayfa"
+            id="canvas-ekle" href="#"><i class="fas fa-file"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bilgisayara Kaydet"
+            id="saveJsonToLocal"href="#"><i class="fas fa-file-download"></i></div>
+            <div class="nav-item nav-link" 
+            data-toggle="tooltip" data-placement="top" title="Zemin Resmi"
+            id="bg-ekle" href="#"><i class="fas fa-stroopwafel"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Metin Kutusu"
+            id="textarea-ekle" href="#"><i class="fab fa-tumblr-square"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Resim Alanı"
+            id="croparea-ekle" href="#"><i class="fas fa-image"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Logo / Serbest Resim"
+            id="logo-ekle" href="#"><i class="fas fa-icons"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Sil"
+            id="obje-sil"href="#"><i class="fas fa-trash"></i></div>
+            
+
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bir Alta Gönder"
+            id="sendBackwards"href="#">
+              <svg class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+              </svg>
+            </div>
+            
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Bir Öne Getir"
+            id="bringForward"href="#">
+              <svg style="transform: rotate(180deg);" class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+              </svg>
+            </div>
+
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Sunum Moduna Geç"
+            id="sunumuBaslat"href="#"><i class="fas fa-eye"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Büyük Resmi Çiz"
+            id="renderWithBigBGImage"href="#"><i class="fas fa-expand-alt"></i></div>
+            <div class="nav-item nav-link"  
+            data-toggle="tooltip" data-placement="top" title="Büyük Resmi İndir"
+            id="downloadBigImage"href="#"><i class="fas fa-file-download"></i></div>
+
+          </div>
+        </div>
+    </nav>
+    <!-- END-->
+
+    <div class="container">
+        <!-- =========================================  AGEDİTÖR MENU    =====================  -->
+        <div id="ageditor" class="col-sm-8 col-lg-9 col-xl-9">
+
+        </div>
+        <!-- END-->
+
+        <!-- =========================================  PROPERTIES PANEL    =====================  -->
+        <div id="properties-panel" class="col-sm-4 col-lg-3 col-xl-3">
+          <div class="card">
+            <h5 class="card-header">Özellikler</h5>
+            <div class="card-body">
+              <table class="table table-borderless properties">
+            
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- END-->
+    </div><!-- End container -->
+
+
+
+
+
+
+  <!-- =========================================  PREVIEW PANEL    =====================  -->
+    <div id="preview-input-panel" style="display: none;">
+      <div class="card">
+        <h5 class="card-header">Giriş</h5>
+        <div class="card-body">
+          <table class="table table-borderless inputs">
+            
+          </table>
+        </div>
+      </div>
+    </div>
+  <!-- END-->
+
+
+
+
+    <!-- =========================================  MODAL KÜTÜPHANE SEÇ    =====================  -->
+    <div class="modal" tabindex="-1" id="modal-kutuphane" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Resimler</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+    <!-- =========================================  MODAL RESİMLERİM   =====================  -->
+    <div class="modal modal-fullscreen" tabindex="-1" id="modal-agcropper" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn btn-link ag-crop-resim-resimlerim" style="display: none;"><i class="fas fa-caret-square-left"></i> Resimlerim </button>
+            <button type="button" class="btn btn-link ag-crop-resim-yukle"><i class="fas fa-upload"></i> Yükle </button>
+            <button type="button" class="btn btn-link ag-crop-resim-rotate-left crop-menu-item"><i class="fas fa-undo"></i></i></button>
+            <button type="button" class="btn btn-link ag-crop-resim-rotate-right crop-menu-item"><i class="fas fa-redo"></i></button>
+            <button type="button" class="btn btn-link ag-crop-resim-crop crop-menu-item"><i class="fas fa-crop"></i> Kırp </button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+              
+          </div>
+          <div class="modal-footer"> 
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+    <!-- =========================================  MODAL PROGRESS   =====================  -->
+    <div class="modal" tabindex="-1" id="modal-progress" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: darkgrey;">
+            DURUM
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"> 
+            <div style="width: 100%;text-align: center;padding: 25px;">
+                <div class="spinner-border text-muted"></div>
+                <br>
+                İşlem devam ediyor.
+            </div>
+          </div>
+          <div class="modal-footer"> 
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END-->
+
+    
+</body>
+</html>

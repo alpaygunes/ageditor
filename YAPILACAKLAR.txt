@@ -4,7 +4,3 @@
 3 - CurveText ve güzel yazı sanatı araştırılsın. (WordArt)
 4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
 5 - Baskı için PDF hazırlansın
-
-
-küçük resim export
-kullaıcı resmi silme

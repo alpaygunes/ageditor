@@ -100,6 +100,7 @@ class AgEditor {
             canvas.width        = w;
             canvas.height       = h;
             canvas.id           = id;
+            canvas.agSmallImageUrl='';
             canvas.selection    = false
 
             $(canvas.wrapperEl).css('outline','none');
@@ -459,6 +460,7 @@ class AgEditor {
                                                             "agMaxWidth",
                                                             "agCropImageData",
                                                             "agCropData",
+                                                            "agSmallImageUrl",
                                                             "agImageUrl",
                                                             "evented",
                                                             "hasControls",
@@ -796,8 +798,10 @@ class AgCropper{
             );
 
         if(window.localStorage.getItem('localresimlerim')){
-            this.editor.modal_progress.modal('show');
             let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
+            if(localresimlerim && localresimlerim.length){
+                this.editor.modal_progress.modal('show');
+            }
             $(this.modal_element).find('.modal-body').empty();
             $.each(localresimlerim,(i,resim)=>{
                 let img         = document.createElement("img");
@@ -808,7 +812,11 @@ class AgCropper{
                         BU.editor.modal_progress.modal('hide');
                     }
                 }
-                $(this.modal_element).find('.modal-body').append(img);
+                let div         = document.createElement("div"); 
+                div.className   ="wrap-user-image";
+                $(div).append(img);
+                $(div).append('<i class="fas fa-trash-alt" data-lcl-ctoreage-id='+i+'></i>'); 
+                $(this.modal_element).find('.modal-body').append(div);
             });
         }
     }

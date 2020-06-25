@@ -1,7 +1,8 @@
+var baseURL = "http://opencart.test"
 $('document').ready(function(){
-    var agEditor = new AgEditor();
+    var agEditor    = new AgEditor();
     agEditor._refreshMainMenu()
-    var gorev = '' // bg-ekle | logo-ekle
+    var gorev       = '' // bg-ekle | logo-ekle
     $('[data-toggle="tooltip"]').tooltip()
     
     $('#ag-yeni').click(function(){
@@ -175,7 +176,7 @@ $('document').ready(function(){
     })
 
     $(document).on('click','.ag-crop-resim-yukle',()=>{
-        let formData = new FormData();
+        let formData    = new FormData();
         let file_input  = document.createElement("INPUT");
         file_input.setAttribute("type", "file");
         file_input.setAttribute("accept", "image/x-png,image/gif,image/jpeg");
@@ -197,7 +198,7 @@ $('document').ready(function(){
 
             formData.append('userimage', file); 
             $.ajax({
-                url: 'api/?command=uploadUserImage',
+                url: baseURL+'/ageditor/api/?command=uploadUserImage',
                 data: formData,
                 type: 'POST',
                 contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
@@ -213,9 +214,9 @@ $('document').ready(function(){
                         resim           = {"url":data.url}
                         if(window.localStorage.getItem("localresimlerim")){
                             localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
-                            localresimlerim.push(resim);
+                            localresimlerim[Object.keys(localresimlerim).length] = resim;
                         }else{
-                            localresimlerim.push(resim);
+                            localresimlerim[Object.keys(localresimlerim).length] = resim;
                         }
                         window.localStorage.setItem("localresimlerim",JSON.stringify(localresimlerim))
                     }else if(data.messages){
@@ -245,6 +246,21 @@ $('document').ready(function(){
         $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
     })
 
+    $(document).on('click','.wrap-user-image .fa-trash-alt',function(){
+        let id = $(this).attr("data-lcl-ctoreage-id");
+        let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
+        if(localresimlerim){
+            $(this).parent().remove();
+            const newLocalresimlerim = Object.keys(localresimlerim).reduce((object, key) => {
+                if (key !== id) {
+                  object[key] = localresimlerim[key]
+                }
+                return object
+              }, {})
+            window.localStorage.setItem("localresimlerim",JSON.stringify(newLocalresimlerim))
+        }
+    })
+
     $(document).on('click','.ag-crop-resim-rotate-left',function(){
         agEditor.agCropper.rotateLeft();
     })
@@ -272,9 +288,42 @@ $('document').ready(function(){
     async function _uploadPageImg(keys,index,w){
         let key     = keys[index];
         let canvas  = agEditor.fabricCanvases[key]; 
-        let img     = await agEditor.getJPEG(w,canvas);
-        console.log(img)
-        // BURADA AJAX POST İŞLEMİ OLACAK
+        let dataURI = await agEditor.getJPEG(w,canvas);
+
+
+        var byteString  = atob(dataURI.split(',')[1]);
+        var ab          = new ArrayBuffer(byteString.length);
+        var ia          = new Uint8Array(ab);
+    
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        blob =  new Blob([ab], { type: 'image/jpeg' });
+
+        var formData = new FormData();
+        formData.append("smalldesigns", blob,"image_name.jpg");
+
+        $.ajax({
+            url: baseURL+'/ageditor/api/?command=uploadSmallPageImages',
+            data: formData,
+            type: 'POST',
+            contentType: false,  
+            processData: false,  
+            success:function(data){
+                if(data.url){
+                    canvas.agSmallImageUrl = data.url
+                }else{
+                    console.log("agSmallImageUrl alınamadı")
+                }
+            },
+            beforeSend: function(){
+                
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert("Küçük  resim gönderilirken sistem hatası : "+xhr.status);
+            }
+        });
+
         if(index<keys.length-1){
             index++;
             await _uploadPageImg(keys,index,w)
@@ -291,13 +340,13 @@ $('document').ready(function(){
 
 
 function openImageBrowser(folder){
-    url = "api/?command=getBgImages&folder="+folder
+    url = baseURL+"/ageditor/api/?command=getBgImages&folder="+folder
     $.get(url,function(files){
         $('#modal-kutuphane .modal-body').empty();
         if(files){
             $.each(files,function(i,file){ 
                 elm = '<div class="rounded  float-left img-thumbnail">'+
-                      '<img src="'+'api/'+file.path+'">'+
+                      '<img src="'+baseURL+'/ageditor/api/'+file.path+'">'+
                       '<div class="file-name">'+file.name+'</div>'+
                       '</div>';
                 if(file.type == 'folder'){

@@ -1,4 +1,9 @@
 <?php
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET, POST, PUT");
+header("Access-Control-Allow-Headers: Content-Type");
+
+
 $command        = $_GET['command'];
 
 
@@ -74,7 +79,42 @@ function uploadUserImage(){
 
 
 
+//-------------------------          uploadSmallPageImages   -------------------------
+function uploadSmallPageImages(){
+    $maxFileSize    = 21000000;
+    $imageFileType  = strtolower(pathinfo($_FILES["smalldesigns"]["name"],PATHINFO_EXTENSION));
+    $messages       = null;
+    $target_dir     = "smalldesigns/";
+    $target_file    = $target_dir . uniqid().'.'.$imageFileType;
+    $uploadOk       = 1;
+    
+    
+    
+    // Check file size
+    if ($_FILES["smalldesigns"]["size"] > $maxFileSize) {
+        $messages .= "\nDosya boyutu çok büyük! Max. 20 MB olabilir";
+        $uploadOk   = 0;
+    }
+    
+    // Allow certain file formats
+    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
+        $messages  .= "\nDosya formatı sadece JPG, JPEG, PNG olmalı";
+        $uploadOk   = 0;
+    }
+    
 
+
+    header('Content-Type: application/json');
+    if ($uploadOk == 0) {
+        echo json_encode(['messages'=>$messages]);
+    } else {
+        if (move_uploaded_file($_FILES["smalldesigns"]["tmp_name"], $target_file)) {
+            echo json_encode(['url'=>'api/'.$target_file]);
+        } else {
+            echo json_encode(['error'=>"Sorry, there was an error uploading your file."]);
+        }
+    }
+}
 
 
 
@@ -86,4 +126,7 @@ if($command == "getBgImages"){
     getBgImages();
 }else if($command == "uploadUserImage"){
     uploadUserImage();
+
+}else if($command == "uploadSmallPageImages"){
+    uploadSmallPageImages();
 }
