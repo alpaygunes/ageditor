@@ -117,6 +117,44 @@ function uploadSmallPageImages(){
 }
 
 
+//-------------------------          uploadSmallPageImages   -------------------------
+function saveSablonToServer(){
+    $maxFileSize    = 21000000;
+    $imageFileType  = strtolower(pathinfo($_FILES["sablonfile"]["name"],PATHINFO_EXTENSION));
+    $messages       = null;
+    $target_dir     = "sablons/";
+    $target_file    = $target_dir . $_FILES["sablonfile"]["name"];
+    $uploadOk       = 1;
+    
+    
+    
+    // Check file size
+    if ($_FILES["sablonfile"]["size"] > $maxFileSize) {
+        $messages .= "\nDosya boyutu çok büyük! Max. 20 MB olabilir";
+        $uploadOk   = 0;
+    }
+    
+    // Allow certain file formats
+    if($imageFileType != "json") {
+        $messages  .= "\nDosya formatı sadece JSON";
+        $uploadOk   = 0;
+    }
+    
+
+
+    header('Content-Type: application/json');
+    if ($uploadOk == 0) {
+        echo json_encode(['messages'=>$messages]);
+    } else {
+        if (move_uploaded_file($_FILES["sablonfile"]["tmp_name"], $target_file)) {
+            echo json_encode(['url'=>'api/'.$target_file]);
+        } else {
+            echo json_encode(['error'=>"Sorry, there was an error uploading your file."]);
+        }
+    }
+}
+
+
 
 
 
@@ -129,4 +167,6 @@ if($command == "getBgImages"){
 
 }else if($command == "uploadSmallPageImages"){
     uploadSmallPageImages();
+}else if($command == "saveSablonToServer"){
+    saveSablonToServer();
 }

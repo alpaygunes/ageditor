@@ -5,9 +5,12 @@ class AgEditor {
     constructor(){
         this.agPresentation             = new AgPresentation(this);
         this.agCropper                  = new AgCropper(this);
-        this.target_html_element        = $('#ageditor');
+        this.container_html_element     = $('.ag-container');
+        this.editor_html_element        = $('#ageditor');
         this.modal_progress             = $('#modal-progress');
         this.target_properties_panel    = $('#properties-panel');
+        this.nav_html_element           = $('.ag-container .navbar');
+        this.preview_input_panel        = $('#preview-input-panel');
         this.fabricCanvases             = [];
         this.activeCanvas               = null;
         this.presentMode                = false;
@@ -32,6 +35,7 @@ class AgEditor {
             $('#canvas-ekle').show();
         }else{
             $('.nav-link').show();
+            $(this.nav_html_element).show();
         }
 
         if(this.activeCanvas){
@@ -91,11 +95,11 @@ class AgEditor {
             let h       = page.h;
             let bgColor = page.bgColor;
 
-            $(BU.target_html_element).append('<canvas id="'
+            $(BU.editor_html_element).append('<canvas id="'
                                                 + id + '" width="'
                                                 + w + '"  height="'
                                                 + h + '"></canvas>');
-            $(BU.target_html_element).append('<div class="clear"></div');
+            $(BU.editor_html_element).append('<div class="clear"></div');
             let canvas          = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
             canvas.width        = w;
             canvas.height       = h;
@@ -202,7 +206,7 @@ class AgEditor {
     }
 
     async loadFont(font_name){  
-        let junction_font = new FontFace(font_name, 'url('+baseURL+'/ageditor/editor/fonts/'+font_name+'.ttf)');
+        let junction_font = new FontFace(font_name, 'url('+agBaseURL+'/ageditor/editor/fonts/'+font_name+'.ttf)');
         return  new Promise((resolve,reject)=>{
                         let fnt = junction_font.load() 
                         fnt.then((loaded_face)=>{
@@ -218,7 +222,7 @@ class AgEditor {
     async addCropArea(){
         let BU = this
         if(this.activeCanvas){   
-             new fabric.Image.fromURL(baseURL+"/ageditor/editor/agblank.png",
+             new fabric.Image.fromURL(agBaseURL+"/ageditor/editor/agblank.png",
                     function(oImg) {
                         oImg.id = Math.floor(Math.random() * 100000) + 1
                         oImg.left = 200
@@ -330,7 +334,7 @@ class AgEditor {
 
     async _loadfonts(){
         let BU = this;
-        $.get( baseURL+"/ageditor/editor/fonts/fonts.json", (fonts) =>{  
+        $.get( agBaseURL+"/ageditor/editor/fonts/fonts.json", (fonts) =>{  
             this.fontsJson = fonts;
         });
     }
@@ -508,10 +512,9 @@ class AgEditor {
     } 
        */
 
-    async _fromJSON(stringFile){
-        let BU              = this;
-        let jsonFile        = JSON.parse(stringFile);
-        $(this.target_html_element).empty();
+    async _fromJSON(jsonFile){
+        let BU              = this;        
+        $(this.editor_html_element).empty();
         this.fabricCanvases = [];
         $.each(jsonFile,async (i,val)=>{
             let obj     = JSON.parse(val)
@@ -747,7 +750,6 @@ class AgPresentation{
 
 
 
-
 ///////////////////////////////////////   AGCROPPER  ////////////////////////////////////////
 class AgCropper{
 
@@ -889,8 +891,8 @@ class AgCropper{
             img.scaleX  = 1/3
             img.scaleY  = 1/3
             BU.editor.activeCanvas.renderAll();
-            let elm = document.getElementById(obj.id);
-            $('#modal-agcropper').remove(elm);
+            //let elm = document.getElementById(obj.id);
+            //$('#modal-agcropper').remove(elm);
             tmpcropper.destroy();
         }); 
     }

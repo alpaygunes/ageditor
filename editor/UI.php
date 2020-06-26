@@ -111,6 +111,10 @@
                       data-toggle="tooltip" data-placement="top" title="Büyük Resmi İndir"
                       id="downloadBigImage"href="#"><i class="fas fa-file-download"></i></div>
 
+                      <div class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="top" title="Sunucuya kaydet"
+                      id="saveSablonToServer"href="#"><i class="fas fa-cloud-upload-alt"></i></div>
+
                     </div>
                   </div>
               </nav>

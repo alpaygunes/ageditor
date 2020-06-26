@@ -1,8 +1,21 @@
-var baseURL = "http://opencart.test"
-$('document').ready(function(){
-    var agEditor    = new AgEditor();
+var agBaseURL       = "http://opencart.test"
+var agEditor;
+var ag_gorev        = '' // bg-ekle | logo-ekle
+var ag_product_id   = null;
+
+$('document').ready(  function(){
+    agEditor        = new AgEditor();
+    if(!ifExistProductIdinUrl()){
+        $(agEditor.nav_html_element).hide();
+        $(agEditor.target_properties_panel).hide(); 
+        return;
+    }
+
+     getSablonFile()
+
     agEditor._refreshMainMenu()
-    var gorev       = '' // bg-ekle | logo-ekle
+
+
     $('[data-toggle="tooltip"]').tooltip()
     
     $('#ag-yeni').click(function(){
@@ -10,13 +23,12 @@ $('document').ready(function(){
     })
 
     $('#bg-ekle').click(function(){
-        gorev = 'bg-ekle'
+        ag_gorev = 'bg-ekle'
         openImageBrowser('/');
     })
 
     $('#textarea-ekle').click(function(){
         agEditor.addTextArea();
-        uploadSmallPageImages(300)
     })
 
     $('#croparea-ekle').click(function(){
@@ -24,7 +36,7 @@ $('document').ready(function(){
     })
 
     $('#logo-ekle').click(function(){
-        gorev = 'logo-ekle'
+        ag_gorev = 'logo-ekle'
         openImageBrowser('/');
     })
 
@@ -51,13 +63,12 @@ $('document').ready(function(){
         fileslct.click();
 
         return new Promise((resolve,reject)=>{
-            $(fileslct).change(function(){
-                agEditor
+            $(fileslct).change(function(){                
                 let file        = $(this)[0].files[0]
                 let reader      = new FileReader();
                 reader.readAsText(file);
                 reader.onload   = async function() {
-                    await agEditor._fromJSON(reader.result);
+                    await agEditor._fromJSON(JSON.parse(reader.result));
                     resolve();
                 };
                 reader.onerror  = function() {
@@ -67,8 +78,6 @@ $('document').ready(function(){
             })
         })
 
-        /*agEditor = new AgEditor();
-        await agEditor.openJsonFromLocal(); */
         setTimeout(() => {
             agEditor.sunumuBaslat(); 
         }, 50);
@@ -105,9 +114,9 @@ $('document').ready(function(){
             openImageBrowser(folder);
         }else{
             imgElm = $(this).find('img');
-            if(gorev == "bg-ekle"){
+            if(ag_gorev == "bg-ekle"){
                 agEditor.setPageBgImage(imgElm);
-            }else if(gorev == "logo-ekle"){
+            }else if(ag_gorev == "logo-ekle"){
                 agEditor.addLogo(imgElm);
             }
         }
@@ -148,7 +157,6 @@ $('document').ready(function(){
         let target_id   = $(this).attr('data-target-id') 
         agEditor.writeToText(target_id,$(this).val())
     })
-
 
     $(document).on('keyup','.ag-textbox',function(e){
         let target_id   = $(this).attr('data-target-id') 
@@ -224,7 +232,7 @@ $('document').ready(function(){
 
             formData.append('userimage', file); 
             $.ajax({
-                url: baseURL+'/ageditor/api/?command=uploadUserImage',
+                url: agBaseURL+'/ageditor/api/?command=uploadUserImage',
                 data: formData,
                 type: 'POST',
                 contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
@@ -236,8 +244,8 @@ $('document').ready(function(){
                         agEditor.agCropper.awaitingUploads.splice(index, 1);
                     }
                     if(data.url){
-                        agEditor.agCropper.agImageUrl = baseURL+'/ageditor/'+data.url; 
-                        resim           = {"url":baseURL+'/ageditor/'+data.url}
+                        agEditor.agCropper.agImageUrl = agBaseURL+'/ageditor/'+data.url; 
+                        resim           = {"url":agBaseURL+'/ageditor/'+data.url}
                         if(window.localStorage.getItem("localresimlerim")){
                             localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
                             localresimlerim[Object.keys(localresimlerim).length] = resim;
@@ -305,104 +313,167 @@ $('document').ready(function(){
         }
     })    
 
-    async function uploadSmallPageImages(w = 300){
-        let keys = Object.keys(agEditor.fabricCanvases)
-        let index = 0;
-        await _uploadPageImg(keys,index,w);
-    }
-    
-    async function _uploadPageImg(keys,index,w){
-        let key     = keys[index];
-        let canvas  = agEditor.fabricCanvases[key]; 
-        let dataURI = await agEditor.getJPEG(w,canvas);
-
-
-        var byteString  = atob(dataURI.split(',')[1]);
-        var ab          = new ArrayBuffer(byteString.length);
-        var ia          = new Uint8Array(ab);
-    
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        blob =  new Blob([ab], { type: 'image/jpeg' });
-
-        var formData = new FormData();
-        formData.append("smalldesigns", blob,"image_name.jpg");
-
-        $.ajax({
-            url: baseURL+'/ageditor/api/?command=uploadSmallPageImages',
-            data: formData,
-            type: 'POST',
-            contentType: false,  
-            processData: false,  
-            success:function(data){
-                if(data.url){
-                    canvas.agSmallImageUrl = data.url
-                }else{
-                    console.log("agSmallImageUrl alınamadı")
-                }
-            },
-            beforeSend: function(){
-                
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                alert("Küçük  resim gönderilirken sistem hatası : "+xhr.status);
-            }
-        });
-
-        if(index<keys.length-1){
-            index++;
-            await _uploadPageImg(keys,index,w)
-        }else{
-            return;
-        }
-    }
 
     var fullpage = false
     $(document).on('click','.ag-fullpage',function(){
         if(!fullpage){
-            $('.ag-container .navbar-expand-lg').addClass('fixed-top')
-            $('.ag-container').addClass('ag-container-fullpage')
-            $('#ageditor').css('margin-top','75px')
-            $('#properties-panel').css('position','fixed')
-            $('#properties-panel').css('top','68px')
+            $(agEditor.container_html_element).find('.navbar-expand-lg').addClass('fixed-top')
+            $(agEditor.container_html_element).addClass('ag-container-fullpage')
+            $(agEditor.editor_html_element).css('margin-top','100px')
+            $(agEditor.target_properties_panel).css('position','fixed')
+            $(agEditor.target_properties_panel).css('top','68px')
 
-            $('#preview-input-panel').css('position','fixed')
-            $('#preview-input-panel').css('top','68px')
+            $(agEditor.preview_input_panel).css('position','fixed')
+            $(agEditor.preview_input_panel).css('top','68px')
         }else{
-            $('.ag-container .navbar-expand-lg').removeClass('fixed-top')
-            $('.ag-container').removeClass('ag-container-fullpage')
-            $('#ageditor').css('margin-top','25px')
-            $('#properties-panel').css('position','relative')
-            $('#properties-panel').css('top','0px')
-            $('#preview-input-panel').css('position','relative')
-            $('#preview-input-panel').css('top','0px')
+            $(agEditor.container_html_element).find('.navbar-expand-lg').removeClass('fixed-top')
+            $(agEditor.container_html_element).removeClass('ag-container-fullpage')
+            $(agEditor.editor_html_element).css('margin-top','25px')
+            $(agEditor.target_properties_panel).css('position','relative')
+            $(agEditor.target_properties_panel).css('top','0px')
+            $(agEditor.preview_input_panel).css('position','relative')
+            $(agEditor.preview_input_panel).css('top','0px')
         }
         fullpage = !fullpage;
     })
 
-
     var agContentHeight = $('body').outerHeight(true );
-    $('.ag-container').css({
+    $(agEditor.container_html_element).css({
         'height': agContentHeight + 'px'
     });
-    
 
+    $(document).on('click','#saveSablonToServer',function(){        
+        saveSablonToServer();        
+    })
+    
+    
 })//End document ready
 
 
+async function uploadSmallPageImages(w = 300){
+    let keys = Object.keys(agEditor.fabricCanvases)
+    let index = 0;
+    await _uploadSmallPageImg(keys,index,w);
+}
+
+async function _uploadSmallPageImg(keys,index,w){
+    let key     = keys[index];
+    let canvas  = agEditor.fabricCanvases[key]; 
+    let dataURI = await agEditor.getJPEG(w,canvas);
 
 
+    var byteString  = atob(dataURI.split(',')[1]);
+    var ab          = new ArrayBuffer(byteString.length);
+    var ia          = new Uint8Array(ab);
+
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    blob =  new Blob([ab], { type: 'image/jpeg' });
+
+    var formData = new FormData();
+    formData.append("smalldesigns", blob,"image_name.jpg");
+
+    
+    $.ajax({
+        url: agBaseURL+'/ageditor/api/?command=uploadSmallPageImages',
+        data: formData,
+        type: 'POST',
+        contentType: false,  
+        processData: false,  
+        success:function(data){
+            if(data.url){
+                canvas.agSmallImageUrl = data.url
+            }else{
+                console.log("agSmallImageUrl alınamadı")
+            }
+        },
+        beforeSend: function(){
+            
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert("Küçük  resim gönderilirken sistem hatası : "+xhr.status);
+        }
+    });
+
+    if(index<keys.length-1){
+        index++;
+        await _uploadSmallPageImg(keys,index,w)
+    }else{
+        return;
+    }
+}
+
+
+async function saveSablonToServer() {
+    agEditor.modal_progress.modal('show')
+    let allCanvasesArr=[];
+    for (var key in agEditor.fabricCanvases) {
+        if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
+        let canvas = agEditor.fabricCanvases[key];
+        let serialized = JSON.stringify(canvas.toJSON([ "agSablonResmi",
+                                                        "agKarakterLimiti",
+                                                        "agKutuyaSigdir",
+                                                        "agMaxLines",
+                                                        "agMaxWidth",
+                                                        "agCropImageData",
+                                                        "agCropData",
+                                                        "agSmallImageUrl",
+                                                        "agImageUrl",
+                                                        "evented",
+                                                        "hasControls",
+                                                        "height",
+                                                        "width",
+                                                        "id"
+                                                    ]));       
+        serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+"/ageditor/editor/agblank.png\"")
+        allCanvasesArr.push(serialized) 
+    }
+    const str   = JSON.stringify(allCanvasesArr);
+    const bytes = new TextEncoder().encode(str);
+    const blob  = new Blob([bytes], {
+        type: "application/json"
+    });
+
+    var formData = new FormData();  
+    formData.append("sablonfile", blob , ag_product_id+'.json');
+    //todo: bu işlev müşteri tasarımında işe yarayacam. burada olması sadece deneme amaçlı sonra akldı
+    await uploadSmallPageImages(300);
+    return new Promise(function(resolve,reject){
+        $.ajax({
+            url: agBaseURL+'/ageditor/api/?command=saveSablonToServer',
+            type: 'post',
+            dataType: 'json',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(json) { 
+                if (json['url']) {
+                    console.log("uploadSmallPageImages"); 
+                    agEditor.modal_progress.modal('hide')
+                    resolve();
+                }else{
+                    agEditor.modal_progress.modal('hide')
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                agEditor.modal_progress.modal('hide')
+                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    })
+}
 
 
 function openImageBrowser(folder){
-    url = baseURL+"/ageditor/api/?command=getBgImages&folder="+folder
+    url = agBaseURL+"/ageditor/api/?command=getBgImages&folder="+folder
     $.get(url,function(files){
         $('#modal-kutuphane .modal-body').empty();
         if(files){
             $.each(files,function(i,file){ 
                 elm = '<div class="rounded  float-left img-thumbnail">'+
-                      '<img src="'+baseURL+'/ageditor/api/'+file.path+'">'+
+                      '<img src="'+agBaseURL+'/ageditor/api/'+file.path+'">'+
                       '<div class="file-name">'+file.name+'</div>'+
                       '</div>';
                 if(file.type == 'folder'){
@@ -418,4 +489,29 @@ function openImageBrowser(folder){
             }
         }
     })
+}
+
+
+function ifExistProductIdinUrl() {  
+    let params          = new URLSearchParams(window.location.search)
+    if(params.has('product_id')){ 
+        ag_product_id   = params.get('product_id')
+        return true;
+    } else{
+        const pid_bulunamadi  =  '<div class="alert alert-light pid-bulunamadi" role="alert">'
+                                +'AgEditör\'ü kayıtlı ürünü düzenlerken kullana bilirsiniz.<br>'
+                                +'<big>Ürünü kaydedin ve düzenlemek için açın.</big>'
+                                +'</div>';
+        $(agEditor.container_html_element).append(pid_bulunamadi);
+        return false;
+    }
+}
+
+function getSablonFile() { 
+    agEditor.modal_progress.modal('show')
+    let url = agBaseURL+'/ageditor/api/sablons/'+ag_product_id+'.json';
+    $.getJSON( url, function( data ) { 
+        agEditor._fromJSON(data);
+        agEditor.modal_progress.modal('hide')
+    });
 }

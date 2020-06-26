@@ -4,3 +4,4 @@
 3 - CurveText ve güzel yazı sanatı araştırılsın. (WordArt)
 4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
 5 - Baskı için PDF hazırlansın
+6 - Text kutu hazırlanırken fareyle satır sayısı artırılmasın. Yada satır sayısı artırılırsa özelikler tablosuna yansısız

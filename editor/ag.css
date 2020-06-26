@@ -4,7 +4,6 @@
     border: 1px solid #fff;
 }
 
-
 #ageditor{
     margin-top: 25px;
     float: left;  
@@ -49,8 +48,17 @@
     font-size: 24px;
 }
 
+#saveSablonToServer{     
+    color: red;
+    font-size: 3rem;
+    padding: 0px;
+    position: absolute;
+    right: 30px;
+    margin: 0px!important;
+}
+
 #properties-panel {
-    right: 7px;
+    right: 14px;
     top: 0px;
     position: relative;
     height: 100%;
@@ -227,6 +235,12 @@
     font-size: 16px;
 }
 
+.pid-bulunamadi{
+    padding: 50px;
+    margin: 50px;
+    text-align: center;
+}
 
- 
- 
+.pid-bulunamadi big{
+    font-size: 30px;
+}
