@@ -5,3 +5,4 @@
 4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
 5 - Baskı için PDF hazırlansın
 6 - Text kutu hazırlanırken fareyle satır sayısı artırılmasın. Yada satır sayısı artırılırsa özelikler tablosuna yansısız
+7 - Textbox a şablon hazırlanırken seçilen font , kutu boyu , kutu line sayısı otomatik olarak hesaplanup özelikler tablosundaki ilgili yere eklensin

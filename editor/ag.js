@@ -4,17 +4,19 @@ var ag_gorev        = '' // bg-ekle | logo-ekle
 var ag_product_id   = null;
 
 $('document').ready(  function(){
+
     agEditor        = new AgEditor();
+    
     if(!ifExistProductIdinUrl()){
         $(agEditor.nav_html_element).hide();
         $(agEditor.target_properties_panel).hide(); 
         return;
     }
 
-     getSablonFile()
+    ocFrontPage_ifProductPage();
+    getSablonFile()
 
     agEditor._refreshMainMenu()
-
 
     $('[data-toggle="tooltip"]').tooltip()
     
@@ -77,10 +79,6 @@ $('document').ready(  function(){
                 };
             })
         })
-
-        setTimeout(() => {
-            agEditor.sunumuBaslat(); 
-        }, 50);
     })
 
     $('#sendBackwards').click(function(){ 
@@ -148,8 +146,7 @@ $('document').ready(  function(){
         }
         if (numberOfLines > maxRows ) {
             return false;
-          }
-  
+        }
 
     })
 
@@ -163,7 +160,7 @@ $('document').ready(  function(){
         let fbTxtObj    = agEditor.getObjectByID(target_id)
         let text        = $(this).val(); 
 
-        if(fbTxtObj.agFontSize==0){
+        if(fbTxtObj.agFontSize==0 || fbTxtObj.agFontSize == undefined){
             fbTxtObj.agFontSize = fbTxtObj.fontSize;
         }
 
@@ -172,7 +169,7 @@ $('document').ready(  function(){
 
         if(satirBoyu >= fbTxtObj.getScaledWidth() && !fbTxtObj.agKutuyaSigdir ){ 
             text = text.substring(0,text.length-1) 
-        }
+        }       
 
         if(fbTxtObj.agKutuyaSigdir){ 
             fbTxtObj.fontSize *= degisimOrani 
@@ -184,6 +181,15 @@ $('document').ready(  function(){
         $(this).val(text)
         agEditor.writeToText(target_id,text)
     })
+
+    $(document).on('keypress','.ag-textbox',function(e){
+        let target_id   = $(this).attr('data-target-id') 
+        let fbTxtObj    = agEditor.getObjectByID(target_id)
+        let text        = $(this).val();
+        if(fbTxtObj.agKarakterLimiti <= text.length){
+            return false;
+        }
+    })    
 
     $(document).on('click','.ag-resimekle-btn',function(){
 
@@ -313,11 +319,10 @@ $('document').ready(  function(){
         }
     })    
 
-
     var fullpage = false
     $(document).on('click','.ag-fullpage',function(){
         if(!fullpage){
-            $(agEditor.container_html_element).find('.navbar-expand-lg').addClass('fixed-top')
+            $(agEditor.container_html_element).find('.navbar-default').addClass('navbar-fixed-top')
             $(agEditor.container_html_element).addClass('ag-container-fullpage')
             $(agEditor.editor_html_element).css('margin-top','100px')
             $(agEditor.target_properties_panel).css('position','fixed')
@@ -326,7 +331,7 @@ $('document').ready(  function(){
             $(agEditor.preview_input_panel).css('position','fixed')
             $(agEditor.preview_input_panel).css('top','68px')
         }else{
-            $(agEditor.container_html_element).find('.navbar-expand-lg').removeClass('fixed-top')
+            $(agEditor.container_html_element).find('.navbar-default').removeClass('navbar-fixed-top')
             $(agEditor.container_html_element).removeClass('ag-container-fullpage')
             $(agEditor.editor_html_element).css('margin-top','25px')
             $(agEditor.target_properties_panel).css('position','relative')
@@ -344,6 +349,22 @@ $('document').ready(  function(){
 
     $(document).on('click','#saveSablonToServer',function(){        
         saveSablonToServer();        
+    })
+    
+    $(document).on('click','.bos-birak',function(){        
+        const data_canvas_id    = $(this).attr('data-canvas-id');
+        const data_object_id    = $(this).attr('data-object-id');
+        const obj               = agEditor.getObjectByID(data_object_id);
+        if(obj instanceof fabric.Textbox){
+            if($(this).prop("checked") == true){
+                obj.text = ""
+                agEditor.activeCanvas.renderAll();
+                $("[data-target-id='"+data_object_id+"']").val('')
+                $("[data-target-id='"+data_object_id+"']").attr('disabled', 'disabled');
+            }else{
+                $("[data-target-id='"+data_object_id+"']").removeAttr('disabled');
+            }
+        }
     })
     
     
@@ -508,10 +529,42 @@ function ifExistProductIdinUrl() {
 }
 
 function getSablonFile() { 
-    agEditor.modal_progress.modal('show')
-    let url = agBaseURL+'/ageditor/api/sablons/'+ag_product_id+'.json';
-    $.getJSON( url, function( data ) { 
+    if(!agEditor.agIsOcFrontpage){
+        agEditor.modal_progress.modal('show')
+    }
+    let url = agBaseURL+'/ageditor/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
+    $.getJSON(url, function(data) {
         agEditor._fromJSON(data);
         agEditor.modal_progress.modal('hide')
-    });
+      })
+      .error(function(xhr, ajaxOptions, thrownError) {     
+        console.log("Şablon bulunamadı" + url)      
+        agEditor.modal_progress.modal('hide')
+        $('.row .thumbnails').show();
+        $('.row .ag-thumbnails').hide();
+       })
+      .complete(function() { 
+        agEditor.modal_progress.modal('hide')
+
+        let totalHeight =0
+        $('.canvas-container').each(function (elm) {
+            const cnv = $(this).find('canvas')[0] 
+            $(this).css('height',cnv.scrollHeight+10+'px')
+            totalHeight     +=  cnv.scrollHeight+10;
+        })
+
+        $('#ageditor').css('height',totalHeight+'px');
+         
+      });
+}
+
+
+
+////////////////////////////  OC önsayfası için  ////////////////////
+function ocFrontPage_ifProductPage(){
+    if($('#product-product').length){
+        $('.row .thumbnails').hide();
+        $('.row .ag-thumbnails').show();
+        agEditor.agIsOcFrontpage = true;
+    }
 }

@@ -20,7 +20,7 @@
     min-width: 1000px;
     overflow-y: auto;
     z-index: 1045;
-    width: 1000;
+    width: 1000px;
 }
 
 [data-toggle="tooltip"] {
@@ -30,6 +30,7 @@
 
 .ag-container-fullpage{
     position: fixed;
+    width: 100%;
 }
 
 .clear {
@@ -40,8 +41,8 @@
 }
 
 .ag-container .navbar-nav .nav-link{
-    margin-left: 25px!important;
-    font-size: 2.5rem;
+    margin-left: 5px!important;
+    font-size: 2rem;
 }
 
 .ag-container .navbar .ag-fullpage{
@@ -51,7 +52,6 @@
 #saveSablonToServer{     
     color: red;
     font-size: 3rem;
-    padding: 0px;
     position: absolute;
     right: 30px;
     margin: 0px!important;
@@ -81,8 +81,11 @@
 }
 
 #properties-panel .card .card-header {
-    padding: 0.5rem 1.25rem;   
-    font-size: 16px;
+    padding: 0.5rem 1.25rem;
+    font-size: 18px;
+    background-color: #f8f8f8;
+    margin-top: 0;
+    line-height: 32px;
 }
 
 #preview-input-panel{
@@ -97,6 +100,15 @@
     z-index: 1000;
     background-color: #fff;
     padding: 0px;
+}
+
+
+#preview-input-panel .card .card-header {
+    padding: 0.5rem 1.25rem;
+    font-size: 18px;
+    background-color: #f8f8f8;
+    margin-top: 0;
+    line-height: 32px;
 }
 
 #ageditor .canvas-container{
@@ -173,9 +185,14 @@
     height:16px!important;
 }
 
+
 #modal-agcropper .modal-body{ 
     padding: 0px!important;
+    height: auto!important; 
+    width: 100%;
+    height: 600px!important;
 }
+
 
 #modal-agcropper .modal-body .wrap-user-image .user-image{   
     height:120px;
@@ -211,13 +228,14 @@
 #modal-agcropper .modal-body .wrap-user-image svg:hover{  
     width: 42px;  
 }
-
+ 
 #modal-agcropper .modal-dialog {
     width: 100%;
 	min-width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
+    position: absolute;
   }
   
 #modal-agcropper .modal-content {
@@ -231,8 +249,8 @@
     margin-left:10px; 
 }
 
-#modal-agcropper .btn-link{
-    font-size: 16px;
+#modal-agcropper .btn-link i{
+    font-size: 20px;
 }
 
 .pid-bulunamadi{
@@ -243,4 +261,57 @@
 
 .pid-bulunamadi big{
     font-size: 30px;
+}
+
+
+
+
+/*------------------------------ OC Front Page  -----------------------------*/
+.oc-preview-input-panel{
+    height:unset!important;
+    min-height: unset!important;
+    border:0px!important;
+}
+
+.oc-preview-input-panel tr td{
+    border:0px!important;
+    padding: 0!important;
+}
+
+.ag-alanseti{
+    border: 1px solid #ccc!important;
+    padding: 0;
+    padding-left: 13px!important;
+}
+
+.ag-alanseti label{
+    width: 100%!important;
+    float: none!important;
+    display: inline!important;
+}
+
+.ag-alanseti legend{ 
+    font-style: normal!important;
+    font-weight:normal!important;
+    font-size:15px!important;
+    margin-left: 3px;
+    color: #6f6f6f!important;
+    background-color: transparent!important;
+    width:auto;
+    border: 0;
+    margin: 0;
+}
+
+.ag-alanseti #ageditor{
+    width: 100%;
+    margin-top :0px;
+}
+
+.ag-alanseti .canvas-container{
+    width: 100%!important;
+}
+
+.ag-alanseti canvas{
+    width: 100%!important;
+    height: auto!important;
 }
