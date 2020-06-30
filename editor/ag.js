@@ -351,8 +351,7 @@ $('document').ready(  function(){
         saveSablonToServer();        
     })
     
-    $(document).on('click','.bos-birak',function(){        
-        const data_canvas_id    = $(this).attr('data-canvas-id');
+    $(document).on('click','.bos-birak',function(){
         const data_object_id    = $(this).attr('data-object-id');
         const obj               = agEditor.getObjectByID(data_object_id);
         if(obj instanceof fabric.Textbox){
@@ -364,6 +363,8 @@ $('document').ready(  function(){
             }else{
                 $("[data-target-id='"+data_object_id+"']").removeAttr('disabled');
             }
+            obj.agBosBirak = $(this).prop("checked")
+            console.log(agEditor)
         }
     })
     
@@ -441,6 +442,8 @@ async function saveSablonToServer() {
                                                         "agCropData",
                                                         "agSmallImageUrl",
                                                         "agImageUrl",
+                                                        "agFontSize",
+                                                        "agBosBirak",
                                                         "evented",
                                                         "hasControls",
                                                         "height",

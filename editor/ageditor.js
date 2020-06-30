@@ -1,6 +1,3 @@
-
-
-
 class AgEditor {
 
     constructor(){
@@ -90,7 +87,7 @@ class AgEditor {
         let BU = this;
         return new Promise(async (resolve,reject)=> {
             if(!page){
-                page    = {id:Math.floor(Math.random() * 100000) + 1,w:600,h:700,bgColor:"#ffffff"}
+                page    = {id:Object.keys(BU.fabricCanvases).length + 1,w:600,h:700,bgColor:"#ffffff"}
             }
             let id      = page.id;
             let w       = page.w;
@@ -209,7 +206,7 @@ class AgEditor {
                 agMaxWidth        : 200,
                 agKarakterLimiti: 30,
                 agKutuyaSigdir  : true,
-                agYaziEklemekIstemiyorum : false
+                agBosBirak : false
             });
 
             textBoxFabricInstance.setControlsVisibility({
@@ -518,7 +515,7 @@ class AgEditor {
                                                             "agSmallImageUrl",
                                                             "agImageUrl",
                                                             "agFontSize",
-                                                            "agYaziEklemekIstemiyorum",
+                                                            "agBosBirak", 
                                                             "evented",
                                                             "hasControls",
                                                             "height",
@@ -537,52 +534,66 @@ class AgEditor {
         a.click(); 
     }
 
-     
-
     async _fromJSON(jsonFile){
         let BU              = this;        
         $(this.editor_html_element).empty();
         this.fabricCanvases = [];
+
+        var promises = [];
         $.each(jsonFile,async (i,val)=>{
-            let obj     = JSON.parse(val)
-            let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            let cnvs    = await BU.addCanvas(page);
-            cnvs.loadFromJSON(val,async function() {
-                let cnv     = cnvs;
-                let objects = cnv.getObjects();
-                $.each(objects,async function(j,obj){
-                    obj.strokeUniform = true;
-                    obj.hasControls = true;
-                    if(obj instanceof fabric.Textbox){
-                        obj.setControlsVisibility({
-                            bl: false,
-                            br: false,
-                            tl: false,
-                            tr: false,
-                            mb: false,
-                            ml: true,
-                            mr: true,
-                            mt: false,
-                            mtr: true,
-                          });
-                        await BU.loadFont(obj.fontFamily).then(()=>{
-                            let txt = obj.text
-                            obj.text=" ";
-                            cnv.renderAll()
-                            if(BU.agIsOcFrontpage){
-                                return;
+
+            promises.push(
+                new Promise(async function(resolve,reject){
+                    let obj     = JSON.parse(val)
+                    let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
+                    let cnvs    = await BU.addCanvas(page);
+                    cnvs.loadFromJSON(val,async function() {
+                        let cnv     = cnvs;
+                        let objects = cnv.getObjects();
+                        $.each(objects,async function(j,obj){
+                            obj.strokeUniform   = true;
+                            obj.hasControls     = true;
+                            if(obj instanceof fabric.Textbox){
+                                obj.setControlsVisibility({
+                                    bl: false,
+                                    br: false,
+                                    tl: false,
+                                    tr: false,
+                                    mb: false,
+                                    ml: true,
+                                    mr: true,
+                                    mt: false,
+                                    mtr: true,
+                                });
+                                await BU.loadFont(obj.fontFamily).then(()=>{
+                                    let txt = obj.text
+                                    obj.text=" ";
+                                    cnv.renderAll()
+                                    if(BU.agIsOcFrontpage){
+                                        return;
+                                    }
+                                    obj.text=txt;
+                                    cnv.renderAll()
+                                });
                             }
-                            obj.text=txt;
-                            cnv.renderAll()
+                            if(obj instanceof fabric.Image && !obj.agSablonResmi){
+                                BU.agCropper.autoCrop(obj);
+                            }
                         });
-                    }
-                    if(obj instanceof fabric.Image && !obj.agSablonResmi){
-                        BU.agCropper.autoCrop(obj);
-                    }
-                });
-                BU.sunumuBaslat();
-            })            
+                        resolve();
+                    })   
+                })
+            )// push end
+
+                     
         })
+
+        Promise.all(promises).then(() => 
+            BU.sunumuBaslat()
+        );
+
+
+
     }
    
     getObjectByID(target_id){
@@ -607,16 +618,14 @@ class AgEditor {
 
     async sunumuBaslat(){
         this.presentMode = !this.presentMode;
+        this.activeCanvas   = this.fabricCanvases[Object.keys(this.fabricCanvases)[0]];
 
-        this.presentMode = this.agIsOcFrontpage;
-
-
+        if(this.agIsOcFrontpage){
+            this.presentMode    = this.agIsOcFrontpage;
+        }
         await this.agPresentation.prewiev();
         $(this.agPresentation.preview_input_panel).attr('data-canvas-id','')
-        for (var key in this.fabricCanvases) {
-            this.agPresentation.createInputPanel(this.fabricCanvases[key])
-            break;
-        }
+        this.agPresentation.createInputPanel(this.activeCanvas)
         this._refreshMainMenu();
     }
 
@@ -742,10 +751,10 @@ class AgPresentation{
         $.each(objects,(i,o)=>{
 
             if(o instanceof fabric.Textbox){
-                let o_text = o.text;
+                /*let o_text = o.text;
                 if(BU.editor.agIsOcFrontpage){
                     o_text = '';
-                }
+                }*/
                 
                 if(o.agMaxLines==1){
                     let style        = "font-family:"+o.fontFamily+";"
@@ -764,7 +773,7 @@ class AgPresentation{
                     $(BU.preview_input_panel).find('.inputs')
                         .append('<tr>'
                             +'  <td>'
-                            +'      <input type="text"      style="'+style+'"  class="form-control ag-textbox" value="'+o_text+'"  data-target-id="'+o.id+'">'
+                            +'      <input type="text"      style="'+style+'"  class="form-control ag-textbox" value="'+o.text+'"  data-target-id="'+o.id+'">'
                             +'      <div class="checkbox" style="margin-top:0px">'
                             +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
@@ -788,7 +797,7 @@ class AgPresentation{
                     $(BU.preview_input_panel).find('.inputs')
                         .append('<tr>'
                             +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
-                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o_text+'</textarea>'
+                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
                             +'      <div class="checkbox" style="margin-top:0px">'
                             +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
@@ -805,7 +814,7 @@ class AgPresentation{
                     +'  <td>'
                     +'      <input type="button" class="btn btn-primary ag-resimekle-btn" data-target-id="'+o.id+'"  value="Resim Ekle ' + crop_count +'" >'
                     +'      <div class="checkbox" style="margin-top:0px">'
-                    +'      <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'">Resim eklemek istemiyorum</label>'
+                    +'      <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'"  data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
                     +'      </div>'
                     +'  </td>'
                     +'</tr>')
