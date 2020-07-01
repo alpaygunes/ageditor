@@ -14,6 +14,7 @@ $('document').ready(  function(){
     }
 
     ocFrontPage_ifProductPage();
+
     getSablonFile()
 
     agEditor._refreshMainMenu()
@@ -114,6 +115,7 @@ $('document').ready(  function(){
             imgElm = $(this).find('img');
             if(ag_gorev == "bg-ekle"){
                 agEditor.setPageBgImage(imgElm);
+                $('#modal-kutuphane').modal('hide');
             }else if(ag_gorev == "logo-ekle"){
                 agEditor.addLogo(imgElm);
             }
@@ -192,19 +194,17 @@ $('document').ready(  function(){
     })    
 
     $(document).on('click','.ag-resimekle-btn',function(){
-
         let target_id                   = $(this).attr('data-target-id')
         agEditor.agCropper.targetObj    = agEditor.getObjectByID(target_id)
         agEditor.agCropper.show()
         agEditor.agCropper.showMyImages()
         if(agEditor.agCropper.targetObj.agImageUrl){
-            agEditor.agCropper.agImageUrl = agEditor.agCropper.targetObj.agImageUrl;
-            agEditor.agCropper.imageBase64Data = null;
+            agEditor.agCropper.agImageUrl       = agEditor.agCropper.targetObj.agImageUrl;
+            agEditor.agCropper.imageBase64Data  = null;
             agEditor.agCropper.openForCrop();
             $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
             $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
         }
-
     })
 
     $(document).on('click','.ag-crop-resim-resimlerim',function(){ 
@@ -279,8 +279,8 @@ $('document').ready(  function(){
     })
 
     $(document).on('click','.user-image',function(){
-        agEditor.agCropper.agImageUrl = $(this).attr("src");
-        agEditor.agCropper.imageBase64Data = null;
+        agEditor.agCropper.agImageUrl       = $(this).attr("src");
+        agEditor.agCropper.imageBase64Data  = null;
         agEditor.agCropper.openForCrop();
         $(agEditor.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
         $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
@@ -354,29 +354,52 @@ $('document').ready(  function(){
     $(document).on('click','.bos-birak',function(){
         const data_object_id    = $(this).attr('data-object-id');
         const obj               = agEditor.getObjectByID(data_object_id);
-        if(obj instanceof fabric.Textbox){
-            if($(this).prop("checked") == true){
+        
+        if($(this).prop("checked") == true){
+            if(obj instanceof fabric.Textbox){
                 obj.text = ""
-                agEditor.activeCanvas.renderAll();
-                $("[data-target-id='"+data_object_id+"']").val('')
-                $("[data-target-id='"+data_object_id+"']").attr('disabled', 'disabled');
-            }else{
-                $("[data-target-id='"+data_object_id+"']").removeAttr('disabled');
             }
-            obj.agBosBirak = $(this).prop("checked")
-            console.log(agEditor)
+            agEditor.activeCanvas.renderAll();
+            if(obj instanceof fabric.Textbox){
+                $("[data-target-id='"+data_object_id+"']").val('')
+            }
+            $("[data-target-id='"+data_object_id+"']").attr('disabled', 'disabled');
+            if(obj instanceof fabric.Image){
+                const w=obj.width;
+                const h=obj.height;
+                obj.setSrc(agBaseURL+agEditor.agImagePlaceHolder,function () {
+                    obj.width   = w
+                    obj.height  = h 
+                    agEditor.activeCanvas.renderAll();
+                });
+            }
+        }else{
+            $("[data-target-id='"+data_object_id+"']").removeAttr('disabled');
         }
+        obj.agBosBirak = $(this).prop("checked")        
     })
-    
-    
-})//End document ready
 
+    // oc admin product formda agEditor tabı açılırken yeniden hesaplanmalı heigt ler
+    $(document).on('click','#ag-editor-tab-link',function(){        
+        let totalHeight =0
+        $('.canvas-container').each(function (elm) {
+            const cnv = $(this).find('canvas')[0] 
+            $(this).css('height',cnv.scrollHeight+10+'px')
+            totalHeight     +=  cnv.scrollHeight+10;
+        })
+
+        $('#ageditor').css('height',totalHeight+'px');      
+    })
+
+    
+})//===========================   End document ready
 
 async function uploadSmallPageImages(w = 300){
     let keys = Object.keys(agEditor.fabricCanvases)
     let index = 0;
     await _uploadSmallPageImg(keys,index,w);
 }
+
 
 async function _uploadSmallPageImg(keys,index,w){
     let key     = keys[index];
@@ -446,11 +469,12 @@ async function saveSablonToServer() {
                                                         "agBosBirak",
                                                         "evented",
                                                         "hasControls",
+                                                        "agIsLogo",
                                                         "height",
                                                         "width",
                                                         "id"
                                                     ]));       
-        serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+"/ageditor/editor/agblank.png\"")
+        serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
         allCanvasesArr.push(serialized) 
     }
     const str   = JSON.stringify(allCanvasesArr);
@@ -531,6 +555,7 @@ function ifExistProductIdinUrl() {
     }
 }
 
+
 function getSablonFile() { 
     if(!agEditor.agIsOcFrontpage){
         agEditor.modal_progress.modal('show')
@@ -560,7 +585,6 @@ function getSablonFile() {
          
       });
 }
-
 
 
 ////////////////////////////  OC önsayfası için  ////////////////////

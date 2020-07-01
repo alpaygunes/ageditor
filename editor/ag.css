@@ -173,7 +173,7 @@
     width: 120px;
 }
 
-.form-control{ 
+.ag-form-control{ 
     height: fit-content!important;
     padding: 1px!important;
     border-radius: 0!important;
@@ -261,6 +261,32 @@
 
 .pid-bulunamadi big{
     font-size: 30px;
+}
+
+.inputs .btn {
+    border-radius: 0!important;
+}
+
+.inputs  .ag-edit-font{
+    background-color: #fff;    
+    color: #2196F3;
+    text-shadow: unset; 
+    background-image: unset;
+    background-repeat: repeat-x;
+    border-color:unset;
+    padding: 6px;
+    border: 1px solid #cee5ea;
+}
+
+.inputs .ag-onay i{
+    font-size: 25px!important;
+    color: #2199C6;
+    padding: 2px;
+}
+
+.inputs .ag-textbox{
+    font-size: 18px!important;
+    border: 1px solid #e6e5e5;
 }
 
 

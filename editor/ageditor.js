@@ -1,6 +1,7 @@
 class AgEditor {
 
     constructor(){
+        this.agImagePlaceHolder         = "/ageditor/editor/agblank.png";
         this.agIsOcFrontpage            = false;
         this.agPresentation             = new AgPresentation(this);
         this.agCropper                  = new AgCropper(this);
@@ -100,7 +101,8 @@ class AgEditor {
                                                 + h + '"></canvas>');
             if(!BU.agIsOcFrontpage){
                 $(BU.editor_html_element).append('<div class="clear"></div');
-            }                               
+            }
+
             let canvas          = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
             canvas.width        = w;
             canvas.height       = h;
@@ -127,7 +129,8 @@ class AgEditor {
                     BU._refreshInputPanel(canvas); 
                 }else{
                     BU._refreshInputPanel(e.target);
-                    if(BU.presentMode == true && e.target instanceof fabric.Image && !e.target.agSablonResmi){
+                    if(BU.presentMode == true && e.target instanceof fabric.Image && !e.target.agSablonResmi && !e.target.agIsLogo){
+                        if(e.target.agBosBirak){return;}
                         let target_id           = e.target.id
                         $(BU.target_properties_panel).hide();
                         BU.agCropper.targetObj  = BU.getObjectByID(target_id)
@@ -202,8 +205,8 @@ class AgEditor {
                 angle:          0,
                 strokeUniform   : true,
                 agFontSize      :0,
-                agMaxLines        : 1,
-                agMaxWidth        : 200,
+                agMaxLines      : 1,
+                agMaxWidth      : 200,
                 agKarakterLimiti: 30,
                 agKutuyaSigdir  : true,
                 agBosBirak : false
@@ -242,13 +245,45 @@ class AgEditor {
             await this.loadFont(textBoxFabricInstance.fontFamily);
             textBoxFabricInstance.agKarakterLimiti      = 30
             textBoxFabricInstance.agKutuyaSigdir        = 1
-            textBoxFabricInstance.agMaxLines         = 1
+            textBoxFabricInstance.agMaxLines            = 1
             BU.activeCanvas.add(textBoxFabricInstance);
             BU.activeCanvas.requestRenderAll();
             
         }else{
             alert("Sayfa seçin")
         }
+    }
+
+    async addCropArea(){
+        let BU = this
+        if(this.activeCanvas){   
+             new fabric.Image.fromURL(agBaseURL+BU.agImagePlaceHolder,
+                    function(oImg) {
+                        oImg.id             = Math.floor(Math.random() * 100000) + 1
+                        oImg.left           = 200;
+                        oImg.top            = 200;
+                        oImg.agBosBirak     = false;
+                        oImg.strokeUniform  = true;
+                        BU.activeCanvas.add(oImg);
+                    }
+                );           
+        }else{
+            alert("Sayfa seçin")
+        }
+    }
+
+    async addLogo(imgElm){
+        let BU = this;
+        if(this.activeCanvas){ 
+            fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
+                oImg.id = Math.floor(Math.random() * 100000) + 1
+                oImg.strokeUniform = true;
+                oImg.agIsLogo = true;
+                BU.activeCanvas.add(oImg); 
+            });
+        }else{
+            alert("Sayfa seçin")
+        } 
     }
 
     async loadFont(font_name){  
@@ -265,36 +300,6 @@ class AgEditor {
                     })
     }
 
-    async addCropArea(){
-        let BU = this
-        if(this.activeCanvas){   
-             new fabric.Image.fromURL(agBaseURL+"/ageditor/editor/agblank.png",
-                    function(oImg) {
-                        oImg.id = Math.floor(Math.random() * 100000) + 1
-                        oImg.left = 200
-                        oImg.top = 200
-                        oImg.strokeUniform = true;
-                        BU.activeCanvas.add(oImg);
-                    }
-                );           
-        }else{
-            alert("Sayfa seçin")
-        }
-    }
-
-    async addLogo(imgElm){
-        let BU = this;
-        if(this.activeCanvas){ 
-            fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
-                oImg.id = Math.floor(Math.random() * 100000) + 1
-                oImg.strokeUniform = true;
-                BU.activeCanvas.add(oImg); 
-            });
-        }else{
-            alert("Sayfa seçin")
-        } 
-    }
-
     async drawObjectsBorder(canvas,show) { 
         if(this.presentMode==false){
             return;
@@ -302,7 +307,7 @@ class AgEditor {
         if(this.drawObjectsBordered==false){
             let objects     = canvas.getObjects();
             $.each(objects,async function(j,obj){
-                if(obj.agSablonResmi){return;}
+                if(obj.agSablonResmi || obj.agIsLogo){return;}
                 let borderRect = new fabric.Rect({
                     id      :'borderRect',
                     width   :obj.getScaledWidth(),
@@ -516,6 +521,7 @@ class AgEditor {
                                                             "agImageUrl",
                                                             "agFontSize",
                                                             "agBosBirak", 
+                                                            "agIsLogo",
                                                             "evented",
                                                             "hasControls",
                                                             "height",
@@ -523,7 +529,7 @@ class AgEditor {
                                                             "id"
                                                         ]));
            
-            serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\"editor/agblank.png\"")
+            serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
             allCanvasesArr.push(serialized) 
         }
 
@@ -541,7 +547,6 @@ class AgEditor {
 
         var promises = [];
         $.each(jsonFile,async (i,val)=>{
-
             promises.push(
                 new Promise(async function(resolve,reject){
                     let obj     = JSON.parse(val)
@@ -551,6 +556,9 @@ class AgEditor {
                         let cnv     = cnvs;
                         let objects = cnv.getObjects();
                         $.each(objects,async function(j,obj){
+                            if(BU.agIsOcFrontpage){
+                                obj.selectable      = false;
+                            }
                             obj.strokeUniform   = true;
                             obj.hasControls     = true;
                             if(obj instanceof fabric.Textbox){
@@ -583,9 +591,7 @@ class AgEditor {
                         resolve();
                     })   
                 })
-            )// push end
-
-                     
+            )// push end                     
         })
 
         Promise.all(promises).then(() => 
@@ -744,44 +750,53 @@ class AgPresentation{
         let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
         if(data_canvas_id == canvas.id)return;
 
-        $(BU.preview_input_panel).find('.inputs').empty();
+        $(BU.preview_input_panel).find('.inputs').empty(); 
         $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
         let objects     = canvas.getObjects();
         let crop_count = 0;
         $.each(objects,(i,o)=>{
-
+            let style ='';
+            let disabled = '';
+            let checked = '';
+            if(o.agBosBirak){
+                disabled      = "disabled"
+                checked       = "checked"
+            }
+            
             if(o instanceof fabric.Textbox){
-                /*let o_text = o.text;
-                if(BU.editor.agIsOcFrontpage){
-                    o_text = '';
-                }*/
-                
                 if(o.agMaxLines==1){
-                    let style        = "font-family:"+o.fontFamily+";"
-                    style           += "font-size:"+o.fontSize+"px!important;"
-                    style           += "text-align:"+o.textAlign+";";
-                    //style           += "width:"+o.getScaledWidth()+"px;"
-                    style           += "padding:0px!important;"
+                    //style           += "font-family:"+o.fontFamily+";"
+                    //style           += "font-size:"+o.fontSize+"px!important;"
+                    //style           += "text-align:"+o.textAlign+";";
+                    //style           += "padding:0px!important;"
                     
-                    let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
+                    /*let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
                     let zoomstyle   = '';
                     if(zoom<1){
                         zoomstyle   = ";zoom:"+zoom
                         style       += zoomstyle
-                    }
+                    }*/
 
-                    $(BU.preview_input_panel).find('.inputs')
+                    $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
+                            +'  <td style="min-width:67px">'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
+                            +'  </td>'
                             +'  <td>'
-                            +'      <input type="text"      style="'+style+'"  class="form-control ag-textbox" value="'+o.text+'"  data-target-id="'+o.id+'">'
+                            +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" value="'+o.text+'" '+disabled+'  data-target-id="'+o.id+'">'
                             +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
+                            +'  </td>'
+                            +'  <td>'
+                            +'     <div class="ag-onay">'
+                            +'       <i class="fa fa-check-square fa-2"></i>'
+                            +'     </div>'
                             +'  </td>'
                             +'</tr>')
 
                 }else{
-                    let style        = "font-family:"+o.fontFamily+";"
+                    style           += "font-family:"+o.fontFamily+";"
                     style           += "font-size:"+o.fontSize*o.scaleX+"px!important;"
                     style           += "text-align:"+o.textAlign+";";
                     style           += "width:"+o.getScaledWidth()+"px;"
@@ -794,32 +809,33 @@ class AgPresentation{
                         zoomstyle   = ";zoom:"+zoom
                     }
 
-                    $(BU.preview_input_panel).find('.inputs')
+                    $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
+                            +'  <td>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
+                            +'  </td>'
                             +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
-                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
+                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
                             +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
                             +'  </td>'
                             +'</tr>')
                 }
-
             }
 
-            if(o instanceof fabric.Image && !o.agSablonResmi){
+            if(o instanceof fabric.Image && !o.agSablonResmi && !o.agIsLogo){
                 crop_count++;
-                $(BU.preview_input_panel).find('.inputs')
+                $(BU.preview_input_panel).find('.cropbox')
                 .append('<tr>'
-                    +'  <td>'
-                    +'      <input type="button" class="btn btn-primary ag-resimekle-btn" data-target-id="'+o.id+'"  value="Resim Ekle ' + crop_count +'" >'
-                    +'      <div class="checkbox" style="margin-top:0px">'
-                    +'      <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'"  data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
-                    +'      </div>'
-                    +'  </td>'
+                    +'   <td>'
+                    +'       <div  class="btn btn-primary  ag-resimekle-btn" data-target-id="'+o.id+'" '+disabled+'  ><i class="fa fa-camera"></i> Resim Ekle ' + crop_count +'</div>'
+                    +'       <div class="checkbox" style="margin-top:0px">'
+                    +'       <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'"  '+checked+' data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
+                    +'       </div>'
+                    +'   </td>'
                     +'</tr>')
             }
-
         })
     }
 }
@@ -831,10 +847,10 @@ class AgCropper{
 
     constructor(editor){
         this.awaitingUploads    = [];
-        this.modal_element      =$('#modal-agcropper');
+        this.modal_element      = $('#modal-agcropper');
         this.targetObj          = null;
         this.editor             = editor;
-        this.agImageUrl           = null;
+        this.agImageUrl         = null;
         this.imageBase64Data    = null;
         this.cropper            = null;
     }

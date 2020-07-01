@@ -151,14 +151,16 @@
               </div>
               <!-- END-->
 
-              <!-- =========================================  PREVIEW PANEL    =====================  -->
+              <!-- =========================================  INPUT PANEL    =====================  -->
               <div id="preview-input-panel" class="col-sm-4 col-md-3 col-lg-3 col-xl-3" style="display: none;">
                 <div class="card">
                   <h5 class="card-header">Giriş</h5>
                   <div class="card-body">
                     <fieldset class="ag-alanseti">
                       <legend>Tasarım Yazı &amp; Resim Alanları</legend>
-                      <table class="table table-borderless inputs">
+                      <table class="table table-borderless inputs textbox">  
+                      </table>
+                      <table class="table table-borderless inputs cropbox">  
                       </table>
                     </fieldset>
                   </div>
@@ -240,7 +242,6 @@
                 </div>
               </div>
               <!-- END-->
-
           </div><!-- End container -->
 
 
