@@ -28,7 +28,7 @@ class AgEditor {
         this._loadfonts();
     }
 
-    async _refreshMainMenu(){
+    async refreshMainMenu(){
         if(!Object.keys(this.fabricCanvases).length){
             $('.nav-link').hide();
             $('#openJsonFromLocal').show();
@@ -110,25 +110,23 @@ class AgEditor {
             canvas.agSmallImageUrl='';
             canvas.selection    = false
 
-            $(canvas.wrapperEl).css('outline','none');
+            $('.canvas-container').css('outline','none');
             if(!BU.agIsOcFrontpage){
                 $('#'+id).parent().css('outline','thick solid aqua');
             }
 
             canvas.on("mouse:down", (e)=>{
-                BU._refreshMainMenu()
+                BU.refreshMainMenu()
                 BU.agPresentation.createInputPanel(canvas);
-                if(BU.activeCanvas){
-                    $(BU.activeCanvas.wrapperEl).css('outline','none');
-                }
+                $('.canvas-container').css('outline','none');
                 BU.activeCanvas = canvas;
                 if(!BU.agIsOcFrontpage){
                     $('#'+id).parent().css('outline','thick solid aqua');
                 }
                 if(!e.target){
-                    BU._refreshInputPanel(canvas); 
+                    BU.refreshPropertiesPanel(canvas); 
                 }else{
-                    BU._refreshInputPanel(e.target);
+                    BU.refreshPropertiesPanel(e.target);
                     if(BU.presentMode == true && e.target instanceof fabric.Image && !e.target.agSablonResmi && !e.target.agIsLogo){
                         if(e.target.agBosBirak){return;}
                         let target_id           = e.target.id
@@ -169,9 +167,8 @@ class AgEditor {
             }
 
             BU.activeCanvas = canvas;
-            BU._refreshMainMenu()
+            BU.refreshMainMenu()
             resolve(canvas);
-
         })
     }
 
@@ -224,7 +221,7 @@ class AgEditor {
                 mtr: true,
             });
 
-             textBoxFabricInstance.onInput = function(e){
+            /*textBoxFabricInstance.onInput = function(e){
                 if(this.agMaxLines==1){return;}
                 if (this.agMaxWidth) {
                     const textWidthUnderCursor = BU.activeCanvas.getContext().measureText(this.textLines[this.get2DCursorLocation().lineIndex]).width;
@@ -240,8 +237,9 @@ class AgEditor {
                     }
                   }
                 this.callSuper('onInput', e);
-            }
+            }*/
 
+            //textBoxFabricInstance.on({"scaling":this.scalingHadler})
             await this.loadFont(textBoxFabricInstance.fontFamily);
             textBoxFabricInstance.agKarakterLimiti      = 30
             textBoxFabricInstance.agKutuyaSigdir        = 1
@@ -357,12 +355,19 @@ class AgEditor {
             break;
         }
 
-        this._refreshMainMenu();
+        this.refreshMainMenu();
     }
 
     updateControls(e){
-        this.BU._refreshInputPanel(e.target);
+        e.target.agMaxLines = e.target.textLines.length
+        this.BU.refreshPropertiesPanel(e.target);
     }
+
+    /*scalingHadler(e){
+        e.target.agMaxLines = e.target.textLines.length
+        this.BU.refreshPropertiesPanel(e.target);
+    }*/
+    
 
     async createObjects(page){
          await this._createObject(page,0)
@@ -392,32 +397,32 @@ class AgEditor {
         });
     }
 
-    _refreshInputPanel(object){
+    refreshPropertiesPanel(object){
         let TR              = null; 
         let object_type     = object.get('type');
         // -----------------------------------------------eğer obje bir image text yada crop ise
         if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
             
             if(object_type == 'textbox'){
-                TR    += this._inputPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
-                TR    += this._inputPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fontsJson)
-                TR    += this._inputPanelTR('fontSize','Font Size','number',object.fontSize)
-                TR    += this._inputPanelTR('fontWeight','Font Weight','select',object.fontWeight,this.bolds)
-                TR    += this._inputPanelTR('fontStyle','Italic','select',object.fontStyle,this.italics)
-                TR    += this._inputPanelTR('fill','Fill','color',object.fill)
-                TR    += this._inputPanelTR('stroke','Stroke','color',object.stroke)
-                TR    += this._inputPanelTR('strokeWidth','Stroke Width','number',object.strokeWidth)
-                TR    += this._inputPanelTR('agMaxLines','Satır Limiti','number',object.agMaxLines)
-                TR    += this._inputPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
-                TR    += this._inputPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
+                TR    += this.propertiesPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
+                TR    += this.propertiesPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fontsJson)
+                TR    += this.propertiesPanelTR('fontSize','Font Size','number',object.fontSize)
+                TR    += this.propertiesPanelTR('fontWeight','Font Weight','select',object.fontWeight,this.bolds)
+                TR    += this.propertiesPanelTR('fontStyle','Italic','select',object.fontStyle,this.italics)
+                TR    += this.propertiesPanelTR('fill','Fill','color',object.fill)
+                TR    += this.propertiesPanelTR('stroke','Stroke','color',object.stroke)
+                TR    += this.propertiesPanelTR('strokeWidth','Stroke Width','number',object.strokeWidth)
+                TR    += this.propertiesPanelTR('agMaxLines','Satır Limiti','number',object.agMaxLines)
+                TR    += this.propertiesPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
+                TR    += this.propertiesPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
             }else if(object_type == 'rect' || object_type == 'image'){
-               /// TR    += this._inputPanelTR('height','Height','number',object.getScaledHeight())
+               /// TR    += this.propertiesPanelTR('height','Height','number',object.getScaledHeight())
             }
-            TR    += this._inputPanelTR('height','Height','number',object.getScaledHeight())
-            TR    += this._inputPanelTR('width','Width','number',object.getScaledWidth())
-            TR    += this._inputPanelTR('top','Top','number',object.top)
-            TR    += this._inputPanelTR('left','Left','number',object.left)
-            TR    += this._inputPanelTR('angle','Angle','number',object.angle)
+            TR    += this.propertiesPanelTR('height','Height','number',object.getScaledHeight())
+            TR    += this.propertiesPanelTR('width','Width','number',object.getScaledWidth())
+            TR    += this.propertiesPanelTR('top','Top','number',object.top)
+            TR    += this.propertiesPanelTR('left','Left','number',object.left)
+            TR    += this.propertiesPanelTR('angle','Angle','number',object.angle)
 
 
             $(this.target_properties_panel).find('table').empty();
@@ -425,14 +430,14 @@ class AgEditor {
         // ------------------------------------------------Eğer obje Canvas ise
         }else if(object instanceof fabric.Canvas){
             let TR = null;
-            TR      += this._inputPanelTR('width','Width','number',object.width)
-            TR      += this._inputPanelTR('height','Height','number',object.height)
+            TR      += this.propertiesPanelTR('width','Width','number',object.width)
+            TR      += this.propertiesPanelTR('height','Height','number',object.height)
             $(this.target_properties_panel).find('.properties').empty();
             $(this.target_properties_panel).find('.properties').append(TR);
         }
     }
 
-    _inputPanelTR(prop_name,label,type,value,data=null){
+    propertiesPanelTR(prop_name,label,type,value,data=null){
         let tr = null;
         if(type == 'number'){
             tr = '<tr>'
@@ -457,10 +462,10 @@ class AgEditor {
                 +'<td>'+label+'</td>'
                 +'  <td>'
                 +'      <select class="form-control prop-form-control" data-prop-name="'+prop_name+'">'
-            $.each(data,function (i,fv) {    
-                let selected = fv==value?"selected":null;
-                tr +='      <option '+selected+' value="'+fv+'">'+i+'</option>'; 
-            }) 
+                $.each(data,function (i,fv) {    
+                    let selected = fv==value?"selected":null;
+                    tr +='      <option '+selected+' value="'+fv+'">'+i+'</option>'; 
+                }) 
             tr +='      </select>'
                 +'  </td>'
                 +'</tr>'
@@ -468,7 +473,7 @@ class AgEditor {
             tr = '<tr>'
                 +'  <td >'+label+'</td>'
                 +'  <td>'
-                +'      <input class="form-control prop-form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
+                +'      <input class="prop-form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
                 +'  </td>'
                 +'</tr>';
         }
@@ -541,7 +546,7 @@ class AgEditor {
     }
 
     async _fromJSON(jsonFile){
-        let BU              = this;        
+        let BU              = this;
         $(this.editor_html_element).empty();
         this.fabricCanvases = [];
 
@@ -632,7 +637,7 @@ class AgEditor {
         await this.agPresentation.prewiev();
         $(this.agPresentation.preview_input_panel).attr('data-canvas-id','')
         this.agPresentation.createInputPanel(this.activeCanvas)
-        this._refreshMainMenu();
+        this.refreshMainMenu();
     }
 
     async renderWithBigBGImage(){
@@ -780,19 +785,23 @@ class AgPresentation{
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
                             +'  <td style="min-width:67px">'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
                             +'  </td>'
                             +'  <td>'
                             +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" value="'+o.text+'" '+disabled+'  data-target-id="'+o.id+'">'
-                            +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
-                            +'      </div>'
                             +'  </td>'
                             +'  <td>'
                             +'     <div class="ag-onay">'
                             +'       <i class="fa fa-check-square fa-2"></i>'
                             +'     </div>'
                             +'  </td>'
+                            +'</tr>'
+                            +'<tr>'
+                            +'  <td colspan=3>'
+                            +'      <div class="checkbox" style="margin-top:0px">'
+                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                            +'      </div>'
+                            +'  <td>'
                             +'</tr>')
 
                 }else{
@@ -811,15 +820,19 @@ class AgPresentation{
 
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
-                            +'  <td>'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
+                            +'  <td style="min-width:67px">'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
                             +'  </td>'
                             +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
                             +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
-                            +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'" '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
-                            +'      </div>'
                             +'  </td>'
+                            +'</tr>'
+                            +'<tr>'
+                            +'  <td colspan=3>'
+                            +'      <div class="checkbox" style="margin-top:0px">'
+                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                            +'      </div>'
+                            +'  <td>'
                             +'</tr>')
                 }
             }

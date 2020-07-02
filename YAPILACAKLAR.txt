@@ -1,8 +1,9 @@
-0 - Menü öğeleri actif objeye göre görünür olsun
-1 - "Yeni" ye tıklayınca kayıtlı json dan açılsın. manuel json a gerek kalmadı
-2 - "Sunum Modu" hazırlansın
+// 0 - Menü öğeleri actif objeye göre görünür olsun
+// 1 - "Yeni" ye tıklayınca kayıtlı json dan açılsın. manuel json a gerek kalmadı
+// 2 - "Sunum Modu" hazırlansın
 3 - CurveText ve güzel yazı sanatı araştırılsın. (WordArt)
-4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
+// 4 - Küçük tasarımın orjinal tasarıma ölçeklenmesi yapılacak.
 5 - Baskı için PDF hazırlansın
-6 - Text kutu hazırlanırken fareyle satır sayısı artırılmasın. Yada satır sayısı artırılırsa özelikler tablosuna yansısız
-7 - Textbox a şablon hazırlanırken seçilen font , kutu boyu , kutu line sayısı otomatik olarak hesaplanup özelikler tablosundaki ilgili yere eklensin
+// 6 - Text kutu hazırlanırken fareyle satır sayısı artırılmasın. Yada satır sayısı artırılırsa özelikler tablosuna yansısız
+// 7 - Textbox a şablon hazırlanırken seçilen font , kutu boyu , kutu line sayısı otomatik olarak hesaplanup özelikler tablosundaki ilgili yere eklensin
+8 - CropAlanlar zemin resmin arkasına varsayılan olarak eklenmeli

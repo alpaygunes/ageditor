@@ -290,6 +290,47 @@
 }
 
 
+.ag-font-list{
+    height: 200px;
+    overflow-y: scroll;
+}
+.ag-font-list ul{
+    list-style: none;
+    padding: 0!important;
+}
+
+.ag-font-list ul li{ 
+    font-size: 24px;
+    border: 1px solid #dcdcdc;
+    padding-left: 28px;
+    margin: 2px;
+    display: block; 
+    cursor: pointer;
+}
+
+.ag-font-list ul li:hover{
+    background-color: #cee5ea;
+}
+
+.ag-color-list .ag-color-box{
+    width: 32px;
+    height: 32px;
+    margin: 2px;
+    border: 1px solid #ccc;
+    float: left;
+    display: block;
+    cursor: pointer;
+}
+
+.ag-color-list .ag-color-box:hover{
+    border: 2px solid #ccc;
+}
+
+#modal-font-setting .modal-body{  
+    display: flow-root!important;
+}
+
+
 
 
 /*------------------------------ OC Front Page  -----------------------------*/

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>agEditor</title> 
+    <title>AgEditor</title> 
     
     <script src="editor/lib/jquery-2.1.1.min.js"></script>
     <script src="editor/lib/bootstrap.min.js"></script>
@@ -11,11 +11,9 @@
     <script src="editor/lib/popper.min.js"></script>
     <script src="editor/lib/fabric.min.js"></script>
     <script src="editor/ageditor.js"></script>
-    <link   rel="stylesheet" type="text/css" href="editor/ag.css">
     <script src="editor/ag.js"></script>
-
-    <!-- <script src="editor/node_modules/@fortawesome/fontawesome-free/js/all.js"></script> 
-    <link   rel="stylesheet" type="text/css" href="editor/node_modules/@fortawesome/fontawesome-free/css/all.css"> -->
+    <link   rel="stylesheet" type="text/css" href="editor/ag.css">
+ 
 
     <link   rel="stylesheet" type="text/css" href="editor/font-awesome/css/font-awesome.css">
 
@@ -68,33 +66,33 @@
                         </svg>
                         </a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Bilgisayarımdan Aç"
+                      data-toggle="tooltip" data-placement="bottom" title="Bilgisayarımdan Aç"
                       id="openJsonFromLocal"><i class="fa fa-folder-open"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Bilgisayara Kaydet"
+                      data-toggle="tooltip" data-placement="bottom" title="Bilgisayara Kaydet"
                       id="saveJsonToLocal"><i class="fa fa-floppy-o" aria-hidden="true"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Yeni Sayfa"
+                      data-toggle="tooltip" data-placement="bottom" title="Yeni Sayfa"
                       id="canvas-ekle"><i class="fa fa-file"></i></a></li>
                       <li><a class="nav-item nav-link" 
-                      data-toggle="tooltip" data-placement="top" title="Zemin Resmi"
+                      data-toggle="tooltip" data-placement="bottom" title="Zemin Resmi"
                       id="bg-ekle"><i class="fa fa-database"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Metin Kutusu"
+                      data-toggle="tooltip" data-placement="bottom" title="Metin Kutusu"
                       id="textarea-ekle"><i class="fa fa-tumblr-square"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Resim Alanı"
+                      data-toggle="tooltip" data-placement="bottom" title="Resim Alanı"
                       id="croparea-ekle"><i class="fa fa-image"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Logo / Serbest Resim"
+                      data-toggle="tooltip" data-placement="bottom" title="Logo / Serbest Resim"
                       id="logo-ekle"><i class="fa fa-address-card" aria-hidden="true"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Sil"
+                      data-toggle="tooltip" data-placement="bottom" title="Sil"
                       id="obje-sil"><i class="fa fa-trash"></i></a></li>
                       
 
                       <li><a class="nav-item nav-link"  
-                        data-toggle="tooltip" data-placement="top" title="Bir Alta Gönder"
+                        data-toggle="tooltip" data-placement="bottom" title="Bir Alta Gönder"
                         id="sendBackwards">
                         <svg class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
@@ -103,7 +101,7 @@
                       </a></li>
                       
                       <li><a class="nav-item nav-link"  
-                        data-toggle="tooltip" data-placement="top" title="Bir Öne Getir"
+                        data-toggle="tooltip" data-placement="bottom" title="Bir Öne Getir"
                         id="bringForward">
                         <svg style="transform: rotate(180deg);" class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
@@ -112,19 +110,18 @@
                       </a></li>
 
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Sunum Moduna Geç"
+                      data-toggle="tooltip" data-placement="bottom" title="Sunum Moduna Geç"
                       id="sunumuBaslat"><i class="fa fa-eye"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Büyük Resmi Çiz"
+                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resmi Çiz"
                       id="renderWithBigBGImage"><i class="fa fa-expand" aria-hidden="true"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="top" title="Büyük Resmi İndir"
+                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resmi İndir"
                       id="downloadBigImage"><i class="fa fa-download"></i></a></li>                    
                     </ul>  
 
                     <ul class="nav navbar-nav navbar-right">
-                      <li><a class="nav-item nav-link"  
-                        data-toggle="tooltip" data-placement="top" title="Sunucuya kaydet"
+                      <li><a class="nav-item nav-link" data-toggle="tooltip" data-placement="bottom" title="Sunucuya kaydet"
                         id="saveSablonToServer"><i class="fa fa-cloud-upload"></i></a>
                       </li>
                     </ul>
@@ -234,6 +231,32 @@
                           <br>
                           İşlem devam ediyor.
                       </div>
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  MODAL FONT SETTİNG   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-font-setting" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      Font & Renk Seçin
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                       <div class="col-12 ag-font-list">
+                        
+                       </div>
+                       <div class="col-12 ag-color-list">
+                       coror
+                       </div>
                     </div>
                     <div class="modal-footer"> 
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>

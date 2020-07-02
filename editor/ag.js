@@ -17,7 +17,7 @@ $('document').ready(  function(){
 
     getSablonFile()
 
-    agEditor._refreshMainMenu()
+    agEditor.refreshMainMenu()
 
     $('[data-toggle="tooltip"]').tooltip()
     
@@ -313,6 +313,58 @@ $('document').ready(  function(){
         agEditor.agCropper.crop();
     })
 
+    $(document).on('click','.ag-edit-font',function(){
+        const obj_id = $(this).attr('data-object-id')
+
+        url = agBaseURL+"/ageditor/editor/fonts/fonts.json"
+        $.get(url,function(fonts){
+            let ul = '<ul>'
+            if(fonts){ 
+                $.each(fonts,function (i,fv) {    
+                    let _font = new FontFace(fv, 'url('+agBaseURL+'/ageditor/editor/fonts/'+fv+'.ttf)');
+                    let fnt = _font.load() 
+                    fnt.then((loaded_face)=>{
+                        document.fonts.add(loaded_face)
+                    }).catch((err)=>{
+                        console.error("Font yüklenemedi------------ \n"+err)
+                    })
+                    ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-obj-id="'+obj_id+'" data-font="'+fv+'">'+fv+'</li>';
+                }) 
+            }
+            ul += '\n<ul>'
+            $('#modal-font-setting .ag-font-list').html(ul);
+        })
+
+        url     = agBaseURL+"/ageditor/editor/lib/colors.json"
+        $.get(url,function(colors){ 
+            let cDiv    = '';
+            if(colors){ 
+                $.each(colors,function (i,cv) {
+                    cDiv += '\n<div class="ag-color-box" data-obj-id="'+obj_id+'" data-color = "'+cv+'" style="background-color:'+cv+'"></div>'
+                })
+            }
+            $('#modal-font-setting .ag-color-list').html(cDiv);
+        })
+
+        $('#modal-font-setting').modal('show')
+    })
+
+    $(document).on('click','.ag-font',function(){        
+       let font_name    = $(this).attr('data-font')          
+       let obj_id       = $(this).attr('data-obj-id')
+       obj              = agEditor.getObjectByID(obj_id)
+       obj.fontFamily   = font_name;
+       agEditor.activeCanvas.renderAll();
+    })
+
+    $(document).on('click','.ag-color-box',function(){        
+        let color    = $(this).attr('data-color')          
+        let obj_id       = $(this).attr('data-obj-id')
+        obj              = agEditor.getObjectByID(obj_id)
+        obj.setColor(color);
+        agEditor.activeCanvas.renderAll();
+     })
+
     $(agEditor.agCropper.modal_element).on('hidden.bs.modal', function () {
         if(agEditor.presentMode == false){
             $(agEditor.target_properties_panel).show();
@@ -390,7 +442,6 @@ $('document').ready(  function(){
 
         $('#ageditor').css('height',totalHeight+'px');      
     })
-
     
 })//===========================   End document ready
 
@@ -399,7 +450,6 @@ async function uploadSmallPageImages(w = 300){
     let index = 0;
     await _uploadSmallPageImg(keys,index,w);
 }
-
 
 async function _uploadSmallPageImg(keys,index,w){
     let key     = keys[index];
@@ -448,7 +498,6 @@ async function _uploadSmallPageImg(keys,index,w){
         return;
     }
 }
-
 
 async function saveSablonToServer() {
     agEditor.modal_progress.modal('show')
@@ -513,7 +562,6 @@ async function saveSablonToServer() {
     })
 }
 
-
 function openImageBrowser(folder){
     url = agBaseURL+"/ageditor/api/?command=getBgImages&folder="+folder
     $.get(url,function(files){
@@ -539,7 +587,6 @@ function openImageBrowser(folder){
     })
 }
 
-
 function ifExistProductIdinUrl() {  
     let params          = new URLSearchParams(window.location.search)
     if(params.has('product_id')){ 
@@ -554,7 +601,6 @@ function ifExistProductIdinUrl() {
         return false;
     }
 }
-
 
 function getSablonFile() { 
     if(!agEditor.agIsOcFrontpage){
@@ -585,7 +631,6 @@ function getSablonFile() {
          
       });
 }
-
 
 ////////////////////////////  OC önsayfası için  ////////////////////
 function ocFrontPage_ifProductPage(){

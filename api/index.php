@@ -154,7 +154,34 @@ function saveSablonToServer(){
     }
 }
 
+//-------------------------          getFontList   -------------------------
+function getFontList(){
+    global  $json_header;
+    $bgimagesdir    = "bgimages";
+    $folder         = isset($_GET['folder'])?$_GET['folder']:null;
 
+    if($folder != '/'){
+        $bgimagesdir = $folder ;
+    }
+    $files      = scandir($bgimagesdir);
+    $list       = [];
+    foreach($files as $fval){
+        if($fval!='.'){
+            $path = $bgimagesdir.'/'.$fval;
+            if(is_dir($path)){
+                $list[] = ['type'=>'folder' ,'path'=>$path  ,'name'=>$fval];
+            }else{
+                $ext = pathinfo($fval, PATHINFO_EXTENSION);
+                if(in_array($ext,['jpg','png','svg','jpeg'])){
+                    $list[] = ['type'=>'file'   ,'path'=>$path  ,'name'=>$fval];
+                }
+            }
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($list);
+}
 
 
 
@@ -169,4 +196,6 @@ if($command == "getBgImages"){
     uploadSmallPageImages();
 }else if($command == "saveSablonToServer"){
     saveSablonToServer();
+}else if($command == "getFontList"){
+    getFontList();
 }
