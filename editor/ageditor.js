@@ -25,6 +25,25 @@ class AgEditor {
                                             ,"Justify Center":"justify-center"
                                             ,"Justify Right":"justify-right"}
         this.drawObjectsBordered        = false;
+        this.agJsonExportOptions        = [ 
+                                            "agSablonResmi",
+                                            "agKarakterLimiti",
+                                            "agKutuyaSigdir",
+                                            "agMaxLines",
+                                            "agMaxWidth",
+                                            "agCropImageData",
+                                            "agCropData",
+                                            "agSmallImageUrl",
+                                            "agImageUrl",
+                                            "agFontSize",
+                                            "agBosBirak",
+                                            "evented",
+                                            "hasControls",
+                                            "agIsLogo",
+                                            "height",
+                                            "width",
+                                            "id"
+                                        ]
         this._loadfonts();
     }
 
@@ -221,24 +240,6 @@ class AgEditor {
                 mtr: true,
             });
 
-            /*textBoxFabricInstance.onInput = function(e){
-                if(this.agMaxLines==1){return;}
-                if (this.agMaxWidth) {
-                    const textWidthUnderCursor = BU.activeCanvas.getContext().measureText(this.textLines[this.get2DCursorLocation().lineIndex]).width;
-                    if (textWidthUnderCursor + BU.activeCanvas.getContext().measureText(e.data).width > this.agMaxWidth) {
-                        return;
-                    }
-                  }
-              
-                  if (this.agMaxLines) {
-                    const newLinesLength = this._wrapText(this.ctx, this.text + chars).length;
-                    if (newLinesLength > this.maxLines) {
-                      return;
-                    }
-                  }
-                this.callSuper('onInput', e);
-            }*/
-
             //textBoxFabricInstance.on({"scaling":this.scalingHadler})
             await this.loadFont(textBoxFabricInstance.fontFamily);
             textBoxFabricInstance.agKarakterLimiti      = 30
@@ -359,7 +360,10 @@ class AgEditor {
     }
 
     updateControls(e){
-        e.target.agMaxLines = e.target.textLines.length
+        if(e.target instanceof fabric.Textbox){
+            e.target.agMaxLines = e.target.textLines.length
+        }
+
         this.BU.refreshPropertiesPanel(e.target);
     }
 
@@ -515,24 +519,7 @@ class AgEditor {
         for (var key in BU.fabricCanvases) {
             if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
             let canvas = BU.fabricCanvases[key];
-            let serialized = JSON.stringify(canvas.toJSON([ "agSablonResmi",
-                                                            "agKarakterLimiti",
-                                                            "agKutuyaSigdir",
-                                                            "agMaxLines",
-                                                            "agMaxWidth",
-                                                            "agCropImageData",
-                                                            "agCropData",
-                                                            "agSmallImageUrl",
-                                                            "agImageUrl",
-                                                            "agFontSize",
-                                                            "agBosBirak", 
-                                                            "agIsLogo",
-                                                            "evented",
-                                                            "hasControls",
-                                                            "height",
-                                                            "width",
-                                                            "id"
-                                                        ]));
+            let serialized = JSON.stringify(canvas.toJSON(BU.agJsonExportOptions));
            
             serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
             allCanvasesArr.push(serialized) 
@@ -644,8 +631,8 @@ class AgEditor {
         let BU              = this;
         let bigImgSrc,imgSrc
         if(BU.activeCanvas.imgSrc){
-            bigImgSrc   = BU.activeCanvas.imgSrc;
-            BU.activeCanvas.imgSrc = null;
+            bigImgSrc               = BU.activeCanvas.imgSrc;
+            BU.activeCanvas.imgSrc  = null;
         }else{
             imgSrc      = BU.getObjectByID('bg').getSrc();
             bigImgSrc   = imgSrc.replace("bgimages", "orginal_images");
@@ -659,7 +646,7 @@ class AgEditor {
             fabric.Image.fromURL(bigImgSrc, function(oImg) {
                 BU.modal_progress.modal('hide')
                 if (!oImg._element){
-                    alert("Büyük şsnlon resmi bulunamadı. \n"+bigImgSrc)
+                    alert("Büyük şablon resmi bulunamadı. \n"+bigImgSrc)
                     return;
                 }
                 let w0      = BU.activeCanvas.width;
@@ -690,13 +677,17 @@ class AgEditor {
     }
 
     async downloadBigImage(){
-        let indirlink = document.createElement('a') 
-        indirlink.href = this.activeCanvas.toDataURL({
-            format: 'jpg',
-            quality: 1
-        });
-        indirlink.download = 'canvas.png'
-        indirlink.click();
+        let BU = this;
+        return new Promise(function(resolve,reject){
+            let indirlink = document.createElement('a') 
+            indirlink.href = BU.activeCanvas.toDataURL({
+                format: 'jpg',
+                quality: 1
+            });
+            indirlink.download = 'canvas.png'
+            indirlink.click();   
+            resolve();
+        })     
     }
 
     async getJPEG(w,canvas){
@@ -752,6 +743,11 @@ class AgPresentation{
             return;
         }
 
+        let  o_text='';
+        if(BU.agIsOcFrontpage){
+            o_text = o.text
+        }
+
         let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
         if(data_canvas_id == canvas.id)return;
 
@@ -788,7 +784,7 @@ class AgPresentation{
                             +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
                             +'  </td>'
                             +'  <td>'
-                            +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" value="'+o.text+'" '+disabled+'  data-target-id="'+o.id+'">'
+                            +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" placeholder="Yazı Alanı" value="'+o_text+'" '+disabled+'  data-target-id="'+o.id+'">'
                             +'  </td>'
                             +'  <td>'
                             +'     <div class="ag-onay">'

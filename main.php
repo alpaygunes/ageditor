@@ -1,12 +1,15 @@
 <?php
+/*
 $command        = isset($_GET['command'])?$_GET['command']:null;
 
 
-function getSablonFile(){
-    
+function getCustomerJson(){
+    $url = $_GET['fileurl'];
 }
 
 /////////////////////////////  MAIN /////////////////////
-if($command == "getSablonFile"){
-    getSablonFile();
+
+if($command == "getCustomerJson"){
+    getCustomerJson();
 }
+*/

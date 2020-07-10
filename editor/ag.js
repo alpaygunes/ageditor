@@ -1,7 +1,8 @@
-var agBaseURL       = "http://opencart.test"
+var agBaseURL       = "http://tasarimabasla.test"
 var agEditor;
 var ag_gorev        = '' // bg-ekle | logo-ekle
 var ag_product_id   = null;
+var fullpage = false
 
 $('document').ready(  function(){
 
@@ -103,8 +104,10 @@ $('document').ready(  function(){
         agEditor.renderWithBigBGImage();
     }) 
 
-    $('#downloadBigImage').click(function(){
-        agEditor.downloadBigImage();
+    $('#downloadBigImage').click( async function(){
+        //agEditor.modal_progress.modal('show');
+        await agEditor.downloadBigImage();
+        //agEditor.modal_progress.modal('hide');
     }) 
     
     $('.modal-body').on('click','.img-thumbnail',function(){
@@ -371,27 +374,8 @@ $('document').ready(  function(){
         }
     })    
 
-    var fullpage = false
     $(document).on('click','.ag-fullpage',function(){
-        if(!fullpage){
-            $(agEditor.container_html_element).find('.navbar-default').addClass('navbar-fixed-top')
-            $(agEditor.container_html_element).addClass('ag-container-fullpage')
-            $(agEditor.editor_html_element).css('margin-top','100px')
-            $(agEditor.target_properties_panel).css('position','fixed')
-            $(agEditor.target_properties_panel).css('top','68px')
-
-            $(agEditor.preview_input_panel).css('position','fixed')
-            $(agEditor.preview_input_panel).css('top','68px')
-        }else{
-            $(agEditor.container_html_element).find('.navbar-default').removeClass('navbar-fixed-top')
-            $(agEditor.container_html_element).removeClass('ag-container-fullpage')
-            $(agEditor.editor_html_element).css('margin-top','25px')
-            $(agEditor.target_properties_panel).css('position','relative')
-            $(agEditor.target_properties_panel).css('top','0px')
-            $(agEditor.preview_input_panel).css('position','relative')
-            $(agEditor.preview_input_panel).css('top','0px')
-        }
-        fullpage = !fullpage;
+        switchFullScreen();
     })
 
     var agContentHeight = $('body').outerHeight(true );
@@ -442,6 +426,12 @@ $('document').ready(  function(){
 
         $('#ageditor').css('height',totalHeight+'px');      
     })
+
+
+    
+
+    
+
     
 })//===========================   End document ready
 
@@ -505,24 +495,7 @@ async function saveSablonToServer() {
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas = agEditor.fabricCanvases[key];
-        let serialized = JSON.stringify(canvas.toJSON([ "agSablonResmi",
-                                                        "agKarakterLimiti",
-                                                        "agKutuyaSigdir",
-                                                        "agMaxLines",
-                                                        "agMaxWidth",
-                                                        "agCropImageData",
-                                                        "agCropData",
-                                                        "agSmallImageUrl",
-                                                        "agImageUrl",
-                                                        "agFontSize",
-                                                        "agBosBirak",
-                                                        "evented",
-                                                        "hasControls",
-                                                        "agIsLogo",
-                                                        "height",
-                                                        "width",
-                                                        "id"
-                                                    ]));       
+        let serialized = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
         serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
         allCanvasesArr.push(serialized) 
     }
@@ -592,7 +565,10 @@ function ifExistProductIdinUrl() {
     if(params.has('product_id')){ 
         ag_product_id   = params.get('product_id')
         return true;
-    } else{
+    }else if(typeof fileurl !== 'undefined'){
+        $('#saveSablonToServer').remove();
+        return true;
+    }else{
         const pid_bulunamadi  =  '<div class="alert alert-light pid-bulunamadi" role="alert">'
                                 +'AgEditör\'ü kayıtlı ürünü düzenlerken kullana bilirsiniz.<br>'
                                 +'<big>Ürünü kaydedin ve düzenlemek için açın.</big>'
@@ -607,19 +583,24 @@ function getSablonFile() {
         agEditor.modal_progress.modal('show')
     }
     let url = agBaseURL+'/ageditor/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
+
+    if(typeof fileurl !== "undefined"){ 
+        url = fileurl.replace(/&amp;/g, "&"); 
+    }
+
+
     $.getJSON(url, function(data) {
         agEditor._fromJSON(data);
         agEditor.modal_progress.modal('hide')
+        $('.ag-alanseti').show();
       })
       .error(function(xhr, ajaxOptions, thrownError) {     
         console.log("Şablon bulunamadı" + url)      
         agEditor.modal_progress.modal('hide')
-        $('.row .thumbnails').show();
-        $('.row .ag-thumbnails').hide();
+        $('.left .col-sm-6').show();
        })
       .complete(function() { 
         agEditor.modal_progress.modal('hide')
-
         let totalHeight =0
         $('.canvas-container').each(function (elm) {
             const cnv = $(this).find('canvas')[0] 
@@ -632,11 +613,102 @@ function getSablonFile() {
       });
 }
 
+function switchFullScreen(){
+
+    if(!fullpage){
+        $(agEditor.container_html_element).find('.navbar-default').addClass('navbar-fixed-top')
+        $(agEditor.container_html_element).addClass('ag-container-fullpage')
+        $(agEditor.editor_html_element).css('margin-top','100px')
+        $(agEditor.target_properties_panel).css('position','fixed')
+        $(agEditor.target_properties_panel).css('top','68px')
+
+        $(agEditor.preview_input_panel).css('position','fixed')
+        $(agEditor.preview_input_panel).css('top','68px')
+    }else{
+        $(agEditor.container_html_element).find('.navbar-default').removeClass('navbar-fixed-top')
+        $(agEditor.container_html_element).removeClass('ag-container-fullpage')
+        $(agEditor.editor_html_element).css('margin-top','25px')
+        $(agEditor.target_properties_panel).css('position','relative')
+        $(agEditor.target_properties_panel).css('top','0px')
+        $(agEditor.preview_input_panel).css('position','relative')
+        $(agEditor.preview_input_panel).css('top','0px')
+    }
+    fullpage = !fullpage;
+}
+
 ////////////////////////////  OC önsayfası için  ////////////////////
 function ocFrontPage_ifProductPage(){
-    if($('#product-product').length){
-        $('.row .thumbnails').hide();
-        $('.row .ag-thumbnails').show();
+    if($('.product-info').length){
+        $('.left .col-sm-6').hide(); 
         agEditor.agIsOcFrontpage = true;
+    }else{
+        switchFullScreen();
     }
+}
+
+async function ocCreateAndUploadAgeditorJson(){ 
+    if($('button[id^=\'button-upload\']').length == 0){
+        alert("Ürünün 'Dosya Gönderme' seçeneği olmalı. Hata !");
+        reject();
+    }
+
+    let allCanvasesArr  = [];
+    for (var key in agEditor.fabricCanvases) {
+        if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
+        let canvas      = agEditor.fabricCanvases[key];
+        let serialized  = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
+        serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
+        allCanvasesArr.push(serialized) 
+    }
+
+    const str   = JSON.stringify(allCanvasesArr);
+    const bytes = new TextEncoder().encode(str);
+    const blob  = new Blob([bytes], {
+        type: "application/json"
+    });
+
+    $('#form-upload').remove();
+    $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;">'+
+            '<input type="file" name="file" />'+
+            '</form>');
+    
+    var form        = document.querySelector('#form-upload');
+    var formData    = new FormData(form);
+    formData.append("file", blob , 'ageditorJson.json');
+
+    return new Promise(function(resolve,reject){
+        $.ajax({
+            url: 'index.php?route=tool/upload',
+            type: 'post',
+            dataType: 'json',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+               // $(node).button('loading');
+            },
+            complete: function() {
+                //$(node).button('reset');
+            },
+            success: function(json) {
+                //$('.text-danger').remove();
+    
+                if (json['error']) {
+                    alert("Tasarım dosyası gönderilemedi. Sistemsel bir hata oldu")
+                    reject();
+                }
+    
+                if (json['success']) {                    
+                    node = $('button[id^=\'button-upload\']')[0];
+                    $(node).parent().find('input').val(json['code']);
+                    console.log("AgEditor.json dosyası gönderildi")
+                    resolve(true);
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            }
+        });
+    })
 }

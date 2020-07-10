@@ -246,11 +246,16 @@
 }
 
 #modal-agcropper .crop-menu-item{
-    margin-left:10px; 
+    margin-left:10px;  
+}
+
+#modal-agcropper .btn-link{ 
+    color: #2196F3;
 }
 
 #modal-agcropper .btn-link i{
     font-size: 20px;
+    color: #2196F3;
 }
 
 .pid-bulunamadi{

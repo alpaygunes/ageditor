@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgEditor</title> 
-    
+    <title>AgEditor</title>     
     <script src="editor/lib/jquery-2.1.1.min.js"></script>
     <script src="editor/lib/bootstrap.min.js"></script>
     <link   rel="stylesheet" type="text/css" href="editor/lib/bootstrap.min.css">
@@ -13,16 +12,25 @@
     <script src="editor/ageditor.js"></script>
     <script src="editor/ag.js"></script>
     <link   rel="stylesheet" type="text/css" href="editor/ag.css">
- 
-
     <link   rel="stylesheet" type="text/css" href="editor/font-awesome/css/font-awesome.css">
-
     <!--  CROPPERJS -->
     <script src="editor/lib/cropper.js"></script>
     <link   rel="stylesheet" type="text/css" href="editor/lib/cropper.css">
-    <!--  END       -->
+    <!--  END       -->  
+
     
+    <script src="editor/donusturucu.js"></script>
+
 </head>
+
+<script>
+  <?php if(isset($_GET['fileurl'])){ ?>
+    var fileurl = "<?php echo $_GET['fileurl'];?>"
+  <?php } ?>
+</script>
+
+
+
 <body>
 
     <h1 style="background-color:#abcabc;">AgEditör</h1>
@@ -113,10 +121,10 @@
                       data-toggle="tooltip" data-placement="bottom" title="Sunum Moduna Geç"
                       id="sunumuBaslat"><i class="fa fa-eye"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resmi Çiz"
+                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resim"
                       id="renderWithBigBGImage"><i class="fa fa-expand" aria-hidden="true"></i></a></li>
                       <li><a class="nav-item nav-link"  
-                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resmi İndir"
+                      data-toggle="tooltip" data-placement="bottom" title="Resmi İndir"
                       id="downloadBigImage"><i class="fa fa-download"></i></a></li>                    
                     </ul>  
 
