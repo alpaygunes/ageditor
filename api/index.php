@@ -7,7 +7,6 @@ header("Access-Control-Allow-Headers: Content-Type");
 $command        = $_GET['command'];
 
 
-
 //-------------------------          getBgImages  -------------------------
 function getBgImages(){
     global  $json_header;
@@ -36,8 +35,6 @@ function getBgImages(){
     header('Content-Type: application/json');
     echo json_encode($list);
 }
-
-
 
 
 //-------------------------          getBgImages   -------------------------
@@ -76,7 +73,6 @@ function uploadUserImage(){
         }
     }
 }
-
 
 
 //-------------------------          uploadSmallPageImages   -------------------------
@@ -157,23 +153,18 @@ function saveSablonToServer(){
 //-------------------------          getFontList   -------------------------
 function getFontList(){
     global  $json_header;
-    $bgimagesdir    = "bgimages";
-    $folder         = isset($_GET['folder'])?$_GET['folder']:null;
-
-    if($folder != '/'){
-        $bgimagesdir = $folder ;
-    }
-    $files      = scandir($bgimagesdir);
-    $list       = [];
+    $fontsDir    = "../editor/fonts";
+    $files      = scandir($fontsDir);
+    $list       = new stdClass(); 
     foreach($files as $fval){
         if($fval!='.'){
-            $path = $bgimagesdir.'/'.$fval;
+            $path = $fontsDir.'/'.$fval;
             if(is_dir($path)){
-                $list[] = ['type'=>'folder' ,'path'=>$path  ,'name'=>$fval];
+                //$list[] = ['type'=>'folder' ,'path'=>$path  ,'name'=>$fval];
             }else{
-                $ext = pathinfo($fval, PATHINFO_EXTENSION);
-                if(in_array($ext,['jpg','png','svg','jpeg'])){
-                    $list[] = ['type'=>'file'   ,'path'=>$path  ,'name'=>$fval];
+                $ext = pathinfo($fval);
+                if($ext['extension']=='ttf'){
+                    $list->{$ext['filename']} = $ext['filename'];
                 }
             }
         }

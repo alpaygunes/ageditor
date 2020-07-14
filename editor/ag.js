@@ -1,10 +1,17 @@
-var agBaseURL       = "http://tasarimabasla.test"
+/**
+ * Alpay GÜNEŞ
+ * alpaygunes@gmail.com
+ * alpaygunes.com
+ */
+
+
+var agBaseURL       = "http://tasarimabasla.test/ageditor"
 var agEditor;
 var ag_gorev        = '' // bg-ekle | logo-ekle
 var ag_product_id   = null;
 var fullpage = false
 
-$('document').ready(  function(){
+document.addEventListener( 'DOMContentLoaded',  async function () {
 
     agEditor        = new AgEditor();
     
@@ -16,7 +23,9 @@ $('document').ready(  function(){
 
     ocFrontPage_ifProductPage();
 
-    getSablonFile()
+    getSablonFile().catch(()=>{
+        eskiVersiondanDonustur();
+    })
 
     agEditor.refreshMainMenu()
 
@@ -241,7 +250,7 @@ $('document').ready(  function(){
 
             formData.append('userimage', file); 
             $.ajax({
-                url: agBaseURL+'/ageditor/api/?command=uploadUserImage',
+                url: agBaseURL+'/api/?command=uploadUserImage',
                 data: formData,
                 type: 'POST',
                 contentType: false, // NEEDED, DON'T OMIT THIS (requires jQuery 1.6+)
@@ -253,8 +262,8 @@ $('document').ready(  function(){
                         agEditor.agCropper.awaitingUploads.splice(index, 1);
                     }
                     if(data.url){
-                        agEditor.agCropper.agImageUrl = agBaseURL+'/ageditor/'+data.url; 
-                        resim           = {"url":agBaseURL+'/ageditor/'+data.url}
+                        agEditor.agCropper.agImageUrl = agBaseURL+'/'+data.url; 
+                        resim           = {"url":agBaseURL+'/'+data.url}
                         if(window.localStorage.getItem("localresimlerim")){
                             localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
                             localresimlerim[Object.keys(localresimlerim).length] = resim;
@@ -318,27 +327,23 @@ $('document').ready(  function(){
 
     $(document).on('click','.ag-edit-font',function(){
         const obj_id = $(this).attr('data-object-id')
+        url = agBaseURL+"/editor/fonts/fonts.json"         
+        let ul = '<ul>'
+        $.each(agEditor.fontsJson,function (i,fv) {    
+            let _font = new FontFace(fv, 'url('+agBaseURL+'/editor/fonts/'+fv+'.ttf)');
+            let fnt = _font.load() 
+            fnt.then((loaded_face)=>{
+                document.fonts.add(loaded_face)
+            }).catch(()=>{
+                console.log("Font yüklenemedi font adı " + fv)
+            })
+            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-obj-id="'+obj_id+'" data-font="'+fv+'">'+fv+'</li>';
+        }) 
+        ul += '\n<ul>'
+        $('#modal-font-setting .ag-font-list').html(ul);
+        
 
-        url = agBaseURL+"/ageditor/editor/fonts/fonts.json"
-        $.get(url,function(fonts){
-            let ul = '<ul>'
-            if(fonts){ 
-                $.each(fonts,function (i,fv) {    
-                    let _font = new FontFace(fv, 'url('+agBaseURL+'/ageditor/editor/fonts/'+fv+'.ttf)');
-                    let fnt = _font.load() 
-                    fnt.then((loaded_face)=>{
-                        document.fonts.add(loaded_face)
-                    }).catch((err)=>{
-                        console.error("Font yüklenemedi------------ \n"+err)
-                    })
-                    ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-obj-id="'+obj_id+'" data-font="'+fv+'">'+fv+'</li>';
-                }) 
-            }
-            ul += '\n<ul>'
-            $('#modal-font-setting .ag-font-list').html(ul);
-        })
-
-        url     = agBaseURL+"/ageditor/editor/lib/colors.json"
+        url     = agBaseURL+"/editor/lib/colors.json"
         $.get(url,function(colors){ 
             let cDiv    = '';
             if(colors){ 
@@ -352,16 +357,20 @@ $('document').ready(  function(){
         $('#modal-font-setting').modal('show')
     })
 
-    $(document).on('click','.ag-font',function(){        
-       let font_name    = $(this).attr('data-font')          
-       let obj_id       = $(this).attr('data-obj-id')
-       obj              = agEditor.getObjectByID(obj_id)
-       obj.fontFamily   = font_name;
-       agEditor.activeCanvas.renderAll();
+    $(document).on('click','.ag-font',function(){     
+        $('.ag-font').css('background-color','#fff')  
+        $(this).css('background-color','#eee')        
+        let font_name    = $(this).attr('data-font')          
+        let obj_id       = $(this).attr('data-obj-id')
+        obj              = agEditor.getObjectByID(obj_id)
+        obj.fontFamily   = font_name;
+        agEditor.activeCanvas.renderAll();
     })
 
-    $(document).on('click','.ag-color-box',function(){        
-        let color    = $(this).attr('data-color')          
+    $(document).on('click','.ag-color-box',function(){       
+        $('.ag-color-box').css('border-radius','60px')  
+        $(this).css('border-radius','0')  
+        let color        = $(this).attr('data-color')
         let obj_id       = $(this).attr('data-obj-id')
         obj              = agEditor.getObjectByID(obj_id)
         obj.setColor(color);
@@ -461,7 +470,7 @@ async function _uploadSmallPageImg(keys,index,w){
 
     
     $.ajax({
-        url: agBaseURL+'/ageditor/api/?command=uploadSmallPageImages',
+        url: agBaseURL+'/api/?command=uploadSmallPageImages',
         data: formData,
         type: 'POST',
         contentType: false,  
@@ -511,7 +520,7 @@ async function saveSablonToServer() {
     await uploadSmallPageImages(300);
     return new Promise(function(resolve,reject){
         $.ajax({
-            url: agBaseURL+'/ageditor/api/?command=saveSablonToServer',
+            url: agBaseURL+'/api/?command=saveSablonToServer',
             type: 'post',
             dataType: 'json',
             data: formData,
@@ -536,13 +545,13 @@ async function saveSablonToServer() {
 }
 
 function openImageBrowser(folder){
-    url = agBaseURL+"/ageditor/api/?command=getBgImages&folder="+folder
+    url = agBaseURL+"/api/?command=getBgImages&folder="+folder
     $.get(url,function(files){
         $('#modal-kutuphane .modal-body').empty();
         if(files){
             $.each(files,function(i,file){ 
                 elm = '<div class="rounded  float-left img-thumbnail">'+
-                      '<img src="'+agBaseURL+'/ageditor/api/'+file.path+'">'+
+                      '<img src="'+agBaseURL+'/api/'+file.path+'">'+
                       '<div class="file-name">'+file.name+'</div>'+
                       '</div>';
                 if(file.type == 'folder'){
@@ -578,39 +587,38 @@ function ifExistProductIdinUrl() {
     }
 }
 
-function getSablonFile() { 
+async function getSablonFile() { 
     if(!agEditor.agIsOcFrontpage){
         agEditor.modal_progress.modal('show')
     }
-    let url = agBaseURL+'/ageditor/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
+    let url = agBaseURL+'/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
 
     if(typeof fileurl !== "undefined"){ 
         url = fileurl.replace(/&amp;/g, "&"); 
     }
 
-
-    $.getJSON(url, function(data) {
-        agEditor._fromJSON(data);
-        agEditor.modal_progress.modal('hide')
-        $('.ag-alanseti').show();
-      })
-      .error(function(xhr, ajaxOptions, thrownError) {     
-        console.log("Şablon bulunamadı" + url)      
-        agEditor.modal_progress.modal('hide')
-        $('.left .col-sm-6').show();
-       })
-      .complete(function() { 
-        agEditor.modal_progress.modal('hide')
-        let totalHeight =0
-        $('.canvas-container').each(function (elm) {
-            const cnv = $(this).find('canvas')[0] 
-            $(this).css('height',cnv.scrollHeight+10+'px')
-            totalHeight     +=  cnv.scrollHeight+10;
-        })
-
-        $('#ageditor').css('height',totalHeight+'px');
-         
-      });
+    return new Promise(function(resolve,reject){
+        $.getJSON(url, function(data) {
+                agEditor._fromJSON(data);
+                agEditor.modal_progress.modal('hide')
+                $('.ag-alanseti').show();
+                resolve();
+            }).error(function(xhr, ajaxOptions, thrownError) {
+                console.log("Şablon bulunamadı \n" + url)      
+                agEditor.modal_progress.modal('hide')
+                reject();
+            }).complete(function() {
+                agEditor.modal_progress.modal('hide')
+                let totalHeight =0
+                $('.canvas-container').each(function (elm) {
+                const cnv = $(this).find('canvas')[0] 
+                $(this).css('height',cnv.scrollHeight+10+'px')
+                totalHeight     +=  cnv.scrollHeight+10;
+                resolve();
+            })
+            $('#ageditor').css('height',totalHeight+'px');
+        });
+    })
 }
 
 function switchFullScreen(){

@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>ALPAY</id>
+    <version>1.0.6</version>
+    <vqmver>2.4.1</vqmver>
+    <author>alpaygunes</author>
+
+
+
+
+	<!--   HEADER.TPL  css ve js leri ekleyelim -->
+    <file name="catalog/view/theme/journal2/template/common/header.tpl">
+        <operation info="JS ve CSS linklerini ekleyelim">
+            <search position="before"><![CDATA[</head>]]></search>
+            <add><![CDATA[
+                <script src="/ageditor/editor/lib/fabric.min.js"></script>
+                <script src="/ageditor/editor/ageditor.js"></script>
+                <link rel="stylesheet" type="text/css" href="/ageditor/editor/ag.css">
+                <script src="/ageditor/editor/ag.js"></script> 
+                <script src="/ageditor/editor/lib/cropper.js"></script>
+                <link   rel="stylesheet" type="text/css" href="/ageditor/editor/lib/cropper.css">       
+                <script src="/ageditor/editor/donusturucu.js"></script>    
+            ]]></add>
+        </operation>
+    </file>
+
+	<!--   Sağ ve Sol kolonları 6 yapalım -->
+    <file name="catalog/view/theme/journal2/template/product/product.tpl">
+        <operation error="skip" info="sol ve sağ sütün 6 olsun">
+            <search position="replace" ><![CDATA[<?php $class = 'col-sm-4'; ?>]]></search>
+            <add><![CDATA[<?php $class = 'col-sm-6'; ?>]]></add>
+        </operation> 
+        <operation error="skip" info="sol ve sağ sütün 6 olsun">
+            <search position="replace" ><![CDATA[<?php $class = 'col-sm-8'; ?>]]></search>
+            <add><![CDATA[<?php $class = 'col-sm-6'; ?>]]></add>
+        </operation> 
+    </file>
+
+	<!--   editör html kodları -->
+    <file name="catalog/view/theme/journal2/template/product/product.tpl">
+        <operation info="Ürün sayfasına ageditor alanını koayalım">
+            <search position="after"><![CDATA[<div class="left">]]></search>
+            <add><![CDATA[
+                <fieldset class="ag-alanseti" style="padding: 6px!important;display:none">
+					<legend>Tasarım  Alanları</legend>
+					<div id="ageditor">
+					</div> 
+				</fieldset>
+
+                <!-- =========================================  MODAL KÜTÜPHANE SEÇ    =====================  -->
+                <div class="modal ag-modal" tabindex="-1" id="modal-kutuphane" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Resimler</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> 
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- END-->
+
+                <!-- =========================================  MODAL RESİMLERİM   =====================  -->
+                <div class="modal modal-fullscreen ag-modal"  tabindex="-1" id="modal-agcropper" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn btn-link ag-crop-resim-resimlerim" style="display: none;">
+                        <i class="fa fa-picture-o" aria-hidden="true"></i> <br> Resimlerim </button>
+                        <button type="button" class="btn btn-link ag-crop-resim-yukle">
+                        <i class="fa fa-cloud-upload" aria-hidden="true"></i> <br> Yükle </button>
+                        <button type="button" class="btn btn-link ag-crop-resim-rotate-left crop-menu-item">
+                        <i class="fa fa-undo" aria-hidden="true"></i> <br> Sola döder</button>
+                        <button type="button" class="btn btn-link ag-crop-resim-rotate-right crop-menu-item">
+                        <i class="fa fa-repeat" aria-hidden="true"></i> <br> Sağa dönder</button>
+                        <button type="button" class="btn btn-link ag-crop-resim-crop crop-menu-item">
+                        <i class="fa fa-crop" aria-hidden="true"></i> <br> Kırp </button>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> 
+                        
+                    </div>
+                    <div class="modal-footer"> 
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Vazgeç</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- END-->
+
+                <!-- =========================================  MODAL PROGRESS   =====================  -->
+                <div class="modal ag-modal" tabindex="-1" id="modal-progress" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header" style="background-color: darkgrey;">
+                        DURUM
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> 
+                        <div style="width: 100%;text-align: center;padding: 25px;">
+                            <div class="spinner-border text-muted"></div>
+                            <br>
+                            İşlem devam ediyor.
+                        </div>
+                    </div>
+                    <div class="modal-footer"> 
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- END-->
+
+                <!-- =========================================  MODAL FONT SETTİNG   =====================  -->
+                <div class="modal ag-modal" tabindex="-1" id="modal-font-setting" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        Font & Renk Seçin
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> 
+                        <div class="col-12 ag-font-list">
+                        
+                        </div>
+                        <div class="col-12 ag-color-list">
+                        coror
+                        </div>
+                    </div>
+                    <div class="modal-footer"> 
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                <!-- END-->
+
+
+            ]]></add>
+        </operation>
+    </file>
+
+
+	<!--   yazı ve resim giriş paneli -->
+    <file name="catalog/view/theme/journal2/template/product/product.tpl">
+        <operation info="Yazı ekleme ve resim ekleme düğmelerin yerleşeceği elemen">
+            <search position="after" ><![CDATA[<div id="product" class="product-options">]]></search>
+            <add><![CDATA[            
+            <fieldset class="ag-alanseti ag-input-panel" style="display:none">
+              <legend>Tasarım Yazı &amp; Resim Alanları</legend>
+              <div id="preview-input-panel" class="col-12 oc-preview-input-panel" style="display: none;">
+                  <table class="table table-borderless inputs textbox">  
+                  </table>
+                  <table class="table table-borderless inputs cropbox">  
+                  </table>
+              </div>
+            </fieldset>
+            ]]></add>
+        </operation>
+    </file>
+
+
+  <!-- catalog/model/catalog/product.php -->
+    <file name="catalog/controller/product/product.php">
+        <operation error="skip" info="PRODUCT E OPTION EKLEYEN KOD">
+            <search position="before" ><![CDATA[foreach ($this->model_catalog_product->getProductOptions($this->request->get['product_id']) as $option) {]]></search>
+            <add><![CDATA[
+                
+            $agJSONvar = false;
+            foreach ($this->model_catalog_product->getProductOptions($this->request->get['product_id']) as $option) {
+              if($option['name']=='agJSON'){
+                $agJSONvar = true;
+              }
+            }
+            if(!$agJSONvar){
+              $this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_id = '" . $product_id . "', option_id = '61', required = '0', value = ''  ");
+            }else{
+              echo "agJSON var";
+            }
+            
+            ]]></add>
+        </operation>
+    </file>
+
+
+
+
+
+
+
+
+  <!--   Sepete ekle düğmesi -->
+    <file name="catalog/view/theme/journal2/template/product/product.tpl">
+      <operation info="button-cart ın click olayına upload eklenecek">
+          <search position="replace"><![CDATA[$('#button-cart').on('click', function() {]]></search>
+          <add><![CDATA[$('#button-cart').on('click', async function() { 
+          let sonuc = await ocCreateAndUploadAgeditorJson().catch(hata => {
+            return false;
+          })
+          if(!sonuc){
+            return;
+          }
+          
+          ]]></add>
+      </operation>
+    </file>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!--      ===============================   ADMIN   ===============================      -->
+	<!--   HEADER.TPL  css ve js leri ekleyelim -->
+	<file name="adminefeege/view/template/common/header.tpl">
+		<operation info="JS ve CSS linklerini ekleyelim">
+			<search position="before"><![CDATA[</head>]]></search>
+			<add><![CDATA[
+				<script src="/ageditor/editor/lib/popper.min.js"></script>
+				<script src="/ageditor/editor/lib/fabric.min.js"></script>
+				<script src="/ageditor/editor/ageditor.js"></script>
+				<link 	rel="stylesheet" type="text/css" href="/ageditor/editor/ag.css">
+				<script src="/ageditor/editor/ag.js"></script>
+				<link 	rel="stylesheet" type="text/css" href="/ageditor/editor/font-awesome/css/font-awesome.css"> 
+				<script src="/ageditor/editor/lib/cropper.js"></script>
+				<link   rel="stylesheet" type="text/css" href="/ageditor/editor/lib/cropper.css">
+				]]></add>
+		</operation>
+    </file>  
+
+
+	<!--   product_form.tpl içine tab açıcı ve tab ekleyelim -->
+	<file name="adminefeege/view/template/catalog/product_form.tpl">
+        <operation info="Tab açıcı ekleyelim">
+            <search position="after"><![CDATA[<li><a href="#tab-design" data-toggle="tab"><?php echo $tab_design; ?></a></li>]]></search>
+            <add><![CDATA[<li><a href="#tab-ageditor" id="ag-editor-tab-link" data-toggle="tab">AgEditör</a></li>]]></add>
+        </operation>
+        <operation info="Tab yeri">
+            <search position="before" offset="1"><![CDATA[</form>]]></search>
+            <add><![CDATA[<div class="tab-pane" id="tab-ageditor">
+
+          <div class="container ag-container col-12">
+              <!-- =========================================  TOP MENU    =====================  -->
+              <nav class="navbar navbar-default ">
+                <div class="container-fluid">
+                  <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                  </div>
+                  <!-- Collect the nav links, forms, and other content for toggling -->
+                  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                      <li><a class="btn ag-fullpage">
+                        <svg class="bi bi-arrows-fullscreen" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" d="M1.464 10.536a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3.5a.5.5 0 0 1-.5-.5v-3.5a.5.5 0 0 1 .5-.5z"/>
+                          <path fill-rule="evenodd" d="M5.964 10a.5.5 0 0 1 0 .707l-4.146 4.147a.5.5 0 0 1-.707-.708L5.257 10a.5.5 0 0 1 .707 0zm8.854-8.854a.5.5 0 0 1 0 .708L10.672 6a.5.5 0 0 1-.708-.707l4.147-4.147a.5.5 0 0 1 .707 0z"/>
+                          <path fill-rule="evenodd" d="M10.5 1.5A.5.5 0 0 1 11 1h3.5a.5.5 0 0 1 .5.5V5a.5.5 0 0 1-1 0V2h-3a.5.5 0 0 1-.5-.5zm4 9a.5.5 0 0 0-.5.5v3h-3a.5.5 0 0 0 0 1h3.5a.5.5 0 0 0 .5-.5V11a.5.5 0 0 0-.5-.5z"/>
+                          <path fill-rule="evenodd" d="M10 9.964a.5.5 0 0 0 0 .708l4.146 4.146a.5.5 0 0 0 .708-.707l-4.147-4.147a.5.5 0 0 0-.707 0zM1.182 1.146a.5.5 0 0 0 0 .708L5.328 6a.5.5 0 0 0 .708-.707L1.889 1.146a.5.5 0 0 0-.707 0z"/>
+                          <path fill-rule="evenodd" d="M5.5 1.5A.5.5 0 0 0 5 1H1.5a.5.5 0 0 0-.5.5V5a.5.5 0 0 0 1 0V2h3a.5.5 0 0 0 .5-.5z"/>
+                        </svg>
+                        </a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Bilgisayarımdan Aç"
+                      id="openJsonFromLocal"><i class="fa fa-folder-open"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Bilgisayara Kaydet"
+                      id="saveJsonToLocal"><i class="fa fa-floppy-o" aria-hidden="true"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Yeni Sayfa"
+                      id="canvas-ekle"><i class="fa fa-file"></i></a></li>
+                      <li><a class="nav-item nav-link" 
+                      data-toggle="tooltip" data-placement="bottom" title="Zemin Resmi"
+                      id="bg-ekle"><i class="fa fa-database"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Metin Kutusu"
+                      id="textarea-ekle"><i class="fa fa-tumblr-square"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Resim Alanı"
+                      id="croparea-ekle"><i class="fa fa-image"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Logo / Serbest Resim"
+                      id="logo-ekle"><i class="fa fa-address-card" aria-hidden="true"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Sil"
+                      id="obje-sil"><i class="fa fa-trash"></i></a></li>
+                      
+
+                      <li><a class="nav-item nav-link"  
+                        data-toggle="tooltip" data-placement="bottom" title="Bir Alta Gönder"
+                        id="sendBackwards">
+                        <svg class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                          <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+                        </svg>
+                      </a></li>
+                      
+                      <li><a class="nav-item nav-link"  
+                        data-toggle="tooltip" data-placement="bottom" title="Bir Öne Getir"
+                        id="bringForward">
+                        <svg style="transform: rotate(180deg);" class="bi bi-layers-half" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-4.578 2.441a.5.5 0 0 1-.47 0L3.188 8z"/>
+                          <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+                        </svg>
+                      </a></li>
+
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Sunum Moduna Geç"
+                      id="sunumuBaslat"><i class="fa fa-eye"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Büyük Resmi Çiz"
+                      id="renderWithBigBGImage"><i class="fa fa-expand" aria-hidden="true"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Resmi İndir"
+                      id="downloadBigImage"><i class="fa fa-download"></i></a></li>                    
+                    </ul>  
+
+                    <ul class="nav navbar-nav navbar-right">
+                      <li><a class="nav-item nav-link" data-toggle="tooltip" data-placement="bottom" title="Sunucuya kaydet"
+                        id="saveSablonToServer"><i class="fa fa-cloud-upload"></i></a>
+                      </li>
+                    </ul>
+                  </div><!-- /.navbar-collapse -->
+                </div><!-- /.container-fluid -->
+              </nav>
+              <!-- END -->
+
+              <!-- =========================================  AGEDİTÖR MENU    =====================  -->
+              <div id="ageditor" class="col-sm-7 col-md-9 col-lg-9 col-xl-9">
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  PROPERTIES PANEL    =====================  -->
+              <div id="properties-panel" class="col-sm-4 col-md-3 col-lg-3 col-xl-3">
+                <div class="card">
+                  <h5 class="card-header">Özellikler</h5>
+                  <div class="card-body">
+                    <table class="table table-borderless properties">
+                  
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  INPUT PANEL    =====================  -->
+              <div id="preview-input-panel" class="col-sm-4 col-md-3 col-lg-3 col-xl-3" style="display: none;">
+                <div class="card">
+                  <h5 class="card-header">Giriş</h5>
+                  <div class="card-body">
+                    <fieldset class="ag-alanseti">
+                      <legend>Tasarım Yazı &amp; Resim Alanları</legend>
+                      <table class="table table-borderless inputs textbox">  
+                      </table>
+                      <table class="table table-borderless inputs cropbox">  
+                      </table>
+                    </fieldset>
+                  </div>
+                </div>
+              </div>
+              <!-- END -->
+
+              <!-- =========================================  MODAL KÜTÜPHANE SEÇ    =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-kutuphane" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Resimler</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  MODAL RESİMLERİM   =====================  -->
+              <div class="modal modal-fullscreen ag-modal"  tabindex="-1" id="modal-agcropper" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="btn btn-link ag-crop-resim-resimlerim" style="display: none;">
+                      <i class="fa fa-picture-o" aria-hidden="true"></i> <br> Resimlerim </button>
+                      <button type="button" class="btn btn-link ag-crop-resim-yukle">
+                      <i class="fa fa-cloud-upload" aria-hidden="true"></i> <br> Yükle </button>
+                      <button type="button" class="btn btn-link ag-crop-resim-rotate-left crop-menu-item">
+                      <i class="fa fa-undo" aria-hidden="true"></i> <br> Sola döder</button>
+                      <button type="button" class="btn btn-link ag-crop-resim-rotate-right crop-menu-item">
+                      <i class="fa fa-repeat" aria-hidden="true"></i> <br> Sağa dönder</button>
+                      <button type="button" class="btn btn-link ag-crop-resim-crop crop-menu-item">
+                      <i class="fa fa-crop" aria-hidden="true"></i> <br> Kırp </button>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                        
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  MODAL PROGRESS   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-progress" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header" style="background-color: darkgrey;">
+                      DURUM
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                      <div style="width: 100%;text-align: center;padding: 25px;">
+                          <div class="spinner-border text-muted"></div>
+                          <br>
+                          İşlem devam ediyor.
+                      </div>
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+              <!-- =========================================  MODAL FONT SETTİNG   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-font-setting" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      Font & Renk Seçin
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                       <div class="col-12 ag-font-list">
+                        
+                       </div>
+                       <div class="col-12 ag-color-list">
+                       coror
+                       </div>
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+          </div>
+             
+        </div>]]></add>
+        </operation>
+    </file>
+
+	<!--   order_info.tpl siparişi görmek için -->
+  <file name="adminefeege/view/template/sale/order_info.tpl">
+      <operation info="Sipariş ekranında AgEditor açma linki">
+          <search position="after"><![CDATA[&nbsp;<small> - <?php echo $option['name']; ?>: <a href="<?php echo $option['href']; ?>"><?php echo $option['value']; ?></a></small>]]></search>
+          <add><![CDATA[
+      <?php if($option['href']) { ?>
+        <br><a href = "/ageditor/?command=getCustomerJson&fileurl=<?php echo urlencode($option['href']); ?>" target="_blank">AgEditor</a>
+      <?php } ?>
+    ]]>
+    </add>
+      </operation>
+  </file>
+
+
+</modification>

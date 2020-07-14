@@ -325,10 +325,11 @@
     float: left;
     display: block;
     cursor: pointer;
+    border-radius: 60px;
 }
 
 .ag-color-list .ag-color-box:hover{
-    border: 2px solid #ccc;
+    border: 1px solid #000;
 }
 
 #modal-font-setting .modal-body{  
@@ -386,4 +387,8 @@
 .ag-alanseti canvas{
     width: 100%!important;
     height: auto!important;
+}
+
+.left{
+    min-height: 600px;
 }

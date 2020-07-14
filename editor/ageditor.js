@@ -1,7 +1,7 @@
 class AgEditor {
 
     constructor(){
-        this.agImagePlaceHolder         = "/ageditor/editor/agblank.png";
+        this.agImagePlaceHolder         = "/editor/agblank.png";
         this.agIsOcFrontpage            = false;
         this.agPresentation             = new AgPresentation(this);
         this.agCropper                  = new AgCropper(this);
@@ -220,7 +220,7 @@ class AgEditor {
                 centeredRotation: true,
                 angle:          0,
                 strokeUniform   : true,
-                agFontSize      :0,
+                agFontSize      : 0,
                 agMaxLines      : 1,
                 agMaxWidth      : 200,
                 agKarakterLimiti: 30,
@@ -286,15 +286,15 @@ class AgEditor {
     }
 
     async loadFont(font_name){  
-        let junction_font = new FontFace(font_name, 'url('+agBaseURL+'/ageditor/editor/fonts/'+font_name+'.ttf)');
+        let junction_font = new FontFace(font_name, 'url('+agBaseURL+'/editor/fonts/'+font_name+'.ttf)');
         return  new Promise((resolve,reject)=>{
                         let fnt = junction_font.load() 
                         fnt.then((loaded_face)=>{
                             document.fonts.add(loaded_face)
                             resolve()
-                        }).catch((err)=>{
-                            console.error("Font yüklenemedi------------ \n"+err)
-                            reject(err);
+                        }).catch(()=>{
+                            console.error("Font yüklenemedi. Font adı : "+ font_name)
+                            resolve();
                         })
                     })
     }
@@ -315,7 +315,7 @@ class AgEditor {
                     top     :obj.top,
                     strokeUniform:true,
                     stroke  :'lightgreen',
-                    strokeWidth:2,
+                    strokeWidth:1,
                     hasControls : false,
                     evented : false,
                     angle   :obj.angle,
@@ -366,13 +366,7 @@ class AgEditor {
 
         this.BU.refreshPropertiesPanel(e.target);
     }
-
-    /*scalingHadler(e){
-        e.target.agMaxLines = e.target.textLines.length
-        this.BU.refreshPropertiesPanel(e.target);
-    }*/
-    
-
+ 
     async createObjects(page){
          await this._createObject(page,0)
     }
@@ -396,8 +390,8 @@ class AgEditor {
 
     async _loadfonts(){
         let BU = this;
-        $.get( agBaseURL+"/ageditor/editor/fonts/fonts.json", (fonts) =>{  
-            this.fontsJson = fonts;
+        $.get( agBaseURL+'/api/?command=getFontList', (fonts) =>{  
+            BU.fontsJson = fonts;
         });
     }
 
@@ -536,61 +530,50 @@ class AgEditor {
         let BU              = this;
         $(this.editor_html_element).empty();
         this.fabricCanvases = [];
-
-        var promises = [];
+ 
         $.each(jsonFile,async (i,val)=>{
-            promises.push(
-                new Promise(async function(resolve,reject){
-                    let obj     = JSON.parse(val)
-                    let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-                    let cnvs    = await BU.addCanvas(page);
-                    cnvs.loadFromJSON(val,async function() {
-                        let cnv     = cnvs;
-                        let objects = cnv.getObjects();
-                        $.each(objects,async function(j,obj){
-                            if(BU.agIsOcFrontpage){
-                                obj.selectable      = false;
-                            }
-                            obj.strokeUniform   = true;
-                            obj.hasControls     = true;
-                            if(obj instanceof fabric.Textbox){
-                                obj.setControlsVisibility({
-                                    bl: false,
-                                    br: false,
-                                    tl: false,
-                                    tr: false,
-                                    mb: false,
-                                    ml: true,
-                                    mr: true,
-                                    mt: false,
-                                    mtr: true,
-                                });
-                                await BU.loadFont(obj.fontFamily).then(()=>{
-                                    let txt = obj.text
-                                    obj.text=" ";
-                                    cnv.renderAll()
-                                    if(BU.agIsOcFrontpage){
-                                        return;
-                                    }
-                                    obj.text=txt;
-                                    cnv.renderAll()
-                                });
-                            }
-                            if(obj instanceof fabric.Image && !obj.agSablonResmi){
-                                BU.agCropper.autoCrop(obj);
-                            }
+            let obj     = JSON.parse(val)
+            let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
+            let cnvs    = await BU.addCanvas(page);
+            cnvs.loadFromJSON(obj,async function() {
+                let cnv     = cnvs;
+                let objects = cnv.getObjects();
+                $.each(objects,async function(j,obj){
+                    if(BU.agIsOcFrontpage){
+                        obj.selectable      = false;
+                    }
+                    obj.strokeUniform   = true;
+                    obj.hasControls     = true;
+                    if(obj instanceof fabric.Textbox){
+                        obj.setControlsVisibility({
+                            bl: false,
+                            br: false,
+                            tl: false,
+                            tr: false,
+                            mb: false,
+                            ml: true,
+                            mr: true,
+                            mt: false,
+                            mtr: true,
                         });
-                        resolve();
-                    })   
-                })
-            )// push end                     
+                        await BU.loadFont(obj.fontFamily).then(()=>{
+                            let txt = obj.text
+                            obj.text=" ";
+                            cnv.renderAll()
+                            if(BU.agIsOcFrontpage){
+                                //return;
+                            }
+                            obj.text=txt;
+                            cnv.renderAll()
+                        });
+                    }
+                    if(obj instanceof fabric.Image && !obj.agSablonResmi){
+                        BU.agCropper.autoCrop(obj);
+                    } 
+                }); 
+                BU.sunumuBaslat()
+            })                
         })
-
-        Promise.all(promises).then(() => 
-            BU.sunumuBaslat()
-        );
-
-
 
     }
    
@@ -766,18 +749,6 @@ class AgPresentation{
             
             if(o instanceof fabric.Textbox){
                 if(o.agMaxLines==1){
-                    //style           += "font-family:"+o.fontFamily+";"
-                    //style           += "font-size:"+o.fontSize+"px!important;"
-                    //style           += "text-align:"+o.textAlign+";";
-                    //style           += "padding:0px!important;"
-                    
-                    /*let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
-                    let zoomstyle   = '';
-                    if(zoom<1){
-                        zoomstyle   = ";zoom:"+zoom
-                        style       += zoomstyle
-                    }*/
-
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
                             +'  <td style="min-width:67px">'
@@ -912,13 +883,18 @@ class AgCropper{
                 let img         = document.createElement("img");
                 img.setAttribute('src',resim.url)
                 img.className   ="user-image";
-                img.onload  = function(){
+                img.onload      = function(){
                     if(i == Object.keys(localresimlerim).length-1){
                         BU.editor.modal_progress.modal('hide');
                     }
                 }
+                img.onerror  = function(){
+                    BU.editor.modal_progress.modal('hide'); 
+                    $("[data-lcl-ctoreage-id="+i+"]").trigger('click')
+                }
+
                 let div         = document.createElement("div"); 
-                div.className   ="wrap-user-image";
+                div.className   = "wrap-user-image";
                 $(div).append(img);
                 $(div).append('<i class="fas fa-trash-alt" data-lcl-ctoreage-id='+i+'></i>'); 
                 $(this.modal_element).find('.modal-body').append(div);
