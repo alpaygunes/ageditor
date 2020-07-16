@@ -24,6 +24,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     ocFrontPage_ifProductPage();
 
     getSablonFile().catch(()=>{
+        //docnustur.js içinde
         eskiVersiondanDonustur();
     })
 
@@ -197,6 +198,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })
 
     $(document).on('keypress','.ag-textbox',function(e){
+        $(this).css('border-color','#e6e5e5')
         let target_id   = $(this).attr('data-target-id') 
         let fbTxtObj    = agEditor.getObjectByID(target_id)
         let text        = $(this).val();
@@ -399,6 +401,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     $(document).on('click','.bos-birak',function(){
         const data_object_id    = $(this).attr('data-object-id');
         const obj               = agEditor.getObjectByID(data_object_id);
+        $("[data-target-id='"+data_object_id+"']").css('border-color','#e6e5e5')
         
         if($(this).prop("checked") == true){
             if(obj instanceof fabric.Textbox){
@@ -410,19 +413,26 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             }
             $("[data-target-id='"+data_object_id+"']").attr('disabled', 'disabled');
             if(obj instanceof fabric.Image){
-                const w=obj.width;
-                const h=obj.height;
+                const w = obj.width;
+                const h = obj.height;
                 obj.setSrc(agBaseURL+agEditor.agImagePlaceHolder,function () {
                     obj.width   = w
                     obj.height  = h 
                     agEditor.activeCanvas.renderAll();
                 });
+                delete obj.agImageUrl;
             }
         }else{
             $("[data-target-id='"+data_object_id+"']").removeAttr('disabled');
         }
         obj.agBosBirak = $(this).prop("checked")        
     })
+
+ 
+    $(document).on('click','.ag-modal-tamam-btn',function(){
+        let target_obj_id = $('#ag-input-text').attr('data-target-id')
+        $("[data-target-id='"+target_obj_id+"']").val($('#ag-input-text').val());
+    }) 
 
     // oc admin product formda agEditor tabı açılırken yeniden hesaplanmalı heigt ler
     $(document).on('click','#ag-editor-tab-link',function(){        
@@ -574,7 +584,7 @@ function ifExistProductIdinUrl() {
     if(params.has('product_id')){ 
         ag_product_id   = params.get('product_id')
         return true;
-    }else if(typeof fileurl !== 'undefined'){
+    }else if(typeof agfileurl !== 'undefined'){
         $('#saveSablonToServer').remove();
         return true;
     }else{
@@ -593,8 +603,8 @@ async function getSablonFile() {
     }
     let url = agBaseURL+'/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
 
-    if(typeof fileurl !== "undefined"){ 
-        url = fileurl.replace(/&amp;/g, "&"); 
+    if(typeof agfileurl !== "undefined"){ 
+        url = agfileurl.replace(/&amp;/g, "&"); 
     }
 
     return new Promise(function(resolve,reject){
@@ -649,23 +659,62 @@ function ocFrontPage_ifProductPage(){
     if($('.product-info').length){
         $('.left .col-sm-6').hide(); 
         agEditor.agIsOcFrontpage = true;
+        $("button[id^='button-upload']").hide();
+        $("button[id^='button-upload']").prev().hide();        
     }else{
         switchFullScreen();
     }
 }
 
-async function ocCreateAndUploadAgeditorJson(){ 
+
+
+async function createAndUploadAgeditorJson(){ 
+    let zorunluAlanVar = false;
     if($('button[id^=\'button-upload\']').length == 0){
         alert("Ürünün 'Dosya Gönderme' seçeneği olmalı. Hata !");
         reject();
     }
+
+    // BOŞ  resim yada yazı alanı varsa uyaralım
+    for (var key in agEditor.fabricCanvases) {
+        if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
+        let canvas      = agEditor.fabricCanvases[key];
+        let objects     = canvas.getObjects();
+        $.each(objects,(i,obj)=>{
+            if(obj instanceof fabric.Textbox){
+                if(!obj.agBosBirak){
+                    let str = obj.text.replace(/\s/g, '');
+                    if(!str.length){
+                        zorunluAlanVar = true
+                        $("[data-target-id='"+obj.id+"']").css('border-color','#ff0000')
+                    }
+                }
+            }else if(obj instanceof fabric.Image
+                    && !obj.agSablonResmi 
+                    && !obj.agIsLogo){
+                if(!obj.agBosBirak){ 
+                    if(!obj.agImageUrl){
+                        zorunluAlanVar = true
+                        $("[data-target-id='"+obj.id+"']").css('border-color','#ff0000')
+                    }
+                }
+            }
+        })        
+    }
+    if(zorunluAlanVar){
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $(".ag-input-panel").offset().top
+        }, 200);
+        return;
+    }
+    // END    BOŞ  ------------------------------
 
     let allCanvasesArr  = [];
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas      = agEditor.fabricCanvases[key];
         let serialized  = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
-        serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
+        //serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
         allCanvasesArr.push(serialized) 
     }
 
@@ -694,19 +743,14 @@ async function ocCreateAndUploadAgeditorJson(){
             contentType: false,
             processData: false,
             beforeSend: function() {
-               // $(node).button('loading');
             },
             complete: function() {
-                //$(node).button('reset');
             },
-            success: function(json) {
-                //$('.text-danger').remove();
-    
+            success: function(json) {    
                 if (json['error']) {
                     alert("Tasarım dosyası gönderilemedi. Sistemsel bir hata oldu")
                     reject();
-                }
-    
+                }    
                 if (json['success']) {                    
                     node = $('button[id^=\'button-upload\']')[0];
                     $(node).parent().find('input').val(json['code']);

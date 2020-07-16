@@ -37,6 +37,7 @@ class AgEditor {
                                             "agImageUrl",
                                             "agFontSize",
                                             "agBosBirak",
+                                            "agBigImgSrc",
                                             "evented",
                                             "hasControls",
                                             "agIsLogo",
@@ -146,7 +147,10 @@ class AgEditor {
                     BU.refreshPropertiesPanel(canvas); 
                 }else{
                     BU.refreshPropertiesPanel(e.target);
-                    if(BU.presentMode == true && e.target instanceof fabric.Image && !e.target.agSablonResmi && !e.target.agIsLogo){
+                    if(BU.presentMode == true 
+                            && e.target instanceof fabric.Image 
+                            && !e.target.agSablonResmi 
+                            && !e.target.agIsLogo){
                         if(e.target.agBosBirak){return;}
                         let target_id           = e.target.id
                         $(BU.target_properties_panel).hide();
@@ -160,6 +164,10 @@ class AgEditor {
                             $(BU.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
                             $(BU.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
                         }
+                    }else if(e.target instanceof fabric.Textbox && BU.agIsOcFrontpage){
+                        $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
+                        $('#modal-text-input #ag-input-text').val(e.target.text)
+                        $('#modal-text-input').modal('show')
                     } 
                 }
             });// end mouse:down
@@ -261,7 +269,7 @@ class AgEditor {
                         oImg.id             = Math.floor(Math.random() * 100000) + 1
                         oImg.left           = 200;
                         oImg.top            = 200;
-                        oImg.agBosBirak     = false;
+                        oImg.agBosBirak     = false; 
                         oImg.strokeUniform  = true;
                         BU.activeCanvas.add(oImg);
                     }
@@ -315,11 +323,11 @@ class AgEditor {
                     top     :obj.top,
                     strokeUniform:true,
                     stroke  :'lightgreen',
-                    strokeWidth:1,
+                    strokeWidth :1,
                     hasControls : false,
                     evented : false,
-                    angle   :obj.angle,
-                    fill    :'rgba(0,0,0,0)'
+                    angle   : obj.angle,
+                    fill    :'rgba(255,255,255,0.4)'
                 })
                 canvas.add(borderRect);
             })
@@ -538,10 +546,8 @@ class AgEditor {
             cnvs.loadFromJSON(obj,async function() {
                 let cnv     = cnvs;
                 let objects = cnv.getObjects();
-                $.each(objects,async function(j,obj){
-                    if(BU.agIsOcFrontpage){
-                        obj.selectable      = false;
-                    }
+                $.each(objects,async function(j,obj){ 
+                    obj.evented         = true;
                     obj.strokeUniform   = true;
                     obj.hasControls     = true;
                     if(obj instanceof fabric.Textbox){
@@ -570,6 +576,17 @@ class AgEditor {
                     if(obj instanceof fabric.Image && !obj.agSablonResmi){
                         BU.agCropper.autoCrop(obj);
                     } 
+                    
+                    if(obj instanceof fabric.Image && obj.agSablonResmi){
+                        obj.evented     = false;
+                    }
+                    if(BU.agIsOcFrontpage){
+                        obj.selectable  = false;
+                        if(obj.agIsLogo){
+                            obj.evented     = false;
+                        }
+                    }
+                    
                 }); 
                 BU.sunumuBaslat()
             })                
@@ -614,22 +631,24 @@ class AgEditor {
         let BU              = this;
         let bigImgSrc,imgSrc
         if(BU.activeCanvas.imgSrc){
-            bigImgSrc               = BU.activeCanvas.imgSrc;
-            BU.activeCanvas.imgSrc  = null;
+            bigImgSrc   = BU.activeCanvas.imgSrc;
+            BU.activeCanvas.imgSrc = null;
         }else{
-            imgSrc      = BU.getObjectByID('bg').getSrc();
-            bigImgSrc   = imgSrc.replace("bgimages", "orginal_images");
+            imgSrc                      = BU.getObjectByID('bg').getSrc();
+            bigImgSrc                   = imgSrc.replace("bgimages", "orginal_images");
             BU.activeCanvas.bigImgSrc   = bigImgSrc;
             BU.activeCanvas.imgSrc      = imgSrc;
+            if(BU.activeCanvas.agBigImgSrc){
+                BU.activeCanvas.bigImgSrc   = BU.activeCanvas.agBigImgSrc;
+                bigImgSrc               = BU.activeCanvas.bigImgSrc
+            }
         }
         
         
-        if(this.activeCanvas){
-            BU.modal_progress.modal('show')
+        if(this.activeCanvas){  
             fabric.Image.fromURL(bigImgSrc, function(oImg) {
-                BU.modal_progress.modal('hide')
                 if (!oImg._element){
-                    alert("Büyük şablon resmi bulunamadı. \n"+bigImgSrc)
+                    alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
                     return;
                 }
                 let w0      = BU.activeCanvas.width;

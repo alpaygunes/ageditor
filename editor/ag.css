@@ -336,6 +336,16 @@
     display: flow-root!important;
 }
 
+#modal-text-input #input-text-id{
+    padding: 0; 
+    font-size: 24px; 
+}
+
+#modal-text-input .modal-body{
+    overflow-y: unset;
+    padding:24px
+}
+
 
 
 

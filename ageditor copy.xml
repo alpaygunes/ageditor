@@ -173,6 +173,17 @@
     </file>
 
 
+  <!--   model noyu alamak için --> 
+    <file name="catalog/view/theme/journal2/template/product/product.tpl">
+        <operation info="Yazı ekleme ve resim ekleme düğmelerin yerleşeceği elemen">
+            <search position="after" ><![CDATA[<li class="p-model" style="font-size: 12px"><?php echo $text_model; ?> <span class="p-model" itemprop="model"><?php echo $model; ?></span></li>]]></search>
+            <add><![CDATA[<input type="hidden" id="agModelNo" value="<?php echo $model; ?>">]]></add>
+        </operation>
+    </file>
+
+
+
+
   <!-- catalog/model/catalog/product.php -->
     <file name="catalog/controller/product/product.php">
         <operation error="skip" info="PRODUCT E OPTION EKLEYEN KOD">
@@ -187,8 +198,6 @@
             }
             if(!$agJSONvar){
               $this->db->query("INSERT INTO " . DB_PREFIX . "product_option SET product_id = '" . $product_id . "', option_id = '61', required = '0', value = ''  ");
-            }else{
-              echo "agJSON var";
             }
             
             ]]></add>
@@ -493,16 +502,18 @@
         </operation>
     </file>
 
-	<!--   order_info.tpl siparişi görmek için -->
-  <file name="adminefeege/view/template/sale/order_info.tpl">
+	
+  
+  <!--   order_info.tpl siparişi görmek için -->
+  <file name="adminefeege/view/template/ortakpanel/order_info.tpl">
       <operation info="Sipariş ekranında AgEditor açma linki">
           <search position="after"><![CDATA[&nbsp;<small> - <?php echo $option['name']; ?>: <a href="<?php echo $option['href']; ?>"><?php echo $option['value']; ?></a></small>]]></search>
           <add><![CDATA[
-      <?php if($option['href']) { ?>
-        <br><a href = "/ageditor/?command=getCustomerJson&fileurl=<?php echo urlencode($option['href']); ?>" target="_blank">AgEditor</a>
-      <?php } ?>
-    ]]>
-    </add>
+            <?php if($option['href']) { ?>
+              <br><a href = "/ageditor/?command=getCustomerJson&agfileurl=<?php echo urlencode($option['href']); ?>" target="_blank">AgEditor</a>
+            <?php } ?>
+          ]]>
+          </add>
       </operation>
   </file>
 

@@ -49,7 +49,7 @@ var bgImgObj    =
       "evented": false,
       "hasControls": false,
       "id": "bg",
-      "src": "http://tasarimabasla.test/ageditor/api/bgimages/dugun/ACKT0102.png",
+      "src": "",
       "filters": []
     }
 
@@ -149,9 +149,10 @@ var cropObj     = {
     "cropX": 0,
     "cropY": 0,
     "agBosBirak": false,
+    "agImageUrl":"",
     "evented": true,
     "hasControls": true,
-    "id": 50752,
+    "id": "",
     "src": "http://tasarimabasla.test/ageditor/editor/agblank.png",
     "filters": []
     }
@@ -245,20 +246,169 @@ var logoObj  = {
 }
 
 var progresBar = '<i class="fa fa-cog fa-spin" style="' + 
-'margin-left: auto;'+
-'margin-right: auto;'+
-'display: block;'+
-'width: 257px;'+
-'height: 300px;'+
-'font-size:300px;color:green"'+'></i>'
+                'margin-left: auto;'+
+                'margin-right: auto;'+
+                'display: block;'+
+                'width: 257px;'+
+                'height: 300px;'+
+                'font-size:300px;color:green"'+'></i>'
 
+var buyukZeminResmiURL = '';
 
+var temaKodlari=[];
+temaKodlari['0001'] = '0001'
+temaKodlari['0003'] = '0001'
+temaKodlari['0062'] = '0001'
+temaKodlari['0122'] = '0001'
+temaKodlari['0108'] = '0001'
+temaKodlari['0110'] = '0001'
+temaKodlari['0003'] = '0001'
+temaKodlari['0052'] = '0001'
+temaKodlari['0002'] = '0002'
+temaKodlari['0004'] = '0002'
+temaKodlari['0063'] = '0002'
+temaKodlari['0123'] = '0002'
+temaKodlari['0109'] = '0002'
+temaKodlari['0111'] = '0002'
+temaKodlari['0053'] = '0002'
+temaKodlari['0005'] = '0005'
+temaKodlari['0007'] = '0005'
+temaKodlari['0013'] = '0005'
+temaKodlari['0015'] = '0005'
+temaKodlari['0037'] = '0005'
+temaKodlari['0044'] = '0005'
+temaKodlari['0046'] = '0005'
+temaKodlari['0048'] = '0005'
+temaKodlari['0056'] = '0005'
+temaKodlari['0058'] = '0005'
+temaKodlari['0060'] = '0005'
+temaKodlari['0097'] = '0005'
+temaKodlari['0104'] = '0005'
+temaKodlari['0128'] = '0005'
+temaKodlari['0006'] = '0006'
+temaKodlari['0008'] = '0006'
+temaKodlari['0014'] = '0006'
+temaKodlari['0016'] = '0006'
+temaKodlari['0037R'] = '0006'
+temaKodlari['0045'] = '0006'
+temaKodlari['0047'] = '0006'
+temaKodlari['0049'] = '0006'
+temaKodlari['0057'] = '0006'
+temaKodlari['0059'] = '0006'
+temaKodlari['0061'] = '0006'
+temaKodlari['0098'] = '0006'
+temaKodlari['0105'] = '0006'
+temaKodlari['0129'] = '0006'
+temaKodlari['0031A'] = '0031'
+temaKodlari['0031KA'] = '0031'
+temaKodlari['0031'] = '0031'
+temaKodlari['0050'] = '0031'
+temaKodlari['0074'] = '0031'
+temaKodlari['0083'] = '0031'
+temaKodlari['0087'] = '0031'
+temaKodlari['0093'] = '0031'
+temaKodlari['0095'] = '0031'
+temaKodlari['0099'] = '0031'
+temaKodlari['0032KA'] = '0032'
+temaKodlari['0032A'] = '0032'
+temaKodlari['0032'] = '0032'
+temaKodlari['0075'] = '0032'
+temaKodlari['0084'] = '0032'
+temaKodlari['0088'] = '0032'
+temaKodlari['0094'] = '0032'
+temaKodlari['0096'] = '0032'
+temaKodlari['0100'] = '0032'
+temaKodlari['0031'] = '0031'
+temaKodlari['0050'] = '0031'
+temaKodlari['0074'] = '0031'
+temaKodlari['0083'] = '0031'
+temaKodlari['0087'] = '0031'
+temaKodlari['0093'] = '0031'
+temaKodlari['0095'] = '0031'
+temaKodlari['0099'] = '0031'
+temaKodlari['0032'] = '0032'
+temaKodlari['0051'] = '0032'
+temaKodlari['0075'] = '0032'
+temaKodlari['0084'] = '0032'
+temaKodlari['0088'] = '0032'
+temaKodlari['0094'] = '0032'
+temaKodlari['0096'] = '0032'
+temaKodlari['0100'] = '0032'
+temaKodlari['0038'] = '0038'
+temaKodlari['0040'] = '0038'
+temaKodlari['0039'] = '0039'
+temaKodlari['0041'] = '0039'
+temaKodlari['0055'] = '0055'
+temaKodlari['0072'] = '0072'
+temaKodlari['0073'] = '0073'
+temaKodlari['0082'] = '0082'
+temaKodlari['0102'] = '0102'
+temaKodlari['0106'] = '0102'
+temaKodlari['0103'] = '0103'
+temaKodlari['0107'] = '0103'
+temaKodlari['0130'] = '0130'
+temaKodlari['0131'] = '0131'
+temaKodlari['0089'] = '0089'
+temaKodlari['0090'] = '0090'
+temaKodlari['0091'] = '0089'
+temaKodlari['0092'] = '0090'
+temaKodlari['0124'] = '0089'
+temaKodlari['0125'] = '0090'
+temaKodlari['0017'] = '0011'
+temaKodlari['0018'] = '0012'
+temaKodlari['0011'] = '0011'
+temaKodlari['0012'] = '0012'
+temaKodlari['0085'] = '0011'
+temaKodlari['0086'] = '0012'
+temaKodlari['0021'] = '0011'
+temaKodlari['0022'] = '0012'
+temaKodlari['0019'] = '0011'
+temaKodlari['0020'] = '0012'
+temaKodlari['0064'] = '0089'
+temaKodlari['0065'] = '0090'
+temaKodlari['0023'] = '0089'
+temaKodlari['0024'] = '0090'
+temaKodlari['00231'] = '00231'
+temaKodlari['00232'] = '00232'
+temaKodlari['0138'] = '0102'
+temaKodlari['0139'] = '0103'
+temaKodlari['9998'] = '9998'
+temaKodlari['9999'] = '9999'
+temaKodlari['0140'] = '0005'
+temaKodlari['0141'] = '0006'
+temaKodlari['0081'] = '0081'
+temaKodlari['0082'] = '0081'
+temaKodlari['mnion0003'] = 'mnion0003'
+temaKodlari['mnion0004'] = 'mnion0003'
+temaKodlari['MG0029'] = 'mnion0003'
+temaKodlari['mnion0111'] = 'mnion0003'
+temaKodlari['0154'] = '0031'
+temaKodlari['0155'] = '0032'
+temaKodlari['0156'] = '0031'
+temaKodlari['0157'] = '0032'
+temaKodlari['0158'] = '0031'
+temaKodlari['0159'] = '0032'
+temaKodlari['0160'] = '0130'
+temaKodlari['0161'] = '0131'
+temaKodlari['0132'] = '0132'
+temaKodlari['0133'] = '0133'
+temaKodlari['0134'] = '0134'
+temaKodlari['0135'] = '0135'
+temaKodlari['0136'] = '0136'
+temaKodlari['0137'] = '0137'
+temaKodlari['0158'] = '0134'
+temaKodlari['0159'] = '0135'
+temaKodlari['0152'] = '0132'
+temaKodlari['0153'] = '0133'
+temaKodlari['0150'] = '0150'
+temaKodlari['0151'] = '0151'
+temaKodlari['T713'] = 'T713'
+temaKodlari['T708'] = 'T708'
+temaKodlari['T707'] = 'T707'
+temaKodlari['T709'] = 'T709'
+temaKodlari['T704'] = 'T704'
+temaKodlari['T700'] = 'T700'
 
-/*
-document.addEventListener( 'DOMContentLoaded',  async function () {
-
-});//----------------- END Documend Ready ------------------------
-*/
 
 async function eskiVersiondanDonustur(){
     if($('[name="product_id"]').length==0){return;}
@@ -266,8 +416,44 @@ async function eskiVersiondanDonustur(){
     $('.left').prepend(progresBar);
     iceriklerJSON       = await getIceriklerJSON(product_id);
     if(iceriklerJSON!='false'){ 
-        createFabricJSON(iceriklerJSON);
+        buyukZeminResmiURL = parseProductModelNo();
+        createFabricJSON(iceriklerJSON);    
     }
+}
+
+function parseProductModelNo(){
+    if(!$('#agModelNo').length){ 
+         console.log("Model No Bulunamadı !")
+         return;
+    } 
+    dir             = "/agorjinalresimler/"
+    model           = $('#agModelNo').val();
+    model_suffixarr = model.match(/\d/g);
+    model_suffix    = model_suffixarr.join("");
+    ilk_rakam_pos   = model.indexOf(model_suffixarr[0])
+    model_prefix    = model.substring(0 , ilk_rakam_pos);
+    if(temaKodlari[model_suffix]){
+        resimAdi        = model_prefix + temaKodlari[model_suffix] + '.png'
+    }else{
+        resimAdi        = model + '.png'
+    }
+
+    let url             = dir+resimAdi;
+    /*new Promise(resolve => {
+        let orjinalResim = new Image(); 
+        orjinalResim.onload     = function (img) {
+            buyukResimW         = this.width
+            buyukResimH         = this.height 
+            console.log("Resim yüklenemedi  : " + url); 
+            resolve(true);
+        };
+        orjinalResim.onerror = function() {
+            console.log("Büyük zemin yüklendi  : " + url); 
+            resolve(false);
+        };
+        orjinalResim.src = url;
+    });*/
+    return url;
 }
 
 async function  getIceriklerJSON(product_id){ 
@@ -302,7 +488,6 @@ async function  getIceriklerJSON(product_id){
     })
 }
 
-
 //------------------------ Create Fabric Canvas --------------------------
 async function  createFabricJSON(iceriklerJSON){
     
@@ -336,13 +521,14 @@ async function  createFabricJSON(iceriklerJSON){
             imgElm.onload   = function(){
                 fabricObj.height        = imgElm.naturalHeight
                 fabricObj.width         = imgElm.naturalWidth 
-                bgImgObj.height        = imgElm.naturalHeight
-                bgImgObj.width         = imgElm.naturalWidth 
-                bgImgObj.agSablonResmi    = true 
-                bgImgObj.evented     = false
-                bgImgObj.hasControls = false
-                bgImgObj.id          = "bg"
-                bgImgObj.src         = imgElm.src
+                fabricObj.agBigImgSrc   = buyukZeminResmiURL 
+                bgImgObj.height         = imgElm.naturalHeight
+                bgImgObj.width          = imgElm.naturalWidth 
+                bgImgObj.agSablonResmi  = true 
+                bgImgObj.evented        = false
+                bgImgObj.hasControls    = false
+                bgImgObj.id             = "bg"
+                bgImgObj.src            = imgElm.src 
                 fabricObj.objects.push(bgImgObj); 
                 resolve(true);
             }
@@ -377,7 +563,7 @@ async function  createFabricJSON(iceriklerJSON){
         cloneTextBox.agMaxWidth       = txtBox.width
         cloneTextBox.agFontSize       = 0
         cloneTextBox.agBosBirak       = false
-        cloneTextBox.evented          = false
+        cloneTextBox.evented          = true
         cloneTextBox.hasControls      = false
         cloneTextBox.id               = 'txt_kutu'+i
         fabricObj.objects.push(cloneTextBox);

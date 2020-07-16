@@ -24,8 +24,8 @@
 </head>
 
 <script>
-  <?php if(isset($_GET['fileurl'])){ ?>
-    var fileurl = "<?php echo $_GET['fileurl'];?>"
+  <?php if(isset($_GET['agfileurl'])){ ?>
+    var agfileurl = "<?php echo $_GET['agfileurl'];?>" 
   <?php } ?>
 </script>
 
@@ -273,6 +273,34 @@
                 </div>
               </div>
               <!-- END-->
+
+
+
+              <!-- =========================================  MODAL TEXT İNPUT   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-text-input" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header"> 
+                        YAZI ALANI
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body"> 
+                       <input type="text" class="form-control ag-textbox" id="ag-input-text" data-target-id='' value="" placeholder="Yazı yazın">
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-success ag-modal-tamam-btn" data-dismiss="modal">Tamam</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+
+
+
+
           </div><!-- End container -->
 
 
