@@ -1,8 +1,14 @@
+/**
+ * Alpay GÜNEŞ
+ * alpaygunes@gmail.com
+ * alpaygunes.com
+ */
+
 class AgEditor {
 
     constructor(){
         this.agImagePlaceHolder         = "/editor/agblank.png";
-        this.agIsOcFrontpage            = false;
+        this.workLocation              = '';
         this.agPresentation             = new AgPresentation(this);
         this.agCropper                  = new AgCropper(this);
         this.container_html_element     = $('.ag-container');
@@ -81,6 +87,10 @@ class AgEditor {
             $('.nav-link').hide();
             $('#sunumuBaslat').show();
         }
+
+        if(this.workLocation =='order_info_page' ){
+            $('#saveSablonToServer').hide();
+        }
     }
 
     async setPageBgImage(imgElm){
@@ -119,7 +129,7 @@ class AgEditor {
                                                 + id + '" width="'
                                                 + w + '"  height="'
                                                 + h + '"></canvas>');
-            if(!BU.agIsOcFrontpage){
+            if(BU.workLocation!='product_page'){
                 $(BU.editor_html_element).append('<div class="clear"></div');
             }
 
@@ -131,44 +141,43 @@ class AgEditor {
             canvas.selection    = false
 
             $('.canvas-container').css('outline','none');
-            if(!BU.agIsOcFrontpage){
+            if(BU.workLocation!='product_page'){
                 $('#'+id).parent().css('outline','thick solid aqua');
             }
 
             canvas.on("mouse:down", (e)=>{
-                BU.refreshMainMenu()
+                if(BU.workLocation!='product_page'){
+                    BU.refreshMainMenu()
+                }
                 BU.agPresentation.createInputPanel(canvas);
                 $('.canvas-container').css('outline','none');
                 BU.activeCanvas = canvas;
-                if(!BU.agIsOcFrontpage){
+                if(BU.workLocation!='product_page'){
                     $('#'+id).parent().css('outline','thick solid aqua');
                 }
                 if(!e.target){
                     BU.refreshPropertiesPanel(canvas); 
                 }else{
                     BU.refreshPropertiesPanel(e.target);
-                    if(BU.presentMode == true 
-                            && e.target instanceof fabric.Image 
-                            && !e.target.agSablonResmi 
-                            && !e.target.agIsLogo){
-                        if(e.target.agBosBirak){return;}
-                        let target_id           = e.target.id
-                        $(BU.target_properties_panel).hide();
-                        BU.agCropper.targetObj  = BU.getObjectByID(target_id)
-                        BU.agCropper.show()
-                        BU.agCropper.showMyImages()
-                        if(e.target.agImageUrl){
-                            BU.agCropper.agImageUrl = e.target.agImageUrl;
-                            BU.agCropper.imageBase64Data = null;
-                            BU.agCropper.openForCrop();
-                            $(BU.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
-                            $(BU.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
-                        }
-                    }else if(e.target instanceof fabric.Textbox && BU.agIsOcFrontpage){
-                        $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
-                        $('#modal-text-input #ag-input-text').val(e.target.text)
-                        $('#modal-text-input').modal('show')
-                    } 
+                    if(BU.presentMode == true  && e.target instanceof fabric.Image   && !e.target.agSablonResmi && !e.target.agIsLogo){
+                            if(e.target.agBosBirak){return;}
+                            let target_id           = e.target.id
+                            $(BU.target_properties_panel).hide();
+                            BU.agCropper.targetObj  = BU.getObjectByID(target_id)
+                            BU.agCropper.show()
+                            BU.agCropper.showMyImages()
+                            if(e.target.agImageUrl){
+                                BU.agCropper.agImageUrl = e.target.agImageUrl;
+                                BU.agCropper.imageBase64Data = null;
+                                BU.agCropper.openForCrop();
+                                $(BU.agCropper.modal_element).find(".ag-crop-resim-resimlerim").show();
+                                $(BU.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
+                            }
+                    }else if(BU.presentMode == true  && e.target instanceof fabric.Textbox ){
+                                $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
+                                $('#modal-text-input #ag-input-text').val(e.target.text)
+                                $('#modal-text-input').modal('show')
+                    }
                 }
             });// end mouse:down
 
@@ -358,12 +367,11 @@ class AgEditor {
 
         for (var key in this.fabricCanvases) {
             this.activeCanvas = this.fabricCanvases[key]
-            if(!this.agIsOcFrontpage){
+            if(BU.workLocation!='product_page'){
                 $('#'+this.activeCanvas.id).parent().css('outline','thick solid aqua');
             }
             break;
         }
-
         this.refreshMainMenu();
     }
 
@@ -407,8 +415,7 @@ class AgEditor {
         let TR              = null; 
         let object_type     = object.get('type');
         // -----------------------------------------------eğer obje bir image text yada crop ise
-        if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){
-            
+        if(object_type == 'rect' || object_type == 'text' || object_type == 'image'  || object_type == 'textbox'){            
             if(object_type == 'textbox'){
                 TR    += this.propertiesPanelTR('textAlign','Text Align','select',object.textAlign,this.align)
                 TR    += this.propertiesPanelTR('fontFamily','Font Family','select',object.fontFamily,this.fontsJson)
@@ -422,7 +429,8 @@ class AgEditor {
                 TR    += this.propertiesPanelTR('agKarakterLimiti','Karakter Limiti','number',object.agKarakterLimiti)
                 TR    += this.propertiesPanelTR('agKutuyaSigdir','Kutuya Sığdır','checkbox',object.agKutuyaSigdir)
             }else if(object_type == 'rect' || object_type == 'image'){
-               /// TR    += this.propertiesPanelTR('height','Height','number',object.getScaledHeight())
+                TR    += this.propertiesPanelTR('brightness','Brightness','range',null,null,object)
+                TR    += this.propertiesPanelTR('contrast','Contrast','range',null,null,object)
             }
             TR    += this.propertiesPanelTR('height','Height','number',object.getScaledHeight())
             TR    += this.propertiesPanelTR('width','Width','number',object.getScaledWidth())
@@ -443,7 +451,7 @@ class AgEditor {
         }
     }
 
-    propertiesPanelTR(prop_name,label,type,value,data=null){
+    propertiesPanelTR(prop_name,label,type,value,data=null,object=null){
         let tr = null;
         if(type == 'number'){
             tr = '<tr>'
@@ -468,7 +476,7 @@ class AgEditor {
                 +'<td>'+label+'</td>'
                 +'  <td>'
                 +'      <select class="form-control prop-form-control" data-prop-name="'+prop_name+'">'
-                $.each(data,function (i,fv) {    
+                $.each(data,function (i,fv) {
                     let selected = fv==value?"selected":null;
                     tr +='      <option '+selected+' value="'+fv+'">'+i+'</option>'; 
                 }) 
@@ -482,6 +490,24 @@ class AgEditor {
                 +'      <input class="prop-form-control" style="height:24px!important" type="'+type+'" value="'+value+'" data-prop-name="'+prop_name+'">'
                 +'  </td>'
                 +'</tr>';
+        }else if(type == 'range'){
+            if(object.filters.length){
+                value = 0;
+                if(prop_name == 'brightness' 
+                        &&  typeof object.filters[0]!='undefined'){
+                        value   =  object.filters[0].brightness
+                }else if(prop_name == 'contrast'
+                        &&  typeof object.filters[1]!='undefined'){
+                        value   =  object.filters[1].contrast
+                } 
+            }
+            tr = '<tr>'
+            +'  <td >'+label+'</td>'
+            +'  <td>'
+            +'      <input class="form-control prop-form-control" type="'+type+'"' 
+            +'      value="'+value+'" min="-1" max="1" step="0.0001" data-prop-name="'+prop_name+'">'
+            +'  </td>'
+            +'</tr>';        
         }
         return tr
     }
@@ -500,6 +526,30 @@ class AgEditor {
         }else if(prop_name == 'fontFamily'){
             await this.loadFont(value.name);
             value = value.name
+        }else if(prop_name == "brightness"){ 
+            let filter = new fabric.Image.filters.Brightness({
+                brightness: value
+            });
+            if(typeof this.activeCanvas.getActiveObject().filters[0] == 'undefined'){ 
+                this.activeCanvas.getActiveObject().filters[0]=filter;  
+            }
+            if(this.activeCanvas.getActiveObject().filters[0].hasOwnProperty('brightness')){
+                this.activeCanvas.getActiveObject().filters[0].brightness=value
+            }
+
+            this.activeCanvas.getActiveObject().applyFilters();
+        }else if(prop_name == "contrast"){ 
+            let filter = new fabric.Image.filters.Contrast({
+                contrast: value
+            });
+            if(typeof this.activeCanvas.getActiveObject().filters[1] == 'undefined'){ 
+                this.activeCanvas.getActiveObject().filters[1]=filter;  
+            }
+            if(this.activeCanvas.getActiveObject().filters[1].hasOwnProperty('contrast')){
+                this.activeCanvas.getActiveObject().filters[1].contrast=value
+            }
+
+            this.activeCanvas.getActiveObject().applyFilters();
         }
 
         if(!this.activeCanvas.getActiveObject() && this.activeCanvas){
@@ -523,7 +573,7 @@ class AgEditor {
             let canvas = BU.fabricCanvases[key];
             let serialized = JSON.stringify(canvas.toJSON(BU.agJsonExportOptions));
            
-            serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
+            //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
             allCanvasesArr.push(serialized) 
         }
 
@@ -565,9 +615,9 @@ class AgEditor {
                         await BU.loadFont(obj.fontFamily).then(()=>{
                             let txt = obj.text
                             obj.text=" ";
-                            cnv.renderAll()
-                            if(BU.agIsOcFrontpage){
-                                //return;
+                            cnv.renderAll() 
+                            if(BU.workLocation=='product_page'){
+                                return;
                             }
                             obj.text=txt;
                             cnv.renderAll()
@@ -580,13 +630,13 @@ class AgEditor {
                     if(obj instanceof fabric.Image && obj.agSablonResmi){
                         obj.evented     = false;
                     }
-                    if(BU.agIsOcFrontpage){
+                    if(BU.workLocation == 'product_page'){
                         obj.selectable  = false;
                         if(obj.agIsLogo){
                             obj.evented     = false;
                         }
-                    }
-                    
+                        obj.filters=[];
+                    }                    
                 }); 
                 BU.sunumuBaslat()
             })                
@@ -618,9 +668,10 @@ class AgEditor {
         this.presentMode = !this.presentMode;
         this.activeCanvas   = this.fabricCanvases[Object.keys(this.fabricCanvases)[0]];
 
-        if(this.agIsOcFrontpage){
-            this.presentMode    = this.agIsOcFrontpage;
+        if(this.workLocation=='product_page'){
+            this.presentMode    = true;
         }
+
         await this.agPresentation.prewiev();
         $(this.agPresentation.preview_input_panel).attr('data-canvas-id','')
         this.agPresentation.createInputPanel(this.activeCanvas)
@@ -640,7 +691,7 @@ class AgEditor {
             BU.activeCanvas.imgSrc      = imgSrc;
             if(BU.activeCanvas.agBigImgSrc){
                 BU.activeCanvas.bigImgSrc   = BU.activeCanvas.agBigImgSrc;
-                bigImgSrc               = BU.activeCanvas.bigImgSrc
+                bigImgSrc                   = BU.activeCanvas.bigImgSrc
             }
         }
         
@@ -699,7 +750,7 @@ class AgEditor {
             format: 'jpg', 
             multiplier: ratio,
         });  
-    }
+    } 
 }
 
 
@@ -745,11 +796,6 @@ class AgPresentation{
             return;
         }
 
-        let  o_text='';
-        if(BU.agIsOcFrontpage){
-            o_text = o.text
-        }
-
         let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
         if(data_canvas_id == canvas.id)return;
 
@@ -765,21 +811,25 @@ class AgPresentation{
                 disabled      = "disabled"
                 checked       = "checked"
             }
+
+            let  o_text='';
+            if(BU.workLocation!='product_page'){
+                o_text = o.text
+            }
             
             if(o instanceof fabric.Textbox){
                 if(o.agMaxLines==1){
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
-                            +'  <td style="min-width:67px">'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
+                            +'  <td style="min-width:71px;padding:0!important;padding-top:0px!important">'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left;padding-top:2px"></i><span>Yazı Tipi</span></div>'
                             +'  </td>'
                             +'  <td>'
                             +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" placeholder="Yazı Alanı" value="'+o_text+'" '+disabled+'  data-target-id="'+o.id+'">'
                             +'  </td>'
-                            +'  <td>'
-                            +'     <div class="ag-onay">'
-                            +'       <i class="fa fa-check-square fa-2"></i>'
-                            +'     </div>'
+                            +'  <td style="min-width: 60px; padding: 0!important; padding-top: 1px!important;">'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
                             +'  </td>'
                             +'</tr>'
                             +'<tr>'
@@ -828,7 +878,7 @@ class AgPresentation{
                 $(BU.preview_input_panel).find('.cropbox')
                 .append('<tr>'
                     +'   <td>'
-                    +'       <div  class="btn btn-primary  ag-resimekle-btn" data-target-id="'+o.id+'" '+disabled+'  ><i class="fa fa-camera"></i> Resim Ekle ' + crop_count +'</div>'
+                    +'       <div  class="btn btn-primary  ag-resimekle-btn" data-target-id="'+o.id+'" '+disabled+'  ><i class="fa fa-camera" style="color:#fff"></i> Resim Ekle ' + crop_count +'</div>'
                     +'       <div class="checkbox" style="margin-top:0px">'
                     +'       <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'"  '+checked+' data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
                     +'       </div>'
@@ -886,7 +936,7 @@ class AgCropper{
         let BU = this
         $(this.modal_element).find('.modal-body').empty();
         $(this.modal_element).find('.modal-body').append(
-                '<div style="width: 100%;text-align: center;padding: 50px;">'+
+                '<div style="text-align: center;padding: 50px;">'+
                     '<p style="display: block;">Henüz hiç resminiz yok.</p>'+
                     '<div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
                 '</div>'
@@ -915,7 +965,7 @@ class AgCropper{
                 let div         = document.createElement("div"); 
                 div.className   = "wrap-user-image";
                 $(div).append(img);
-                $(div).append('<i class="fas fa-trash-alt" data-lcl-ctoreage-id='+i+'></i>'); 
+                $(div).append('<i class="fa fa-trash" data-lcl-ctoreage-id='+i+'></i>'); 
                 $(this.modal_element).find('.modal-body').append(div);
             });
         }

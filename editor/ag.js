@@ -5,28 +5,42 @@
  */
 
 
-var agBaseURL       = "http://tasarimabasla.test/ageditor"
+var agBaseURL       = "https://www.partimagnet.com/ageditor"
 var agEditor;
 var ag_gorev        = '' // bg-ekle | logo-ekle
-var ag_product_id   = null;
+var product_id   = null;
 var fullpage = false
 
 document.addEventListener( 'DOMContentLoaded',  async function () {
 
     agEditor        = new AgEditor();
     
-    if(!ifExistProductIdinUrl()){
-        $(agEditor.nav_html_element).hide();
-        $(agEditor.target_properties_panel).hide(); 
-        return;
+    getWorkedLocationAndProductId();
+ 
+    
+    if(agEditor.workLocation =='product_page' 
+        || agEditor.workLocation =='order_info_page' 
+        || agEditor.workLocation =='product_edit_page'){
+            $(agEditor.nav_html_element).hide();
+            $(agEditor.target_properties_panel).hide();  
+            getSablonFile().catch(()=>{ 
+                eskiVersiondanDonustur();
+            }) 
+
+        if(agEditor.workLocation =='product_edit_page'){
+            if(product_id == null){
+                const pid_bulunamadi  =  '<div class="alert alert-light pid-bulunamadi" role="alert">'
+                                        +'AgEditör\'ü kayıtlı ürünü düzenlerken kullana bilirsiniz.<br>'
+                                        +'<big>Ürünü kaydedin ve düzenlemek için açın.</big>'
+                                        +'</div>';
+                $(agEditor.container_html_element).append(pid_bulunamadi); 
+            }
+        }
+    }else if(agEditor.workLocation =='cart_page'){
+        getProductPrewievImages();
     }
 
-    ocFrontPage_ifProductPage();
 
-    getSablonFile().catch(()=>{
-        //docnustur.js içinde
-        eskiVersiondanDonustur();
-    })
 
     agEditor.refreshMainMenu()
 
@@ -111,6 +125,18 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })  
     
     $('#renderWithBigBGImage').click(function(){
+        let params          = new URLSearchParams(window.location.search)
+        if(params.has('model')){ 
+            model   = params.get('model')  
+           model_suffixarr = model.match(/\d/g);
+           model_suffix    = model_suffixarr.join("");
+           ilk_rakam_pos   = model.indexOf(model_suffixarr[0])
+           model_prefix    = model.substring(0 , ilk_rakam_pos);
+           console.log(koseNoktalari[model_suffix])
+             
+        }else{
+            console.log("Model no bulunamadı")
+        }
         agEditor.renderWithBigBGImage();
     }) 
 
@@ -300,7 +326,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         $(agEditor.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
     })
 
-    $(document).on('click','.wrap-user-image .fa-trash-alt',function(){
+    $(document).on('click','.wrap-user-image .fa-trash',function(){
         let id = $(this).attr("data-lcl-ctoreage-id");
         let  localresimlerim = JSON.parse(window.localStorage.getItem("localresimlerim"));
         if(localresimlerim){
@@ -358,6 +384,21 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
 
         $('#modal-font-setting').modal('show')
     })
+
+    $(document).on('click','.ag-edit-font-size',function(){
+        let data_val       = $(this).attr('data-val');
+        let data_object_id = $(this).attr('data-object-id');
+        let obj            = agEditor.getObjectByID(data_object_id)
+        if(data_val == '+'){
+            obj.fontSize++
+            obj.top--
+        }else if(data_val == '-'){
+            obj.fontSize--
+            obj.top++
+        }
+        agEditor.activeCanvas.requestRenderAll();
+    })
+    
 
     $(document).on('click','.ag-font',function(){     
         $('.ag-font').css('background-color','#fff')  
@@ -431,7 +472,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
  
     $(document).on('click','.ag-modal-tamam-btn',function(){
         let target_obj_id = $('#ag-input-text').attr('data-target-id')
-        $("[data-target-id='"+target_obj_id+"']").val($('#ag-input-text').val());
+        $("input[data-target-id='"+target_obj_id+"']").val($('#ag-input-text').val());
     }) 
 
     // oc admin product formda agEditor tabı açılırken yeniden hesaplanmalı heigt ler
@@ -446,6 +487,16 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         $('#ageditor').css('height',totalHeight+'px');      
     })
 
+    $(document).on('click','.ag-tasarim-onizleme',function(){        
+         $('#modal-cart-image').modal('show')
+         let resimler = $(this).find('.ag-cart-thum')
+         $('#modal-cart-image .modal-body').empty();
+         $.each(resimler,(i,resim)=>{
+            let img = "<img src=\""+$(resim).attr("src")+"\">"
+            $('#modal-cart-image .modal-body').html($('#modal-cart-image .modal-body').html()+"\n"+img)
+         })
+    })
+
 
     
 
@@ -457,7 +508,10 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
 async function uploadSmallPageImages(w = 300){
     let keys = Object.keys(agEditor.fabricCanvases)
     let index = 0;
-    await _uploadSmallPageImg(keys,index,w);
+    return new Promise(async(resolve,reject)=>{
+        await _uploadSmallPageImg(keys,index,w);
+        resolve();
+    })
 }
 
 async function _uploadSmallPageImg(keys,index,w){
@@ -473,39 +527,46 @@ async function _uploadSmallPageImg(keys,index,w){
     for (var i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
     }
-    blob =  new Blob([ab], { type: 'image/jpeg' });
+    blob =  new Blob([ab], { type: 'image/png' });
 
     var formData = new FormData();
-    formData.append("smalldesigns", blob,"image_name.jpg");
+    formData.append("smalldesigns", blob,"image_name.png");
 
-    
-    $.ajax({
-        url: agBaseURL+'/api/?command=uploadSmallPageImages',
-        data: formData,
-        type: 'POST',
-        contentType: false,  
-        processData: false,  
-        success:function(data){
-            if(data.url){
-                canvas.agSmallImageUrl = data.url
-            }else{
-                console.log("agSmallImageUrl alınamadı")
+    let gndr = new Promise(async(resolve,reject)=>{
+        $.ajax({
+            url: agBaseURL+'/api/?command=uploadSmallPageImages',
+            data: formData,
+            type: 'POST',
+            contentType: false,  
+            processData: false,  
+            success:function(data){
+                if(data.url){
+                    canvas.agSmallImageUrl = data.url 
+                    resolve();
+                }else{
+                    console.log("agSmallImageUrl alınamadı")
+                    alert("Küçük  resim gönderilirken sistem hatası");
+                    reject();
+                }
+            },
+            beforeSend: function(){
+                
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert("Küçük  resim gönderilirken sistem hatası : "+xhr.status);
+                reject();
             }
-        },
-        beforeSend: function(){
-            
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            alert("Küçük  resim gönderilirken sistem hatası : "+xhr.status);
-        }
-    });
+        });
+    })
 
-    if(index<keys.length-1){
-        index++;
-        await _uploadSmallPageImg(keys,index,w)
-    }else{
-        return;
-    }
+    await gndr.then(async()=>{
+        if(index<keys.length-1){
+            index++;
+            await _uploadSmallPageImg(keys,index,w)
+            return;
+        } 
+    })
+
 }
 
 async function saveSablonToServer() {
@@ -515,7 +576,7 @@ async function saveSablonToServer() {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas = agEditor.fabricCanvases[key];
         let serialized = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
-        serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
+        //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
         allCanvasesArr.push(serialized) 
     }
     const str   = JSON.stringify(allCanvasesArr);
@@ -525,9 +586,7 @@ async function saveSablonToServer() {
     });
 
     var formData = new FormData();  
-    formData.append("sablonfile", blob , ag_product_id+'.json');
-    //todo: bu işlev müşteri tasarımında işe yarayacam. burada olması sadece deneme amaçlı sonra akldı
-    await uploadSmallPageImages(300);
+    formData.append("sablonfile", blob , product_id+'.json');
     return new Promise(function(resolve,reject){
         $.ajax({
             url: agBaseURL+'/api/?command=saveSablonToServer',
@@ -579,29 +638,13 @@ function openImageBrowser(folder){
     })
 }
 
-function ifExistProductIdinUrl() {  
-    let params          = new URLSearchParams(window.location.search)
-    if(params.has('product_id')){ 
-        ag_product_id   = params.get('product_id')
-        return true;
-    }else if(typeof agfileurl !== 'undefined'){
-        $('#saveSablonToServer').remove();
-        return true;
-    }else{
-        const pid_bulunamadi  =  '<div class="alert alert-light pid-bulunamadi" role="alert">'
-                                +'AgEditör\'ü kayıtlı ürünü düzenlerken kullana bilirsiniz.<br>'
-                                +'<big>Ürünü kaydedin ve düzenlemek için açın.</big>'
-                                +'</div>';
-        $(agEditor.container_html_element).append(pid_bulunamadi);
-        return false;
-    }
-}
-
 async function getSablonFile() { 
-    if(!agEditor.agIsOcFrontpage){
+    if(agEditor.workLocation!='product_page'){
         agEditor.modal_progress.modal('show')
+    }else{
+        product_id      = $('[name="product_id"]').val();
     }
-    let url = agBaseURL+'/api/sablons/'+ag_product_id+'.json?dummy='+Math.random();
+    let url = agBaseURL+'/api/sablons/'+product_id+'.json?dummy='+Math.random();
 
     if(typeof agfileurl !== "undefined"){ 
         url = agfileurl.replace(/&amp;/g, "&"); 
@@ -612,6 +655,7 @@ async function getSablonFile() {
                 agEditor._fromJSON(data);
                 agEditor.modal_progress.modal('hide')
                 $('.ag-alanseti').show();
+                $('.fa-spin').remove();
                 resolve();
             }).error(function(xhr, ajaxOptions, thrownError) {
                 console.log("Şablon bulunamadı \n" + url)      
@@ -655,18 +699,32 @@ function switchFullScreen(){
 }
 
 ////////////////////////////  OC önsayfası için  ////////////////////
-function ocFrontPage_ifProductPage(){
+function getWorkedLocationAndProductId(){
+    let params          = new URLSearchParams(window.location.search)
+    if(params.has('product_id')){ 
+        product_id   = params.get('product_id')
+    }
+
     if($('.product-info').length){
         $('.left .col-sm-6').hide(); 
-        agEditor.agIsOcFrontpage = true;
+        agEditor.workLocation  = 'product_page';
         $("button[id^='button-upload']").hide();
-        $("button[id^='button-upload']").prev().hide();        
-    }else{
+        $("button[id^='button-upload']").prev().hide(); 
+        if($('[name="product_id"]').length==0){
+            console.log("Çalışma konumu önsayfa fakat product_id yok. Allah Allah :(")
+            return;
+        }
+        product_id      = $('[name="product_id"]').val();
+        $('.left').prepend(progresBar);
+    }else if(window.location.search.includes('checkout/cart')){ 
+        agEditor.workLocation  = 'cart_page';
+    }else if($('#tab-ageditor').length){
+        agEditor.workLocation  = 'product_edit_page';
+    }else if(typeof agfileurl  !== 'undefined'){
+        agEditor.workLocation  = 'order_info_page';
         switchFullScreen();
     }
 }
-
-
 
 async function createAndUploadAgeditorJson(){ 
     let zorunluAlanVar = false;
@@ -686,7 +744,7 @@ async function createAndUploadAgeditorJson(){
                     let str = obj.text.replace(/\s/g, '');
                     if(!str.length){
                         zorunluAlanVar = true
-                        $("[data-target-id='"+obj.id+"']").css('border-color','#ff0000')
+                        $("[data-target-id='"+obj.id+"']").css('border','4px solid #ff0000')
                     }
                 }
             }else if(obj instanceof fabric.Image
@@ -695,7 +753,8 @@ async function createAndUploadAgeditorJson(){
                 if(!obj.agBosBirak){ 
                     if(!obj.agImageUrl){
                         zorunluAlanVar = true
-                        $("[data-target-id='"+obj.id+"']").css('border-color','#ff0000')
+                        $("[data-target-id='"+obj.id+"']").css('border','4px solid #ff0000')
+                        //$("[data-target-id='"+obj.id+"']").css('border-color','#ff0000')
                     }
                 }
             }
@@ -707,8 +766,9 @@ async function createAndUploadAgeditorJson(){
         }, 200);
         return;
     }
-    // END    BOŞ  ------------------------------
+     
 
+    await uploadSmallPageImages(300);
     let allCanvasesArr  = [];
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
@@ -763,4 +823,30 @@ async function createAndUploadAgeditorJson(){
             }
         });
     })
+}
+
+async function getProductPrewievImages() {
+    if($('.ag-json-url').length){
+        let htmlElems = $('.ag-json-url')
+        $.each(htmlElems,(i,elms)=>{
+            let url = elms.value
+            return new Promise(function(resolve,reject){
+                $.getJSON(url, function(datas) {                     
+                        let tr      = $(elms).parent().parent()
+                        first_td    = $(tr).find('td')[0];
+                        $.each(datas,(i,val)=>{
+                            let v = JSON.parse(val)
+                            console.log(v.agSmallImageUrl)
+                            $(first_td).append("<img class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")
+                        })
+                        resolve();
+                    }).error(function(xhr, ajaxOptions, thrownError) {
+                        console.log("agjson dosyası bulunamadı \n" + url)  
+                        reject();
+                    }).complete(function() {
+                        resolve();
+                    });
+            })
+        })
+    }
 }

@@ -203,9 +203,9 @@
                       <button type="button" class="btn btn-link ag-crop-resim-yukle">
                       <i class="fa fa-cloud-upload" aria-hidden="true"></i> <br> Yükle </button>
                       <button type="button" class="btn btn-link ag-crop-resim-rotate-left crop-menu-item">
-                      <i class="fa fa-undo" aria-hidden="true"></i> <br> Sola döder</button>
+                      <i class="fa fa-undo" aria-hidden="true"></i> <br>Dödür</button>
                       <button type="button" class="btn btn-link ag-crop-resim-rotate-right crop-menu-item">
-                      <i class="fa fa-repeat" aria-hidden="true"></i> <br> Sağa dönder</button>
+                      <i class="fa fa-repeat" aria-hidden="true"></i> <br> Dödür </button>
                       <button type="button" class="btn btn-link ag-crop-resim-crop crop-menu-item">
                       <i class="fa fa-crop" aria-hidden="true"></i> <br> Kırp </button>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">

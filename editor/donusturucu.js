@@ -153,7 +153,7 @@ var cropObj     = {
     "evented": true,
     "hasControls": true,
     "id": "",
-    "src": "http://tasarimabasla.test/ageditor/editor/agblank.png",
+    "src": agBaseURL+"/editor/agblank.png",
     "filters": []
     }
 
@@ -194,10 +194,11 @@ var fligranObj  = {
     "cropX": 0,
     "cropY": 0,
     "agBosBirak": false,
-    "evented": true,
+    "agIsLogo":true,
+    "evented": false,
     "hasControls": true,
     "id": 50752,
-    "src": "http://tasarimabasla.test/ageditor/editor/agblank.png",
+    "src": agBaseURL+"/editor/agblank.png",
     "filters": []
     }
 
@@ -238,10 +239,11 @@ var logoObj  = {
     "cropX": 0,
     "cropY": 0,
     "agBosBirak": false,
-    "evented": true,
+    "agIsLogo":true,
+    "evented": false,
     "hasControls": true,
     "id": 50752,
-    "src": "http://tasarimabasla.test/ageditor/editor/agblank.png",
+    "src": agBaseURL+"/editor/agblank.png",
     "filters": []
 }
 
@@ -256,164 +258,312 @@ var progresBar = '<i class="fa fa-cog fa-spin" style="' +
 var buyukZeminResmiURL = '';
 
 var temaKodlari=[];
-temaKodlari['0001'] = '0001'
-temaKodlari['0003'] = '0001'
-temaKodlari['0062'] = '0001'
-temaKodlari['0122'] = '0001'
-temaKodlari['0108'] = '0001'
-temaKodlari['0110'] = '0001'
-temaKodlari['0003'] = '0001'
-temaKodlari['0052'] = '0001'
-temaKodlari['0002'] = '0002'
-temaKodlari['0004'] = '0002'
-temaKodlari['0063'] = '0002'
-temaKodlari['0123'] = '0002'
-temaKodlari['0109'] = '0002'
-temaKodlari['0111'] = '0002'
-temaKodlari['0053'] = '0002'
-temaKodlari['0005'] = '0005'
-temaKodlari['0007'] = '0005'
-temaKodlari['0013'] = '0005'
-temaKodlari['0015'] = '0005'
-temaKodlari['0037'] = '0005'
-temaKodlari['0044'] = '0005'
-temaKodlari['0046'] = '0005'
-temaKodlari['0048'] = '0005'
-temaKodlari['0056'] = '0005'
-temaKodlari['0058'] = '0005'
-temaKodlari['0060'] = '0005'
-temaKodlari['0097'] = '0005'
-temaKodlari['0104'] = '0005'
-temaKodlari['0128'] = '0005'
-temaKodlari['0006'] = '0006'
-temaKodlari['0008'] = '0006'
-temaKodlari['0014'] = '0006'
-temaKodlari['0016'] = '0006'
-temaKodlari['0037R'] = '0006'
-temaKodlari['0045'] = '0006'
-temaKodlari['0047'] = '0006'
-temaKodlari['0049'] = '0006'
-temaKodlari['0057'] = '0006'
-temaKodlari['0059'] = '0006'
-temaKodlari['0061'] = '0006'
-temaKodlari['0098'] = '0006'
-temaKodlari['0105'] = '0006'
-temaKodlari['0129'] = '0006'
-temaKodlari['0031A'] = '0031'
-temaKodlari['0031KA'] = '0031'
-temaKodlari['0031'] = '0031'
-temaKodlari['0050'] = '0031'
-temaKodlari['0074'] = '0031'
-temaKodlari['0083'] = '0031'
-temaKodlari['0087'] = '0031'
-temaKodlari['0093'] = '0031'
-temaKodlari['0095'] = '0031'
-temaKodlari['0099'] = '0031'
-temaKodlari['0032KA'] = '0032'
-temaKodlari['0032A'] = '0032'
-temaKodlari['0032'] = '0032'
-temaKodlari['0075'] = '0032'
-temaKodlari['0084'] = '0032'
-temaKodlari['0088'] = '0032'
-temaKodlari['0094'] = '0032'
-temaKodlari['0096'] = '0032'
-temaKodlari['0100'] = '0032'
-temaKodlari['0031'] = '0031'
-temaKodlari['0050'] = '0031'
-temaKodlari['0074'] = '0031'
-temaKodlari['0083'] = '0031'
-temaKodlari['0087'] = '0031'
-temaKodlari['0093'] = '0031'
-temaKodlari['0095'] = '0031'
-temaKodlari['0099'] = '0031'
-temaKodlari['0032'] = '0032'
-temaKodlari['0051'] = '0032'
-temaKodlari['0075'] = '0032'
-temaKodlari['0084'] = '0032'
-temaKodlari['0088'] = '0032'
-temaKodlari['0094'] = '0032'
-temaKodlari['0096'] = '0032'
-temaKodlari['0100'] = '0032'
-temaKodlari['0038'] = '0038'
-temaKodlari['0040'] = '0038'
-temaKodlari['0039'] = '0039'
-temaKodlari['0041'] = '0039'
-temaKodlari['0055'] = '0055'
-temaKodlari['0072'] = '0072'
-temaKodlari['0073'] = '0073'
-temaKodlari['0082'] = '0082'
-temaKodlari['0102'] = '0102'
-temaKodlari['0106'] = '0102'
-temaKodlari['0103'] = '0103'
-temaKodlari['0107'] = '0103'
-temaKodlari['0130'] = '0130'
-temaKodlari['0131'] = '0131'
-temaKodlari['0089'] = '0089'
-temaKodlari['0090'] = '0090'
-temaKodlari['0091'] = '0089'
-temaKodlari['0092'] = '0090'
-temaKodlari['0124'] = '0089'
-temaKodlari['0125'] = '0090'
-temaKodlari['0017'] = '0011'
-temaKodlari['0018'] = '0012'
-temaKodlari['0011'] = '0011'
-temaKodlari['0012'] = '0012'
-temaKodlari['0085'] = '0011'
-temaKodlari['0086'] = '0012'
-temaKodlari['0021'] = '0011'
-temaKodlari['0022'] = '0012'
-temaKodlari['0019'] = '0011'
-temaKodlari['0020'] = '0012'
-temaKodlari['0064'] = '0089'
-temaKodlari['0065'] = '0090'
-temaKodlari['0023'] = '0089'
-temaKodlari['0024'] = '0090'
-temaKodlari['00231'] = '00231'
-temaKodlari['00232'] = '00232'
-temaKodlari['0138'] = '0102'
-temaKodlari['0139'] = '0103'
-temaKodlari['9998'] = '9998'
-temaKodlari['9999'] = '9999'
-temaKodlari['0140'] = '0005'
-temaKodlari['0141'] = '0006'
-temaKodlari['0081'] = '0081'
-temaKodlari['0082'] = '0081'
-temaKodlari['mnion0003'] = 'mnion0003'
-temaKodlari['mnion0004'] = 'mnion0003'
-temaKodlari['MG0029'] = 'mnion0003'
-temaKodlari['mnion0111'] = 'mnion0003'
-temaKodlari['0154'] = '0031'
-temaKodlari['0155'] = '0032'
-temaKodlari['0156'] = '0031'
-temaKodlari['0157'] = '0032'
-temaKodlari['0158'] = '0031'
-temaKodlari['0159'] = '0032'
-temaKodlari['0160'] = '0130'
-temaKodlari['0161'] = '0131'
-temaKodlari['0132'] = '0132'
-temaKodlari['0133'] = '0133'
-temaKodlari['0134'] = '0134'
-temaKodlari['0135'] = '0135'
-temaKodlari['0136'] = '0136'
-temaKodlari['0137'] = '0137'
-temaKodlari['0158'] = '0134'
-temaKodlari['0159'] = '0135'
-temaKodlari['0152'] = '0132'
-temaKodlari['0153'] = '0133'
-temaKodlari['0150'] = '0150'
-temaKodlari['0151'] = '0151'
-temaKodlari['T713'] = 'T713'
-temaKodlari['T708'] = 'T708'
-temaKodlari['T707'] = 'T707'
-temaKodlari['T709'] = 'T709'
-temaKodlari['T704'] = 'T704'
-temaKodlari['T700'] = 'T700'
+    temaKodlari['0001'] = '0001'
+    temaKodlari['0003'] = '0001'
+    temaKodlari['0062'] = '0001'
+    temaKodlari['0122'] = '0001'
+    temaKodlari['0108'] = '0001'
+    temaKodlari['0110'] = '0001'
+    temaKodlari['0003'] = '0001'
+    temaKodlari['0052'] = '0001'
+    temaKodlari['0002'] = '0002'
+    temaKodlari['0004'] = '0002'
+    temaKodlari['0063'] = '0002'
+    temaKodlari['0123'] = '0002'
+    temaKodlari['0109'] = '0002'
+    temaKodlari['0111'] = '0002'
+    temaKodlari['0053'] = '0002'
+    temaKodlari['0005'] = '0005'
+    temaKodlari['0007'] = '0005'
+    temaKodlari['0013'] = '0005'
+    temaKodlari['0015'] = '0005'
+    temaKodlari['0037'] = '0005'
+    temaKodlari['0044'] = '0005'
+    temaKodlari['0046'] = '0005'
+    temaKodlari['0048'] = '0005'
+    temaKodlari['0056'] = '0005'
+    temaKodlari['0058'] = '0005'
+    temaKodlari['0060'] = '0005'
+    temaKodlari['0097'] = '0005'
+    temaKodlari['0104'] = '0005'
+    temaKodlari['0128'] = '0005'
+    temaKodlari['0006'] = '0006'
+    temaKodlari['0008'] = '0006'
+    temaKodlari['0014'] = '0006'
+    temaKodlari['0016'] = '0006'
+    temaKodlari['0037R'] = '0006'
+    temaKodlari['0045'] = '0006'
+    temaKodlari['0047'] = '0006'
+    temaKodlari['0049'] = '0006'
+    temaKodlari['0057'] = '0006'
+    temaKodlari['0059'] = '0006'
+    temaKodlari['0061'] = '0006'
+    temaKodlari['0098'] = '0006'
+    temaKodlari['0105'] = '0006'
+    temaKodlari['0129'] = '0006'
+    temaKodlari['0031A'] = '0031'
+    temaKodlari['0031KA'] = '0031'
+    temaKodlari['0031'] = '0031'
+    temaKodlari['0050'] = '0031'
+    temaKodlari['0074'] = '0031'
+    temaKodlari['0083'] = '0031'
+    temaKodlari['0087'] = '0031'
+    temaKodlari['0093'] = '0031'
+    temaKodlari['0095'] = '0031'
+    temaKodlari['0099'] = '0031'
+    temaKodlari['0032KA'] = '0032'
+    temaKodlari['0032A'] = '0032'
+    temaKodlari['0032'] = '0032'
+    temaKodlari['0075'] = '0032'
+    temaKodlari['0084'] = '0032'
+    temaKodlari['0088'] = '0032'
+    temaKodlari['0094'] = '0032'
+    temaKodlari['0096'] = '0032'
+    temaKodlari['0100'] = '0032'
+    temaKodlari['0031'] = '0031'
+    temaKodlari['0050'] = '0031'
+    temaKodlari['0074'] = '0031'
+    temaKodlari['0083'] = '0031'
+    temaKodlari['0087'] = '0031'
+    temaKodlari['0093'] = '0031'
+    temaKodlari['0095'] = '0031'
+    temaKodlari['0099'] = '0031'
+    temaKodlari['0032'] = '0032'
+    temaKodlari['0051'] = '0032'
+    temaKodlari['0075'] = '0032'
+    temaKodlari['0084'] = '0032'
+    temaKodlari['0088'] = '0032'
+    temaKodlari['0094'] = '0032'
+    temaKodlari['0096'] = '0032'
+    temaKodlari['0100'] = '0032'
+    temaKodlari['0038'] = '0038'
+    temaKodlari['0040'] = '0038'
+    temaKodlari['0039'] = '0039'
+    temaKodlari['0041'] = '0039'
+    temaKodlari['0055'] = '0055'
+    temaKodlari['0072'] = '0072'
+    temaKodlari['0073'] = '0073'
+    temaKodlari['0082'] = '0082'
+    temaKodlari['0102'] = '0102'
+    temaKodlari['0106'] = '0102'
+    temaKodlari['0103'] = '0103'
+    temaKodlari['0107'] = '0103'
+    temaKodlari['0130'] = '0130'
+    temaKodlari['0131'] = '0131'
+    temaKodlari['0089'] = '0089'
+    temaKodlari['0090'] = '0090'
+    temaKodlari['0091'] = '0089'
+    temaKodlari['0092'] = '0090'
+    temaKodlari['0124'] = '0089'
+    temaKodlari['0125'] = '0090'
+    temaKodlari['0017'] = '0011'
+    temaKodlari['0018'] = '0012'
+    temaKodlari['0011'] = '0011'
+    temaKodlari['0012'] = '0012'
+    temaKodlari['0085'] = '0011'
+    temaKodlari['0086'] = '0012'
+    temaKodlari['0021'] = '0011'
+    temaKodlari['0022'] = '0012'
+    temaKodlari['0019'] = '0011'
+    temaKodlari['0020'] = '0012'
+    temaKodlari['0064'] = '0089'
+    temaKodlari['0065'] = '0090'
+    temaKodlari['0023'] = '0089'
+    temaKodlari['0024'] = '0090'
+    temaKodlari['00231'] = '00231'
+    temaKodlari['00232'] = '00232'
+    temaKodlari['0138'] = '0102'
+    temaKodlari['0139'] = '0103'
+    temaKodlari['9998'] = '9998'
+    temaKodlari['9999'] = '9999'
+    temaKodlari['0140'] = '0005'
+    temaKodlari['0141'] = '0006'
+    temaKodlari['0081'] = '0081'
+    temaKodlari['0082'] = '0081'
+    temaKodlari['mnion0003'] = 'mnion0003'
+    temaKodlari['mnion0004'] = 'mnion0003'
+    temaKodlari['MG0029'] = 'mnion0003'
+    temaKodlari['mnion0111'] = 'mnion0003'
+    temaKodlari['0154'] = '0031'
+    temaKodlari['0155'] = '0032'
+    temaKodlari['0156'] = '0031'
+    temaKodlari['0157'] = '0032'
+    temaKodlari['0158'] = '0031'
+    temaKodlari['0159'] = '0032'
+    temaKodlari['0160'] = '0130'
+    temaKodlari['0161'] = '0131'
+    temaKodlari['0132'] = '0132'
+    temaKodlari['0133'] = '0133'
+    temaKodlari['0134'] = '0134'
+    temaKodlari['0135'] = '0135'
+    temaKodlari['0136'] = '0136'
+    temaKodlari['0137'] = '0137'
+    temaKodlari['0158'] = '0134'
+    temaKodlari['0159'] = '0135'
+    temaKodlari['0152'] = '0132'
+    temaKodlari['0153'] = '0133'
+    temaKodlari['0150'] = '0150'
+    temaKodlari['0151'] = '0151'
+    temaKodlari['T713'] = 'T713'
+    temaKodlari['T708'] = 'T708'
+    temaKodlari['T707'] = 'T707'
+    temaKodlari['T709'] = 'T709'
+    temaKodlari['T704'] = 'T704'
+    temaKodlari['T700'] = 'T700'
 
+var koseNoktalari=[];
+    koseNoktalari['T700'] = ['2','6']
+    koseNoktalari['T704'] = ['26','8']
+    koseNoktalari['T707'] = ['10','2']
+    koseNoktalari['T708'] = ['10','2']
+    koseNoktalari['T713'] = ['10','2']
+    koseNoktalari['0001'] = ['17','98']
+    koseNoktalari['0002'] = ['17','98']
+    koseNoktalari['0003'] = ['17','98']
+    koseNoktalari['0004'] = ['17','98']
+    koseNoktalari['0005'] = ['64','64']
+    koseNoktalari['0006'] = ['64','64']
+    koseNoktalari['0007'] = ['64','64']
+    koseNoktalari['0008'] = ['64','64']
+    koseNoktalari['0009'] = ['64','64']
+    koseNoktalari['0010'] = ['64','64']
+    koseNoktalari['0011'] = ['220','10']
+    koseNoktalari['0012'] = ['220','10']
+    koseNoktalari['0013'] = ['64','64']
+    koseNoktalari['0014'] = ['64','64']
+    koseNoktalari['0015'] = ['64','64']
+    koseNoktalari['0016'] = ['64','64']
+    koseNoktalari['0017'] = ['220','10']
+    koseNoktalari['0018'] = ['220','10']
+    koseNoktalari['0019'] = ['220','10']
+    koseNoktalari['0020'] = ['220','10']
+    koseNoktalari['0021'] = ['220','10']
+    koseNoktalari['0022'] = ['220','10']
+    koseNoktalari['0023'] = ['98','17']
+    koseNoktalari['0024'] = ['98','17']
+    koseNoktalari['0025'] = ['17','222']
+    koseNoktalari['0026'] = ['17','222']
+    koseNoktalari['0027'] = ['64','64']
+    koseNoktalari['0028'] = ['64','64']
+    koseNoktalari['0029'] = ['220','10']
+    koseNoktalari['0030'] = ['220','10']
+    koseNoktalari['0031'] = ['64','64']
+    koseNoktalari['0032'] = ['64','64']
+    koseNoktalari['0033'] = ['64','64']
+    koseNoktalari['0034'] = ['64','64']
+    koseNoktalari['0035'] = ['64','64']
+    koseNoktalari['0036'] = ['64','64']
+    koseNoktalari['0037'] = ['64','64']
+    koseNoktalari['0037R'] = ['64','64']
+    koseNoktalari['0038'] = ['100','17']
+    koseNoktalari['0039'] = ['100','17']
+    koseNoktalari['0040'] = ['100','17']
+    koseNoktalari['0041'] = ['100','17']
+    koseNoktalari['0042'] = ['64','64']
+    koseNoktalari['0043'] = ['64','64']
+    koseNoktalari['0044'] = ['64','64']
+    koseNoktalari['0045'] = ['64','64']
+    koseNoktalari['0046'] = ['64','64']
+    koseNoktalari['0047'] = ['64','64']
+    koseNoktalari['0048'] = ['64','64']
+    koseNoktalari['0049'] = ['64','64']
+    koseNoktalari['0050'] = ['64','64']
+    koseNoktalari['0051'] = ['64','64']
+    koseNoktalari['0052'] = ['64','64']
+    koseNoktalari['0053'] = ['64','64']
+    koseNoktalari['0054'] = ['64','64']
+    koseNoktalari['0055'] = ['116','17']
+    koseNoktalari['0055R'] = ['116','17']
+    koseNoktalari['0056'] = ['64','64']
+    koseNoktalari['0057'] = ['64','64']
+    koseNoktalari['0058'] = ['64','64']
+    koseNoktalari['0059'] = ['64','64']
+    koseNoktalari['0060'] = ['64','64']
+    koseNoktalari['0061'] = ['64','64']
+    koseNoktalari['0062'] = ['17','98']
+    koseNoktalari['0063'] = ['17','98']
+    koseNoktalari['0064'] = ['64','64']
+    koseNoktalari['0065'] = ['64','64']
+    koseNoktalari['0066'] = ['64','64']
+    koseNoktalari['0067'] = ['64','64']
+    koseNoktalari['0068'] = ['64','64']
+    koseNoktalari['0069'] = ['64','64']
+    koseNoktalari['0070'] = ['64','64']
+    koseNoktalari['0071'] = ['64','64']
+    koseNoktalari['0072'] = ['194','17']
+    koseNoktalari['0073'] = ['194','17']
+    koseNoktalari['0074'] = ['64','64']
+    koseNoktalari['0075'] = ['64','64']
+    koseNoktalari['0076'] = ['64','64']
+    koseNoktalari['0077'] = ['64','64']
+    koseNoktalari['0078'] = ['64','64']
+    koseNoktalari['0079'] = ['64','64']
+    koseNoktalari['0080'] = ['64','64']
+    koseNoktalari['0081'] = ['64','64']
+    koseNoktalari['0082'] = ['102','17']
+    koseNoktalari['0083'] = ['64','64']
+    koseNoktalari['0084'] = ['64','64']
+    koseNoktalari['0085'] = ['220','10']
+    koseNoktalari['0086'] = ['220','10']
+    koseNoktalari['0087'] = ['64','64']
+    koseNoktalari['0088'] = ['64','64']
+    koseNoktalari['0089'] = ['98','17']
+    koseNoktalari['0090'] = ['98','17']
+    koseNoktalari['0091'] = ['98','17']
+    koseNoktalari['0092'] = ['98','17']
+    koseNoktalari['0093'] = ['64','64']
+    koseNoktalari['0094'] = ['64','64']
+    koseNoktalari['0095'] = ['64','64']
+    koseNoktalari['0096'] = ['64','64']
+    koseNoktalari['0097'] = ['64','64']
+    koseNoktalari['0098'] = ['64','64']
+    koseNoktalari['0099'] = ['64','64']
+    koseNoktalari['0100'] = ['64','64']
+    koseNoktalari['0101'] = ['64','64']
+    koseNoktalari['0102'] = ['17','98']
+    koseNoktalari['0103'] = ['17','98']
+    koseNoktalari['0104'] = ['64','64']
+    koseNoktalari['0105'] = ['64','64']
+    koseNoktalari['0106'] = ['17','98']
+    koseNoktalari['0107'] = ['17','98']
+    koseNoktalari['0108'] = ['17','98']
+    koseNoktalari['0109'] = ['17','98']
+    koseNoktalari['0110'] = ['17','98']
+    koseNoktalari['0111'] = ['17','98']
+    koseNoktalari['0112'] = ['64','64']
+    koseNoktalari['0113'] = ['64','64']
+    koseNoktalari['0114'] = ['64','64']
+    koseNoktalari['0115'] = ['64','64']
+    koseNoktalari['0116'] = ['64','64']
+    koseNoktalari['0117'] = ['64','64']
+    koseNoktalari['0118'] = ['64','64']
+    koseNoktalari['0119'] = ['64','64']
+    koseNoktalari['0120'] = ['64','64']
+    koseNoktalari['0121'] = ['64','64']
+    koseNoktalari['0122'] = ['17','98']
+    koseNoktalari['0123'] = ['17','98']
+    koseNoktalari['0124'] = ['98','17']
+    koseNoktalari['0125'] = ['98','17']
+    koseNoktalari['0126'] = ['64','64']
+    koseNoktalari['0127'] = ['64','64']
+    koseNoktalari['0128'] = ['64','64']
+    koseNoktalari['0129'] = ['64','64']
+    koseNoktalari['0130'] = ['17','164']
+    koseNoktalari['0131'] = ['17','164']
+    koseNoktalari['0132'] = ['64','64']
+    koseNoktalari['0133'] = ['64','64']
+    koseNoktalari['0134'] = ['64','64']
+    koseNoktalari['0135'] = ['64','64']
+    koseNoktalari['0136'] = ['64','64']
+    koseNoktalari['0137'] = ['64','64']
+    koseNoktalari['0138'] = ['64','64']
+    koseNoktalari['0139'] = ['64','64']
+    koseNoktalari['0140'] = ['64','64']
+    koseNoktalari['0141'] = ['64','64']
+    koseNoktalari['0142'] = ['64','64']
+    koseNoktalari['0143'] = ['64','64']
 
-async function eskiVersiondanDonustur(){
-    if($('[name="product_id"]').length==0){return;}
-    let product_id      = $('[name="product_id"]').val();
-    $('.left').prepend(progresBar);
+async function eskiVersiondanDonustur(){        
     iceriklerJSON       = await getIceriklerJSON(product_id);
     if(iceriklerJSON!='false'){ 
         buyukZeminResmiURL = parseProductModelNo();
@@ -460,10 +610,10 @@ async function  getIceriklerJSON(product_id){
     return new Promise(function(resolve,reject){
         var data = new FormData();
         data.append('product_id', product_id);
-        $('.fa-spin').css('margin-left','auto')
-        $('.fa-spin').css('margin-right','auto')
+        //$('.fa-spin').css('margin-left','auto')
+        //$('.fa-spin').css('margin-right','auto')
         jQuery.ajax({
-            url: '?route=tasarim/icerikver/getIceriklerArr',
+            url: '/?route=tasarim/icerikver/getIceriklerArr',
             data: data,
             cache: false,
             contentType: false,
@@ -478,6 +628,7 @@ async function  getIceriklerJSON(product_id){
                 }
                 iceriklerArr = JSON.parse(data);
                 $('.fa-spin').remove();
+                console.log("Eski versiyondan dönüşüm yapıldı product_id:"+product_id)
                 resolve(iceriklerArr)
             },
             error: errorHandler = function(xhr, status, error) {
@@ -601,7 +752,7 @@ async function  createFabricJSON(iceriklerJSON){
         cloneFligranBox.evented          = false
         cloneFligranBox.hasControls      = false
         cloneFligranBox.id               = 'fligran'+i
-        cloneFligranBox.agIsLogo             = true
+        cloneFligranBox.agIsLogo         = true
         fabricObj.objects.push(cloneFligranBox);
     })
 
@@ -623,7 +774,7 @@ async function  createFabricJSON(iceriklerJSON){
                 clonLogoBox.evented          = false
                 clonLogoBox.hasControls      = false 
                 clonLogoBox.id               = 'logo'+0
-                clonLogoBox.agIsLogo         = true
+                //clonLogoBox.agIsLogo         = true
                 fabricObj.objects.push(clonLogoBox);
                 resolve();
             }

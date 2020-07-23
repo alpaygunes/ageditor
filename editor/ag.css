@@ -1,5 +1,5 @@
 .cropper-point{
-    width: 15px!important;
+    width: 15px!important!important;
     height: 15px!important;
     border: 1px solid #fff;
 }
@@ -193,6 +193,9 @@
     height: 600px!important;
 }
 
+#modal-agcropper .modal-header{
+    padding: 0px!important;
+}
 
 #modal-agcropper .modal-body .wrap-user-image .user-image{   
     height:120px;
@@ -246,7 +249,8 @@
 }
 
 #modal-agcropper .crop-menu-item{
-    margin-left:10px;  
+    margin-left:0px;
+    padding: 0;
 }
 
 #modal-agcropper .btn-link{ 
@@ -257,6 +261,16 @@
     font-size: 20px;
     color: #2196F3;
 }
+
+#modal-agcropper .modal-header .close{
+    margin-top: 0px;
+    margin-right: 20px;
+    margin-top: 20px;
+}
+
+
+
+
 
 .pid-bulunamadi{
     padding: 50px;
@@ -270,6 +284,10 @@
 
 .inputs .btn {
     border-radius: 0!important;
+}
+
+.inputs .btn i{
+    color: #2196F3;
 }
 
 .inputs  .ag-edit-font{
@@ -294,6 +312,22 @@
     border: 1px solid #e6e5e5;
 }
 
+
+
+.ag-edit-font-size{
+    padding: 2px!important;
+    border-radius: 30px!important; 
+    width: 24px;
+    margin: 2px;
+    background-color: #fff;    
+    color: #2196F3;
+    text-shadow: unset; 
+    background-image: unset;
+    background-repeat: repeat-x;
+    border-color:unset;
+    padding: 6px;
+    border: 1px solid #cee5ea;
+}
 
 .ag-font-list{
     height: 200px;
@@ -345,7 +379,16 @@
     overflow-y: unset;
     padding:24px
 }
+ 
+.wrap-user-image .fa-trash{
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    cursor: pointer;
+}
 
+ 
 
 
 
@@ -399,6 +442,23 @@
     height: auto!important;
 }
 
-.left{
-    min-height: 600px;
+
+.ag-cart-thum{
+    display: none!important;
 }
+
+#modal-cart-image .modal-body img{
+    display: block!important; 
+    /*min-width: 100%!important;*/
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#modal-cart-image .modal-body {
+     position: unset!important; 
+     padding: 0!important; 
+     max-height: unset!important; 
+     max-height: unset!important; 
+     overflow-y: unset!important; 
+}
+ 
