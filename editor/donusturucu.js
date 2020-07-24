@@ -1,5 +1,6 @@
 var fabricObj   = {
                 version:"3.6.1",
+                agVersion:"1",
                 objects:[],
                 background:"#ffffff",
                 agSmallImageUrl:"",

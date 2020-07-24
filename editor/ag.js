@@ -124,26 +124,30 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         agEditor.sunumuBaslat();
     })  
     
-    $('#renderWithBigBGImage').click(function(){
-        let params          = new URLSearchParams(window.location.search)
-        if(params.has('model')){ 
-            model   = params.get('model')  
-           model_suffixarr = model.match(/\d/g);
-           model_suffix    = model_suffixarr.join("");
-           ilk_rakam_pos   = model.indexOf(model_suffixarr[0])
-           model_prefix    = model.substring(0 , ilk_rakam_pos);
-           console.log(koseNoktalari[model_suffix])
-             
-        }else{
-            console.log("Model no bulunamadı")
+    $('#renderWithBigBGImage').click(async function(){
+
+        if(agEditor.activeCanvas){
+            let objects = agEditor.activeCanvas.getObjects();
+            $.each(objects,(i,obj)=>{ 
+                if(obj.agIsLogo){
+                    obj.opacity = 0
+                }
+            }) 
         }
-        agEditor.renderWithBigBGImage();
+        agEditor.modal_progress.modal('show');
+        if(agEditor.activeCanvas.agVersion == "1" ){
+            await renderOldversionBigBGImage();
+        }
+        await agEditor.renderWithBigBGImage();
+        agEditor.modal_progress.modal('hide');
     }) 
 
     $('#downloadBigImage').click( async function(){
-        //agEditor.modal_progress.modal('show');
-        await agEditor.downloadBigImage();
-        //agEditor.modal_progress.modal('hide');
+        agEditor.modal_progress.modal('show');
+        setTimeout(async () => {
+            await agEditor.downloadBigImage();
+            agEditor.modal_progress.modal('hide');
+        }, 1);
     }) 
     
     $('.modal-body').on('click','.img-thumbnail',function(){
@@ -496,14 +500,58 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             $('#modal-cart-image .modal-body').html($('#modal-cart-image .modal-body').html()+"\n"+img)
          })
     })
-
-
-    
-
-    
-
     
 })//===========================   End document ready
+
+
+async function renderOldversionBigBGImage() {
+    let params          = new URLSearchParams(window.location.search)
+    if(params.has('model')){ 
+        model   = params.get('model')  
+        model_suffixarr = model.match(/\d/g);
+        model_suffix    = model_suffixarr.join("");
+        ilk_rakam_pos   = model.indexOf(model_suffixarr[0])
+        model_prefix    = model.substring(0 , ilk_rakam_pos);
+        console.log(koseNoktalari[model_suffix])             
+    }else{
+        console.log("Model no bulunamadı")
+    }
+     
+    bigImgSrc  = agEditor.getObjectByID('bg').getSrc();    
+    if(agEditor.activeCanvas){
+        return new Promise((resolve,reject)=>{
+            fabric.Image.fromURL(bigImgSrc, function(oImg) {
+                if (!oImg._element){
+                    alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
+                    reject()
+                    return;
+                }
+                let objects = agEditor.activeCanvas.getObjects();
+                $.each(objects,(i,obj)=>{ 
+                    let top     = obj.top - koseNoktalari[model_suffix][0]
+                    obj.set('top',top)
+                    let left    = obj.left- koseNoktalari[model_suffix][1]
+                    obj.set('left',left)
+                    agEditor.activeCanvas.requestRenderAll(); 
+                })
+                agEditor.activeCanvas.setDimensions({
+                    width: agEditor.activeCanvas.width-(2*koseNoktalari[model_suffix][1]),
+                    height: agEditor.activeCanvas.height-(2*koseNoktalari[model_suffix][0])
+                })
+                resolve();
+            })
+        })
+    }
+
+
+
+
+
+
+
+
+ 
+}
 
 async function uploadSmallPageImages(w = 300){
     let keys = Object.keys(agEditor.fabricCanvases)
@@ -625,7 +673,7 @@ function openImageBrowser(folder){
                       '</div>';
                 if(file.type == 'folder'){
                     elm =   '<div class="rounded  float-left img-thumbnail" data-path="'+file.path+'" >'+
-                            '<i class="fas fa-folder" style="font-size:52px;color:#fec929"></i>'+
+                            '<i class="fa fa-folder" style="font-size:52px;color:#fec929"></i>'+
                             '<div class="file-name">'+file.name+'</div>'+
                             '</div>';
                 }

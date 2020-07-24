@@ -44,6 +44,7 @@ class AgEditor {
                                             "agFontSize",
                                             "agBosBirak",
                                             "agBigImgSrc",
+                                            "agVersion",
                                             "evented",
                                             "hasControls",
                                             "agIsLogo",
@@ -138,7 +139,8 @@ class AgEditor {
             canvas.height       = h;
             canvas.id           = id;
             canvas.agSmallImageUrl='';
-            canvas.selection    = false
+            canvas.selection    = false;
+            canvas.agVersion    = "2";
 
             $('.canvas-container').css('outline','none');
             if(BU.workLocation!='product_page'){
@@ -679,50 +681,53 @@ class AgEditor {
     }
 
     async renderWithBigBGImage(){
-        let BU              = this;
+        let BU                              = this;
         let bigImgSrc,imgSrc
         if(BU.activeCanvas.imgSrc){
-            bigImgSrc   = BU.activeCanvas.imgSrc;
-            BU.activeCanvas.imgSrc = null;
+            bigImgSrc                       = BU.activeCanvas.imgSrc;
+            BU.activeCanvas.imgSrc          = null;
         }else{
-            imgSrc                      = BU.getObjectByID('bg').getSrc();
-            bigImgSrc                   = imgSrc.replace("bgimages", "orginal_images");
-            BU.activeCanvas.bigImgSrc   = bigImgSrc;
-            BU.activeCanvas.imgSrc      = imgSrc;
+            imgSrc                          = BU.getObjectByID('bg').getSrc();
+            bigImgSrc                       = imgSrc.replace("bgimages", "orginal_images");
+            BU.activeCanvas.bigImgSrc       = bigImgSrc;
+            BU.activeCanvas.imgSrc          = imgSrc;
             if(BU.activeCanvas.agBigImgSrc){
                 BU.activeCanvas.bigImgSrc   = BU.activeCanvas.agBigImgSrc;
                 bigImgSrc                   = BU.activeCanvas.bigImgSrc
             }
-        }
-        
+        }        
         
         if(this.activeCanvas){  
-            fabric.Image.fromURL(bigImgSrc, function(oImg) {
-                if (!oImg._element){
-                    alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
-                    return;
-                }
-                let w0      = BU.activeCanvas.width;
-                let index   = BU.activeCanvas.getObjects()
-                                  .indexOf(BU.getObjectByID('bg'))
-                BU.activeCanvas.remove(BU.getObjectByID('bg'))
-                oImg.id             = "bg"
-                oImg.lockMovementX  = oImg.lockMovementY = true;
-                oImg.hasControls    = false
-                oImg.evented        = false
-                oImg.agSablonResmi  = true  
-                BU.activeCanvas.add(oImg);
-                BU.activeCanvas.moveTo(oImg, index)
-                let scaleRatio      = oImg.width / w0
-                BU.activeCanvas.setDimensions({   
-                        width: oImg.width , 
-                        height: oImg.height  
-                    })
-                scaleRatio=scaleRatio<1?1:scaleRatio;
-                BU.activeCanvas.setZoom(scaleRatio);
-                oImg.scaleX=1/scaleRatio
-                oImg.scaleY=1/scaleRatio
-            }); 
+            return new Promise((resolve,reject)=>{
+                fabric.Image.fromURL(bigImgSrc, function(oImg) {
+                    if (!oImg._element){
+                        alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
+                        reject()
+                        return;
+                    }
+                    let w0      = BU.activeCanvas.width;
+                    let index   = BU.activeCanvas.getObjects()
+                                    .indexOf(BU.getObjectByID('bg'))
+                    BU.activeCanvas.remove(BU.getObjectByID('bg'))
+                    oImg.id             = "bg"
+                    oImg.lockMovementX  = oImg.lockMovementY = true;
+                    oImg.hasControls    = false
+                    oImg.evented        = false
+                    oImg.agSablonResmi  = true  
+                    BU.activeCanvas.add(oImg);
+                    BU.activeCanvas.moveTo(oImg, index)
+                    let scaleRatio      = oImg.width / w0
+                    BU.activeCanvas.setDimensions({   
+                            width: oImg.width , 
+                            height: oImg.height  
+                        })
+                    scaleRatio=scaleRatio<1?1:scaleRatio;
+                    BU.activeCanvas.setZoom(scaleRatio);
+                    oImg.scaleX=1/scaleRatio
+                    oImg.scaleY=1/scaleRatio
+                    resolve(scaleRatio)
+                });                 
+            })
         }else{
             alert("Sayfa seçin")
         }
