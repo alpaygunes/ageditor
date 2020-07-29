@@ -136,7 +136,11 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         }
         agEditor.modal_progress.modal('show');
         if(agEditor.activeCanvas.agVersion == "1" ){
-            await renderOldversionBigBGImage();
+            let snc = await renderOldversionBigBGImage();
+            if(!snc){
+                agEditor.modal_progress.modal('hide');
+                return;
+            }
         }
         await agEditor.renderWithBigBGImage();
         agEditor.modal_progress.modal('hide');
@@ -205,6 +209,15 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         let fbTxtObj    = agEditor.getObjectByID(target_id)
         let text        = $(this).val(); 
 
+        //eğer belge turu tek_harf banner ise font boyutunu hesaplama
+        if(agEditor.agBelgeTuru == 'tek_harfli_banner'){
+            let trgObj = agEditor.getObjectByID(target_id)
+            trgObj.agTekHarfliBannerIcinKelime = text
+            text = text.charAt(0)
+            agEditor.writeToText(target_id,text)
+            return;
+        }
+
         if(fbTxtObj.agFontSize==0 || fbTxtObj.agFontSize == undefined){
             fbTxtObj.agFontSize = fbTxtObj.fontSize;
         }
@@ -212,7 +225,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         let satirBoyu = fbTxtObj.getMeasuringContext().measureText(text+"mm").width * fbTxtObj.fontSize / fbTxtObj.CACHE_FONT_SIZE;
         let degisimOrani = fbTxtObj.getScaledWidth()/satirBoyu
 
-        if(satirBoyu >= fbTxtObj.getScaledWidth() && !fbTxtObj.agKutuyaSigdir ){ 
+        if(satirBoyu >= fbTxtObj.getScaledWidth() && !fbTxtObj.agKutuyaSigdir ){
             text = text.substring(0,text.length-1) 
         }       
 
@@ -223,11 +236,17 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             }
         }
 
-        $(this).val(text)
+        $(this).val(text) 
         agEditor.writeToText(target_id,text)
     })
 
     $(document).on('keypress','.ag-textbox',function(e){
+
+        if(agEditor.agBelgeTuru == 'tek_harfli_banner'){
+            //karater limitini tikkate alama. çık
+            return;
+        }
+
         $(this).css('border-color','#e6e5e5')
         let target_id   = $(this).attr('data-target-id') 
         let fbTxtObj    = agEditor.getObjectByID(target_id)
@@ -235,7 +254,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         if(fbTxtObj.agKarakterLimiti <= text.length){
             return false;
         }
-    })    
+    })
 
     $(document).on('click','.ag-resimekle-btn',function(){
         let target_id                   = $(this).attr('data-target-id')
@@ -359,6 +378,8 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
 
     $(document).on('click','.ag-edit-font',function(){
         const obj_id = $(this).attr('data-object-id')
+        $('#modal-font-setting').attr('data-obj-id',obj_id)
+
         url = agBaseURL+"/editor/fonts/fonts.json"         
         let ul = '<ul>'
         $.each(agEditor.fontsJson,function (i,fv) {    
@@ -369,7 +390,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             }).catch(()=>{
                 console.log("Font yüklenemedi font adı " + fv)
             })
-            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-obj-id="'+obj_id+'" data-font="'+fv+'">'+fv+'</li>';
+            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-font="'+fv+'">'+fv+'</li>';
         }) 
         ul += '\n<ul>'
         $('#modal-font-setting .ag-font-list').html(ul);
@@ -408,7 +429,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         $('.ag-font').css('background-color','#fff')  
         $(this).css('background-color','#eee')        
         let font_name    = $(this).attr('data-font')          
-        let obj_id       = $(this).attr('data-obj-id')
+        let obj_id       = $('#modal-font-setting').attr('data-obj-id')
         obj              = agEditor.getObjectByID(obj_id)
         obj.fontFamily   = font_name;
         agEditor.activeCanvas.renderAll();
@@ -418,7 +439,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         $('.ag-color-box').css('border-radius','60px')  
         $(this).css('border-radius','0')  
         let color        = $(this).attr('data-color')
-        let obj_id       = $(this).attr('data-obj-id')
+        let obj_id       = $('#modal-font-setting').attr('data-obj-id')
         obj              = agEditor.getObjectByID(obj_id)
         obj.setColor(color);
         agEditor.activeCanvas.renderAll();
@@ -500,6 +521,41 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             $('#modal-cart-image .modal-body').html($('#modal-cart-image .modal-body').html()+"\n"+img)
          })
     })
+
+    $(document).on('click','#ag-settings',function(){
+        if(!agEditor.activeCanvas){
+            alert("Seçili sayfa yok")
+            return;
+        }
+
+        if(agEditor.fabricCanvases.length){
+            $('#modal-settings .ag-belge-turu').val(agEditor.agBelgeTuru)
+            $('#modal-settings').modal('show')
+        } else{
+            alert("Henüz  belgeniz yok")
+        }
+    })
+
+    $(document).on('click','.ag-modal-settings-tamam-btn',function(){
+        let belge_turu = $('.ag-belge-turu').val()
+        if(belge_turu=='tek_harfli_banner'){
+            const Objs= agEditor.activeCanvas.getObjects();
+            let sayac = 0;
+            $.each(Objs,function(i,obs){
+                if(obs instanceof fabric.Textbox){
+                    obs.text = 'Yazı Alanı '+ sayac 
+                    sayac++;
+                }
+            })
+            if(sayac>1){
+                alert("Belgede enfazla bir Yazı Alanı olabilir. Diğerlerini silmelisiniz.")
+                return;
+            }
+        }
+        agEditor.agBelgeTuru = belge_turu;
+    }) 
+
+    
     
 })//===========================   End document ready
 
@@ -511,19 +567,43 @@ async function renderOldversionBigBGImage() {
         model_suffixarr = model.match(/\d/g);
         model_suffix    = model_suffixarr.join("");
         ilk_rakam_pos   = model.indexOf(model_suffixarr[0])
-        model_prefix    = model.substring(0 , ilk_rakam_pos);
-        console.log(koseNoktalari[model_suffix])             
+        model_prefix    = model.substring(0 , ilk_rakam_pos);            
     }else{
         console.log("Model no bulunamadı")
     }
-     
-    bigImgSrc  = agEditor.getObjectByID('bg').getSrc();    
+
+    
+    async function resimVarmi(){
+        return new Promise((resolve,reject)=>{
+            let orjinalBuyukResim = agEditor.activeCanvas.agBigImgSrc
+            let resim       = new Image();
+            resim.addEventListener('load',function(){ 
+                resolve(true);
+            })  
+            resim.addEventListener('error',function(){ 
+                console.log("Büyük resim bu adreste bulunamadı \n"+resim.src) 
+                reject(resim.src);
+            })  
+            resim.src = orjinalBuyukResim;
+        })
+    }
+
+    let sonuc = await resimVarmi().catch((sonuc)=>{ 
+            alert("Orjinal zemin resmi bulunamadığından resim büyütülemiyor\n"+sonuc)
+            return false;
+            
+    })
+    if(!sonuc){
+        return false; 
+    }
+
+    zeminResmi  = agEditor.getObjectByID('bg').getSrc();    
     if(agEditor.activeCanvas){
         return new Promise((resolve,reject)=>{
-            fabric.Image.fromURL(bigImgSrc, function(oImg) {
+            fabric.Image.fromURL(zeminResmi, function(oImg) {
                 if (!oImg._element){
-                    alert("Büyük resim bu yolda bulunamadı \n"+bigImgSrc)
-                    reject()
+                    alert("Büyük resim bu yolda bulunamadı \n"+zeminResmi)
+                    reject(false)
                     return;
                 }
                 let objects = agEditor.activeCanvas.getObjects();
@@ -538,7 +618,7 @@ async function renderOldversionBigBGImage() {
                     width: agEditor.activeCanvas.width-(2*koseNoktalari[model_suffix][1]),
                     height: agEditor.activeCanvas.height-(2*koseNoktalari[model_suffix][0])
                 })
-                resolve();
+                resolve(true);
             })
         })
     }
@@ -817,7 +897,7 @@ async function createAndUploadAgeditorJson(){
      
 
     await uploadSmallPageImages(300);
-    let allCanvasesArr  = [];
+    let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas      = agEditor.fabricCanvases[key];
@@ -828,9 +908,7 @@ async function createAndUploadAgeditorJson(){
 
     const str   = JSON.stringify(allCanvasesArr);
     const bytes = new TextEncoder().encode(str);
-    const blob  = new Blob([bytes], {
-        type: "application/json"
-    });
+    const blob  = new Blob([bytes], { type: "application/json" });
 
     $('#form-upload').remove();
     $('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;">'+
@@ -859,7 +937,7 @@ async function createAndUploadAgeditorJson(){
                     alert("Tasarım dosyası gönderilemedi. Sistemsel bir hata oldu")
                     reject();
                 }    
-                if (json['success']) {                    
+                if (json['success']) {
                     node = $('button[id^=\'button-upload\']')[0];
                     $(node).parent().find('input').val(json['code']);
                     console.log("AgEditor.json dosyası gönderildi")

@@ -7,3 +7,6 @@
 // 6 - Text kutu hazırlanırken fareyle satır sayısı artırılmasın. Yada satır sayısı artırılırsa özelikler tablosuna yansısız
 // 7 - Textbox a şablon hazırlanırken seçilen font , kutu boyu , kutu line sayısı otomatik olarak hesaplanup özelikler tablosundaki ilgili yere eklensin
 8 - CropAlanlar zemin resmin arkasına varsayılan olarak eklenmeli
+9 - Font ve renkler yüklenirken her kutu için data-target-obj-id olmasın modala birtane ekle onu kulan
+10- şablonda doldurulmamış alanlar herhangi bir sayfada olabilir. sadece birinci sayfayı şuan gösteriyor.
+    hatanın olduğu sayfalar vurugulansın

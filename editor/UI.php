@@ -97,6 +97,10 @@
                       <li><a class="nav-item nav-link"  
                       data-toggle="tooltip" data-placement="bottom" title="Sil"
                       id="obje-sil"><i class="fa fa-trash"></i></a></li>
+                      <li><a class="nav-item nav-link"  
+                      data-toggle="tooltip" data-placement="bottom" title="Belge Ayarları"
+                      id="ag-settings"><i class="fa fa-cog" aria-hidden="true"></i></a></li>
+                      
                       
 
                       <li><a class="nav-item nav-link"  
@@ -146,7 +150,7 @@
               <!-- =========================================  PROPERTIES PANEL    =====================  -->
               <div id="properties-panel" class="col-sm-4 col-md-3 col-lg-3 col-xl-3">
                 <div class="card">
-                  <h5 class="card-header">Özellikler</h5>
+                  <h5 class="card-header">Özellikler </h5>
                   <div class="card-body">
                     <table class="table table-borderless properties">
                   
@@ -216,6 +220,7 @@
                         
                     </div>
                     <div class="modal-footer"> 
+                      <button type="button" class="btn btn-secondary ag-crop-resim-crop" data-dismiss="modal">Kırp ve Kapat</button>
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Vazgeç</button>
                     </div>
                   </div>
@@ -275,7 +280,6 @@
               <!-- END-->
 
 
-
               <!-- =========================================  MODAL TEXT İNPUT   =====================  -->
               <div class="modal ag-modal" tabindex="-1" id="modal-text-input" role="dialog">
                 <div class="modal-dialog">
@@ -287,7 +291,8 @@
                       </button>
                     </div>
                     <div class="modal-body"> 
-                       <input type="text" class="form-control ag-textbox" id="ag-input-text" data-target-id='' value="" placeholder="Yazı yazın">
+                       <input type="text" class="form-control ag-textbox"                   id="ag-input-text"      data-target-id='' value="" placeholder="Yazı yazın">
+                       <textarea          class="ag-form-control form-control ag-textarea"  id="ag-input-textarea"  data-target-id="" ></textarea>
                     </div>
                     <div class="modal-footer"> 
                       <button type="button" class="btn btn-success ag-modal-tamam-btn" data-dismiss="modal">Tamam</button>
@@ -298,6 +303,32 @@
               <!-- END-->
 
 
+              <!-- =========================================  MODAL SETTİNGS   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-settings" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header"> 
+                        BELGE AYARLARI
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Belge Türü</label>
+                            <select class="form-control ag-belge-turu">
+                              <option value="varsayilan_belge">Varsayılan Belge</option>
+                              <option value="tek_harfli_banner">Tek Harfli Banner</option>
+                            </select>
+                         </div>
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-success ag-modal-settings-tamam-btn" data-dismiss="modal">Kaydet</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
 
 
 

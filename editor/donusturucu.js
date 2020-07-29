@@ -5,7 +5,7 @@ var fabricObj   = {
                 background:"#ffffff",
                 agSmallImageUrl:"",
                 height:"600",
-                width:"800",
+                width:"800", 
                 id:1
     };
 
@@ -91,8 +91,7 @@ var txtObj      = {
     "fontSize": 24,
     "fontWeight": "normal",
     "fontFamily": "arial",
-    "fontStyle": "normal",
-    "lineHeight": 1.16,
+    "fontStyle": "normal", 
     "underline": false,
     "overline": false,
     "linethrough": false,
@@ -590,20 +589,6 @@ function parseProductModelNo(){
     }
 
     let url             = dir+resimAdi;
-    /*new Promise(resolve => {
-        let orjinalResim = new Image(); 
-        orjinalResim.onload     = function (img) {
-            buyukResimW         = this.width
-            buyukResimH         = this.height 
-            console.log("Resim yüklenemedi  : " + url); 
-            resolve(true);
-        };
-        orjinalResim.onerror = function() {
-            console.log("Büyük zemin yüklendi  : " + url); 
-            resolve(false);
-        };
-        orjinalResim.src = url;
-    });*/
     return url;
 }
 
@@ -611,8 +596,6 @@ async function  getIceriklerJSON(product_id){
     return new Promise(function(resolve,reject){
         var data = new FormData();
         data.append('product_id', product_id);
-        //$('.fa-spin').css('margin-left','auto')
-        //$('.fa-spin').css('margin-right','auto')
         jQuery.ajax({
             url: '/?route=tasarim/icerikver/getIceriklerArr',
             data: data,
@@ -649,11 +632,19 @@ async function  createFabricJSON(iceriklerJSON){
     let cropBoxArr      = [];
     let fligranArr      = [];
     let logoArr      = [];
+
     $.each(iceriklerJSON,(i,icerik)=>{
         if(icerik.tur == 'zemin'){
             zemin   = icerik; 
-        }else if(icerik.tur == 'txt_kutu'){
-           txtBoxArr.push(icerik)
+        }else if(icerik.tur == 'txt_kutu' || icerik.tur == 'cs_txt_kutu'){
+            //eğer tek harfli banner ise diğer txt kutulara gerek yok
+            if(iceriklerJSON[0].banner){
+                if(txtBoxArr.length<1 && icerik.left<iceriklerJSON[0].height){ 
+                    txtBoxArr.push(icerik);
+                }
+            }else{
+                txtBoxArr.push(icerik)
+            }
         }else if(icerik.tur == 'resim_yer_tutucu'){
             cropBoxArr.push(icerik)
         }else if(icerik.tur == 'filigran'){
@@ -662,11 +653,12 @@ async function  createFabricJSON(iceriklerJSON){
             logoArr.push(icerik)
         }
     }) 
+
     // eğer ZEMIN  bulunduysa  
     $('.ag-alanseti').show();
     $('.left .col-sm-6').hide();
 
-    async function zeminiekle(){
+    async function zeminiekle(isBanner){
         return  new Promise(function(resolve,reject){
             let imgElm      = new Image();
             imgElm.src      = zemin.src;
@@ -681,23 +673,41 @@ async function  createFabricJSON(iceriklerJSON){
                 bgImgObj.hasControls    = false
                 bgImgObj.id             = "bg"
                 bgImgObj.src            = imgElm.src 
-                fabricObj.objects.push(bgImgObj); 
+                fabricObj.objects.push(bgImgObj);
+
+                if(isBanner){
+                    agEditor.agBelgeTuru = 'tek_harfli_banner'
+                }else{
+                    agEditor.agBelgeTuru = 'varsayilan_belge'
+                }
+
                 resolve(true);
             }
         })
     }
+
     if(zemin!=''){
-        await zeminiekle();
+        await zeminiekle(iceriklerJSON[0].banner);
     }
-    
-    
+        
     // textBoxlar
     $.each(txtBoxArr,function(i,txtBox){
+        let agMaxLines = 1
         const cloneTextBox = Object.assign({}, txtObj);
+
+        if(txtBox.tur == 'cs_txt_kutu'){
+            agMaxLines = Math.round(txtBox.height/txtBox.font_size)
+        }else{
+            cloneTextBox.height           = txtBox.height
+        }
+
         cloneTextBox.left             = txtBox.left
         cloneTextBox.top              = txtBox.top
+        if(iceriklerJSON[0].banner){
+            cloneTextBox.top              = txtBox.top*.85
+        }
+        
         cloneTextBox.width            = txtBox.width
-        cloneTextBox.height           = txtBox.height 
         cloneTextBox.fill             = txtBox.color
         cloneTextBox.stroke           = txtBox.stroke_color 
         cloneTextBox.angle            = txtBox.rotation
@@ -706,17 +716,17 @@ async function  createFabricJSON(iceriklerJSON){
         cloneTextBox.fontWeight       = txtBox.font_weight
         cloneTextBox.fontFamily       = txtBox.font_family
         cloneTextBox.fontSize         = txtBox.font_size
-        cloneTextBox.fontStyle        = txtBox.font_style
-        cloneTextBox.lineHeight       = txtBox.font_size
+        cloneTextBox.fontStyle        = txtBox.font_style 
         cloneTextBox.textAlign        = txtBox.text_align 
         cloneTextBox.agKarakterLimiti = txtBox.karakter_limiti
         cloneTextBox.agKutuyaSigdir   = true
-        cloneTextBox.agMaxLines       = 1
+        cloneTextBox.agMaxLines       = agMaxLines
         cloneTextBox.agMaxWidth       = txtBox.width
         cloneTextBox.agFontSize       = 0
         cloneTextBox.agBosBirak       = false
         cloneTextBox.evented          = true
         cloneTextBox.hasControls      = false
+        cloneTextBox.agTekHarfliBannerIcinKelime = ''
         cloneTextBox.id               = 'txt_kutu'+i
         fabricObj.objects.push(cloneTextBox);
     })
@@ -743,8 +753,8 @@ async function  createFabricJSON(iceriklerJSON){
     // fligranlar
     $.each(fligranArr,function(i,fligBox){
         const cloneFligranBox            = Object.assign({}, fligranObj);
-        cloneFligranBox.left             = fligBox.left
-        cloneFligranBox.top              = fligBox.top
+        cloneFligranBox.left             = parseInt(fligBox.left)
+        cloneFligranBox.top              = parseInt(fligBox.top)
         cloneFligranBox.width            = fligBox.width
         cloneFligranBox.height           = fligBox.height  
         cloneFligranBox.angle            = fligBox.rotation  
@@ -765,14 +775,14 @@ async function  createFabricJSON(iceriklerJSON){
             imgElm.src      = logoBox.url;
             imgElm.onload   = function(){
                 const clonLogoBox            = Object.assign({}, logoObj);
-                clonLogoBox.left             = logoBox.left
-                clonLogoBox.top              = logoBox.top
+                clonLogoBox.left             = parseInt (logoBox.left)
+                clonLogoBox.top              = parseInt (logoBox.top)
                 clonLogoBox.scaleX           = logoBox.height/imgElm.naturalHeight
                 clonLogoBox.scaleY           = logoBox.width/imgElm.naturalWidth
-                clonLogoBox.angle            = logoBox.rotation  
-                clonLogoBox.src              = logoBox.url  
-                clonLogoBox.agBosBirak       = false
-                clonLogoBox.evented          = false
+                clonLogoBox.angle            = logoBox.rotation 
+                clonLogoBox.src              = logoBox.url 
+                clonLogoBox.agBosBirak       = false 
+                clonLogoBox.evented          = false 
                 clonLogoBox.hasControls      = false 
                 clonLogoBox.id               = 'logo'+0
                 //clonLogoBox.agIsLogo         = true
@@ -787,14 +797,20 @@ async function  createFabricJSON(iceriklerJSON){
     if(logoArr.length){
         await logoEkle();
     }
-    agEditor._fromJSON([JSON.stringify(fabricObj)]);
 
-    let totalHeight =0
+
+    let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
+    allCanvasesArr.push([JSON.stringify(fabricObj)])
+    //const str                   = JSON.stringify(allCanvasesArr);
+    agEditor._fromJSON(allCanvasesArr);
+
+    let totalHeight             = 0
     $('.canvas-container').each(function (elm) {
-        const cnv = $(this).find('canvas')[0] 
+        const cnv               = $(this).find('canvas')[0] 
         $(this).css('height',cnv.scrollHeight+10+'px')
-        totalHeight     +=  cnv.scrollHeight+10;
+        totalHeight             +=  cnv.scrollHeight+10;
     })
+
     $('#ageditor').css('height',totalHeight+'px');
 
     console.log("Şablon dönüştürüldü")

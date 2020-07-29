@@ -45,6 +45,8 @@ class AgEditor {
                                             "agBosBirak",
                                             "agBigImgSrc",
                                             "agVersion",
+                                            "agBelgeTuru",
+                                            "agTekHarfliBannerIcinKelime",
                                             "evented",
                                             "hasControls",
                                             "agIsLogo",
@@ -53,6 +55,7 @@ class AgEditor {
                                             "id"
                                         ]
         this._loadfonts();
+        this.agBelgeTuru                = 'varsayilan_belge';
     }
 
     async refreshMainMenu(){
@@ -148,12 +151,13 @@ class AgEditor {
             }
 
             canvas.on("mouse:down", (e)=>{
-                if(BU.workLocation!='product_page'){
-                    BU.refreshMainMenu()
-                }
                 BU.agPresentation.createInputPanel(canvas);
                 $('.canvas-container').css('outline','none');
                 BU.activeCanvas = canvas;
+
+                if(BU.workLocation!='product_page'){
+                    BU.refreshMainMenu()
+                }
                 if(BU.workLocation!='product_page'){
                     $('#'+id).parent().css('outline','thick solid aqua');
                 }
@@ -176,9 +180,38 @@ class AgEditor {
                                 $(BU.agCropper.modal_element).find(".ag-crop-resim-yukle").hide();
                             }
                     }else if(BU.presentMode == true  && e.target instanceof fabric.Textbox ){
-                                $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
-                                $('#modal-text-input #ag-input-text').val(e.target.text)
-                                $('#modal-text-input').modal('show')
+                        let text = e.target.text 
+                        if(BU.agBelgeTuru == 'tek_harfli_banner'){
+                            text = e.target.agTekHarfliBannerIcinKelime;
+                        }
+                        if(e.target.agMaxLines == 1){
+                            $('#modal-text-input .ag-textarea').hide();
+                            $('#modal-text-input #ag-input-text').show();
+                            $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
+                            $('#modal-text-input #ag-input-text').val(text)
+                        }else{
+                            $('#modal-text-input .ag-textarea').show();
+                            $('#modal-text-input #ag-input-text').hide();
+                            let  style = '';
+                            style           += "font-family:"+e.target.fontFamily+";"
+                            style           += "font-size:"+e.target.fontSize*e.target.scaleX+"px!important;"
+                            style           += "text-align:"+e.target.textAlign+";";
+                            style           += "width:"+e.target.getScaledWidth()+"px;"
+                            style           += "height:"+(e.target.fontSize*e.target.agMaxLines)+"px!important;"
+                            style           += "padding:0px!important;"
+                            style           += "margin-left: auto;"
+                            style           += "display: block;"
+                            style           += "margin-right: auto;"
+                            
+    
+    
+                            $('#modal-text-input .ag-textarea').attr('data-target-id',e.target.id)
+                            $('#modal-text-input .ag-textarea').val(text) 
+                            $('#modal-text-input .ag-textarea').attr('rows',e.target.agMaxLines) 
+                            $('#modal-text-input .ag-textarea').attr('style',style) 
+                            
+                        }       
+                        $('#modal-text-input').modal('show')                        
                     }
                 }
             });// end mouse:down
@@ -219,6 +252,11 @@ class AgEditor {
                 sayac++;
             }
         })
+
+        if(this.agBelgeTuru=='tek_harfli_banner' && sayac>0){
+            alert("Tek harfli banner belgesine ikinci text kutu ekleyemezsiniz!")
+            return;
+        }
 
         let BU = this;
         if(this.activeCanvas){
@@ -264,6 +302,7 @@ class AgEditor {
             textBoxFabricInstance.agKarakterLimiti      = 30
             textBoxFabricInstance.agKutuyaSigdir        = 1
             textBoxFabricInstance.agMaxLines            = 1
+            textBoxFabricInstance.agTekHarfliBannerIcinKelime =''
             BU.activeCanvas.add(textBoxFabricInstance);
             BU.activeCanvas.requestRenderAll();
             
@@ -363,17 +402,27 @@ class AgEditor {
         }else if(this.activeCanvas){
             let canvas_id = $(this.activeCanvas.lowerCanvasEl).attr('id');
             $(this.activeCanvas.wrapperEl).remove();
-            delete this.fabricCanvases[canvas_id];
+            await delete this.fabricCanvases[canvas_id];
+            let kalanCnvslar = this.fabricCanvases.filter(function(i,val){
+                if(val){return val }
+            })
+            this.fabricCanvases = kalanCnvslar
+            if(!Object.keys(this.fabricCanvases).length){
+                this.agBelgeTuru='varsayilan_belge'
+            }
+            if(this.workLocation!='product_page'){
+                $('#'+this.activeCanvas.id).parent().css('outline','thick solid aqua');
+            }
             this.activeCanvas = null;
         }
 
-        for (var key in this.fabricCanvases) {
+        /*for (var key in this.fabricCanvases) {
             this.activeCanvas = this.fabricCanvases[key]
-            if(BU.workLocation!='product_page'){
+            if(this.workLocation!='product_page'){
                 $('#'+this.activeCanvas.id).parent().css('outline','thick solid aqua');
             }
             break;
-        }
+        }*/
         this.refreshMainMenu();
     }
 
@@ -568,8 +617,8 @@ class AgEditor {
     }
 
     saveJsonToLocal(){
-        let BU = this
-        let allCanvasesArr=[];
+        let BU              = this
+        let allCanvasesArr  = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
         for (var key in BU.fabricCanvases) {
             if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
             let canvas = BU.fabricCanvases[key];
@@ -592,9 +641,17 @@ class AgEditor {
         this.fabricCanvases = [];
  
         $.each(jsonFile,async (i,val)=>{
+            if(i==0){
+                return;
+            }
             let obj     = JSON.parse(val)
             let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            let cnvs    = await BU.addCanvas(page);
+            let cnvs    = await BU.addCanvas(page); 
+            if(jsonFile[0] !== undefined){
+                if(jsonFile[0].agBelgeTuru !== undefined ){
+                    BU.agBelgeTuru = jsonFile[0].agBelgeTuru
+                }
+            }
             cnvs.loadFromJSON(obj,async function() {
                 let cnv     = cnvs;
                 let objects = cnv.getObjects();
@@ -817,9 +874,12 @@ class AgPresentation{
                 checked       = "checked"
             }
 
-            let  o_text='';
+            let  o_text     =   '';
             if(BU.workLocation!='product_page'){
                 o_text = o.text
+                if(BU.editor.agBelgeTuru == 'tek_harfli_banner' ){
+                    o_text = o.agTekHarfliBannerIcinKelime
+                }
             }
             
             if(o instanceof fabric.Textbox){
@@ -850,7 +910,7 @@ class AgPresentation{
                     style           += "font-size:"+o.fontSize*o.scaleX+"px!important;"
                     style           += "text-align:"+o.textAlign+";";
                     style           += "width:"+o.getScaledWidth()+"px;"
-                    style           += "height:"+o.getScaledHeight()+"px;"
+                    style           += "height:"+(o.fontSize*o.agMaxLines)+"px!important;"
                     style           += "padding:0px!important;"
 
                     let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
@@ -861,20 +921,24 @@ class AgPresentation{
 
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
-                            +'  <td style="min-width:67px">'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left"></i><span>Yazı Tipi</span></div>'
-                            +'  </td>'
-                            +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
-                            +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
-                            +'  </td>'
-                            +'</tr>'
-                            +'<tr>'
-                            +'  <td colspan=3>'
-                            +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
-                            +'      </div>'
-                            +'  <td>'
-                            +'</tr>')
+                        +'  <td style="min-width:71px;padding:0!important;padding-top:0px!important">'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" style="float: left;padding-top:2px"></i><span>Yazı Tipi</span></div>'
+                        +'  </td>'
+                        +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
+                        +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
+                        +'  </td>'
+                        +'  <td style="min-width: 60px; padding: 0!important; padding-top: 1px!important;">'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
+                        +'  </td>'
+                        +'</tr>'
+                        +'<tr>'
+                        +'  <td colspan=3>'
+                        +'      <div class="checkbox" style="margin-top:0px">'
+                        +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                        +'      </div>'
+                        +'  <td>'
+                        +'</tr>')
                 }
             }
 
