@@ -20,8 +20,11 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     
     if(agEditor.workLocation =='product_page' 
         || agEditor.workLocation =='order_info_page' 
-        || agEditor.workLocation =='product_edit_page'){
-            $(agEditor.nav_html_element).hide();
+        || agEditor.workLocation =='product_edit_page' 
+        || agEditor.workLocation =='ageditor'){
+            if(agEditor.workLocation =='product_page'){
+                $(agEditor.nav_html_element).hide();
+            }
             $(agEditor.target_properties_panel).hide();  
             getSablonFile().catch(()=>{ 
                 eskiVersiondanDonustur();
@@ -555,6 +558,13 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         agEditor.agBelgeTuru = belge_turu;
     }) 
 
+    $(document).on('click','.ag-bannerleri-gor',function(){
+        if(agEditor.activeCanvas){
+            bannerleriGor()
+        }else{
+            alert("Aktif sayfa yok")
+        }
+    })
     
     
 })//===========================   End document ready
@@ -699,13 +709,13 @@ async function _uploadSmallPageImg(keys,index,w){
 
 async function saveSablonToServer() {
     agEditor.modal_progress.modal('show')
-    let allCanvasesArr=[];
+    let allCanvasesArr= [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas = agEditor.fabricCanvases[key];
-        let serialized = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
+        //let serialized = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
         //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
-        allCanvasesArr.push(serialized) 
+        allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions))
     }
     const str   = JSON.stringify(allCanvasesArr);
     const bytes = new TextEncoder().encode(str);
@@ -826,6 +836,43 @@ function switchFullScreen(){
     fullpage = !fullpage;
 }
 
+function bannerleriGor(){
+
+    let harfler                 = ''
+    let objects                 = agEditor.activeCanvas.getObjects()
+    let textBoxObj              = '' 
+
+    $.each(objects,(i,obj)=>{
+        if(obj.agTekHarfliBannerIcinKelime && obj instanceof  fabric.Textbox){
+            textBoxObj          = obj
+            return false;
+        }
+    })
+
+    harfler                     = textBoxObj.agTekHarfliBannerIcinKelime
+    
+    let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
+    for (var key in agEditor.fabricCanvases) {
+        if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
+        let canvas      = agEditor.fabricCanvases[key]; 
+        allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions)) 
+    }
+    
+    let a;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 ////////////////////////////  OC önsayfası için  ////////////////////
 function getWorkedLocationAndProductId(){
     let params          = new URLSearchParams(window.location.search)
@@ -851,6 +898,8 @@ function getWorkedLocationAndProductId(){
     }else if(typeof agfileurl  !== 'undefined'){
         agEditor.workLocation  = 'order_info_page';
         switchFullScreen();
+    }else if(window.location.search.includes('/ageditor/?product_id=')){
+        agEditor.workLocation  = 'ageditor';
     }
 }
 
@@ -901,9 +950,9 @@ async function createAndUploadAgeditorJson(){
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas      = agEditor.fabricCanvases[key];
-        let serialized  = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
+        //let serialized  = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
         //serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
-        allCanvasesArr.push(serialized) 
+        allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions)) 
     }
 
     const str   = JSON.stringify(allCanvasesArr);
@@ -961,6 +1010,7 @@ async function getProductPrewievImages() {
                         let tr      = $(elms).parent().parent()
                         first_td    = $(tr).find('td')[0];
                         $.each(datas,(i,val)=>{
+                            if(i==0){return;}
                             let v = JSON.parse(val)
                             console.log(v.agSmallImageUrl)
                             $(first_td).append("<img class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")

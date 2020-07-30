@@ -800,7 +800,7 @@ async function  createFabricJSON(iceriklerJSON){
 
 
     let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
-    allCanvasesArr.push([JSON.stringify(fabricObj)])
+    allCanvasesArr.push(fabricObj)
     //const str                   = JSON.stringify(allCanvasesArr);
     agEditor._fromJSON(allCanvasesArr);
 

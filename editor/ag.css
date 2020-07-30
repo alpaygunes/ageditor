@@ -255,10 +255,6 @@
     border-radius: 0;
 }
 
-#modal-agcropper .crop-menu-item{
-    /*margin-left:0px;
-    padding: 0;*/
-}
 
 #modal-agcropper .btn-link{ 
     font-size: 12px;
@@ -405,6 +401,12 @@
 .modal-footer .ag-crop-resim-crop{
     background-color: #428bca!important;
     color: #fff!important;
+}
+
+.ag-bannerleri-gor i{
+    margin-right: 10px;
+    font-size: 20px!important;
+    color:#fff!important;
 }
  
 

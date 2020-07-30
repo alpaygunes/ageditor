@@ -65,7 +65,6 @@ class AgEditor {
             $('#canvas-ekle').show();
         }else{
             $('.nav-link').show();
-            $(this.nav_html_element).show();
         }
 
         if(this.activeCanvas){
@@ -622,10 +621,9 @@ class AgEditor {
         for (var key in BU.fabricCanvases) {
             if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
             let canvas = BU.fabricCanvases[key];
-            let serialized = JSON.stringify(canvas.toJSON(BU.agJsonExportOptions));
-           
+            //let serialized = JSON.stringify(canvas.toJSON(BU.agJsonExportOptions));
             //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
-            allCanvasesArr.push(serialized) 
+            allCanvasesArr.push(canvas.toJSON(BU.agJsonExportOptions)) 
         }
 
         let a       = document.createElement('a');
@@ -644,7 +642,7 @@ class AgEditor {
             if(i==0){
                 return;
             }
-            let obj     = JSON.parse(val)
+            let obj     = val
             let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
             let cnvs    = await BU.addCanvas(page); 
             if(jsonFile[0] !== undefined){
@@ -884,6 +882,17 @@ class AgPresentation{
             
             if(o instanceof fabric.Textbox){
                 if(o.agMaxLines==1){
+                    let bannerlereBakTR =''
+                    if(BU.editor.agBelgeTuru == 'tek_harfli_banner'){
+                        bannerlereBakTR = '\n<tr>'
+                                        + '  <td colspan="3">'
+                                        + '     <div class="btn btn-primary ag-bannerleri-gor pull-right">'
+                                        + '     <i class="fa fa-eye"></i>'
+                                        + '     Bannerleri Gör</div>'
+                                        + '  </td>'
+                                        + '</tr>'
+                    }
+
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
                             +'  <td style="min-width:71px;padding:0!important;padding-top:0px!important">'
@@ -898,12 +907,13 @@ class AgPresentation{
                             +'  </td>'
                             +'</tr>'
                             +'<tr>'
-                            +'  <td colspan=3>'
+                            +'  <td colspan="3">'
                             +'      <div class="checkbox" style="margin-top:0px">'
                             +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
-                            +'  <td>'
-                            +'</tr>')
+                            +'  </td>'
+                            +'</tr>'
+                            +bannerlereBakTR)
 
                 }else{
                     style           += "font-family:"+o.fontFamily+";"
