@@ -214,6 +214,12 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
 
         //eğer belge turu tek_harf banner ise font boyutunu hesaplama
         if(agEditor.agBelgeTuru == 'tek_harfli_banner'){
+            let harf_sayisi = text.replace(/\s+/g, '')
+            harf_sayisi = harf_sayisi.length;
+            if (harf_sayisi % 2 != 0) {
+                harf_sayisi++;
+            }
+            $('#input-quantity').val(harf_sayisi)
             let trgObj = agEditor.getObjectByID(target_id)
             trgObj.agTekHarfliBannerIcinKelime = text
             text = text.charAt(0)
@@ -836,29 +842,60 @@ function switchFullScreen(){
     fullpage = !fullpage;
 }
 
-function bannerleriGor(){
+async function bannerleriGor(){
 
     let harfler                 = ''
-    let objects                 = agEditor.activeCanvas.getObjects()
-    let textBoxObj              = '' 
+    let objects                 = agEditor.activeCanvas.getObjects()  
 
     $.each(objects,(i,obj)=>{
         if(obj.agTekHarfliBannerIcinKelime && obj instanceof  fabric.Textbox){
-            textBoxObj          = obj
+            harfler             = obj.agTekHarfliBannerIcinKelime
+            harfler             = harfler.replace(/\s+/g, '')
             return false;
         }
     })
-
-    harfler                     = textBoxObj.agTekHarfliBannerIcinKelime
-    
+        
     let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
     for (var key in agEditor.fabricCanvases) {
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
-        let canvas      = agEditor.fabricCanvases[key]; 
+        let canvas              = agEditor.fabricCanvases[key];
         allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions)) 
     }
+
+
+
+    allCanvasesArr = [{'agBelgeTuru':agEditor.agBelgeTuru}];
+    for(index in harfler){  
+        // canvası clonlayıp harf sayısı kadar çoğaltalım
+        let canvas              = agEditor.fabricCanvases[1];
+        let cloneCanvas         = Object.assign({},canvas.toJSON(agEditor.agJsonExportOptions))
+        for(var key in cloneCanvas.objects){
+            if(cloneCanvas.objects[key].agTekHarfliBannerIcinKelime){
+                cloneCanvas.objects[key].text = harfler[index]
+                cloneCanvas.id = 100+index
+            }
+        }
+        allCanvasesArr.push(cloneCanvas) 
+    }
+
+
+    $('#modal-banner-goster').modal('show')
+    $('#ag-banner-editor').empty();
+    bannerEditor        = new AgEditor();
+    bannerEditor.editor_html_element        = $(null);
+    bannerEditor.agPresentation.preview_input_panel        = $('null');
+    bannerEditor.modal_progress             = $('null');
+    bannerEditor.target_properties_panel    = $('null');
+    bannerEditor.nav_html_element           = $('null');
+    bannerEditor.preview_input_panel        = $('null');
+    await bannerEditor._fromJSON(allCanvasesArr);
+
     
-    let a;
+    for(let ind in bannerEditor.fabricCanvases){
+        let cnvs    = bannerEditor.fabricCanvases[ind];
+        let dataURI = await bannerEditor.getJPEG(300,cnvs) 
+        $('#ag-banner-editor').append('<img src="'+dataURI+'"/>')
+    }
 }
 
 
@@ -898,7 +935,7 @@ function getWorkedLocationAndProductId(){
     }else if(typeof agfileurl  !== 'undefined'){
         agEditor.workLocation  = 'order_info_page';
         switchFullScreen();
-    }else if(window.location.search.includes('/ageditor/?product_id=')){
+    }else if(window.location.href.includes('/ageditor/?product_id=')){
         agEditor.workLocation  = 'ageditor';
     }
 }
@@ -1011,7 +1048,7 @@ async function getProductPrewievImages() {
                         first_td    = $(tr).find('td')[0];
                         $.each(datas,(i,val)=>{
                             if(i==0){return;}
-                            let v = JSON.parse(val)
+                            let v = val
                             console.log(v.agSmallImageUrl)
                             $(first_td).append("<img class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")
                         })

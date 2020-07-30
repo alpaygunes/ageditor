@@ -331,6 +331,29 @@
               <!-- END-->
 
 
+              <!-- =========================================  MODAL BANNER GÖSTER   =====================  -->
+              <div class="modal ag-modal" tabindex="-1" id="modal-banner-goster" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header"> 
+                        BANNERLER
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                         <div id="ag-banner-editor">
+                         </div>
+                    </div>
+                    <div class="modal-footer"> 
+                      <button type="button" class="btn btn-success ag-modal-settings-tamam-btn" data-dismiss="modal">Kaydet</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END-->
+
+
 
           </div><!-- End container -->
 

@@ -8,7 +8,8 @@ class AgEditor {
 
     constructor(){
         this.agImagePlaceHolder         = "/editor/agblank.png";
-        this.workLocation              = '';
+        this.workLocation               = '';
+        this.preview_input_panel        = $('#preview-input-panel');
         this.agPresentation             = new AgPresentation(this);
         this.agCropper                  = new AgCropper(this);
         this.container_html_element     = $('.ag-container');
@@ -16,7 +17,6 @@ class AgEditor {
         this.modal_progress             = $('#modal-progress');
         this.target_properties_panel    = $('#properties-panel');
         this.nav_html_element           = $('.ag-container .navbar');
-        this.preview_input_panel        = $('#preview-input-panel');
         this.fabricCanvases             = [];
         this.activeCanvas               = null;
         this.presentMode                = false;
@@ -414,14 +414,7 @@ class AgEditor {
             }
             this.activeCanvas = null;
         }
-
-        /*for (var key in this.fabricCanvases) {
-            this.activeCanvas = this.fabricCanvases[key]
-            if(this.workLocation!='product_page'){
-                $('#'+this.activeCanvas.id).parent().css('outline','thick solid aqua');
-            }
-            break;
-        }*/
+        
         this.refreshMainMenu();
     }
 
@@ -634,71 +627,96 @@ class AgEditor {
     }
 
     async _fromJSON(jsonFile){
-        let BU              = this;
-        $(this.editor_html_element).empty();
-        this.fabricCanvases = [];
- 
-        $.each(jsonFile,async (i,val)=>{
-            if(i==0){
-                return;
-            }
-            let obj     = val
-            let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
-            let cnvs    = await BU.addCanvas(page); 
-            if(jsonFile[0] !== undefined){
-                if(jsonFile[0].agBelgeTuru !== undefined ){
-                    BU.agBelgeTuru = jsonFile[0].agBelgeTuru
-                }
-            }
-            cnvs.loadFromJSON(obj,async function() {
-                let cnv     = cnvs;
-                let objects = cnv.getObjects();
-                $.each(objects,async function(j,obj){ 
-                    obj.evented         = true;
-                    obj.strokeUniform   = true;
-                    obj.hasControls     = true;
-                    if(obj instanceof fabric.Textbox){
-                        obj.setControlsVisibility({
-                            bl: false,
-                            br: false,
-                            tl: false,
-                            tr: false,
-                            mb: false,
-                            ml: true,
-                            mr: true,
-                            mt: false,
-                            mtr: true,
-                        });
-                        await BU.loadFont(obj.fontFamily).then(()=>{
-                            let txt = obj.text
-                            obj.text=" ";
-                            cnv.renderAll() 
-                            if(BU.workLocation=='product_page'){
-                                return;
-                            }
-                            obj.text=txt;
-                            cnv.renderAll()
-                        });
-                    }
-                    if(obj instanceof fabric.Image && !obj.agSablonResmi){
-                        BU.agCropper.autoCrop(obj);
-                    } 
-                    
-                    if(obj instanceof fabric.Image && obj.agSablonResmi){
-                        obj.evented     = false;
-                    }
-                    if(BU.workLocation == 'product_page'){
-                        obj.selectable  = false;
-                        if(obj.agIsLogo){
-                            obj.evented     = false;
-                        }
-                        obj.filters=[];
-                    }                    
-                }); 
-                BU.sunumuBaslat()
-            })                
-        })
+        return new Promise((res,rej)=>{
 
+
+            let BU              = this;
+            $(this.editor_html_element).empty();
+            this.fabricCanvases = [];
+     
+            let Promises = []
+            $.each(jsonFile,async (i,val)=>{
+                if(i==0){
+                    return;
+                }
+                let Prms = new Promise(async(Resolve,reject)=>{
+                    let obj     = val
+                    let page    = {id:obj.id ,w:obj.width,h:obj.height,bgColor:"#ffffff"}
+                    let cnvs    = await BU.addCanvas(page); 
+                    if(jsonFile[0] !== undefined){
+                        if(jsonFile[0].agBelgeTuru !== undefined ){
+                            BU.agBelgeTuru = jsonFile[0].agBelgeTuru
+                        }
+                    }
+                    cnvs.loadFromJSON(obj,async function() {
+                        let cnv     = cnvs;
+                        let objects = cnv.getObjects();
+                        let promises =[]
+                        $.each(objects,async function(j,obj){ 
+                            let prms = new Promise(async(resolve,reject)=>{
+                                    obj.evented         = true;
+                                    obj.strokeUniform   = true;
+                                    obj.hasControls     = true;
+                                    if(obj instanceof fabric.Textbox){
+                                        obj.setControlsVisibility({
+                                            bl: false,
+                                            br: false,
+                                            tl: false,
+                                            tr: false,
+                                            mb: false,
+                                            ml: true,
+                                            mr: true,
+                                            mt: false,
+                                            mtr: true,
+                                        });
+                                        await BU.loadFont(obj.fontFamily).then(()=>{
+                                            let txt = obj.text
+                                            obj.text= " ";
+                                            cnv.renderAll() 
+                                            if(BU.workLocation == 'product_page'){ 
+                                                return;
+                                            }
+                                            obj.text = txt;
+                                            cnv.renderAll() 
+                                        });
+                                    }
+                                    if(obj instanceof fabric.Image && !obj.agSablonResmi){
+                                        BU.agCropper.autoCrop(obj);
+                                    }                    
+                                    if(obj instanceof fabric.Image && obj.agSablonResmi){
+                                        obj.evented     = false;
+                                    }
+                                    if(BU.workLocation == 'product_page'){
+                                        obj.selectable  = false;
+                                        if(obj.agIsLogo){
+                                            obj.evented     = false;
+                                        }
+                                        obj.filters=[];
+                                    }
+                                    resolve(true);
+                                }) 
+                            promises.push(prms);
+                        }); //end foreach
+    
+                        Promise.all(promises).then(() => {
+                            BU.sunumuBaslat()
+                            Resolve(true);
+                        });
+                    }) 
+                })  // end Prms
+                Promises.push(Prms);          
+            })// foreah
+    
+            Promise.all(Promises).then((s) => {
+                console.log("Tamam") 
+                res();
+            }); 
+
+
+
+
+
+        })
     }
    
     getObjectByID(target_id){
@@ -819,7 +837,7 @@ class AgPresentation{
 
     constructor(editor){
         this.editor                 = editor; 
-        this.preview_input_panel    = $('#preview-input-panel');
+        this.preview_input_panel    = editor.preview_input_panel;
     }
 
     async prewiev() {
@@ -872,8 +890,8 @@ class AgPresentation{
                 checked       = "checked"
             }
 
-            let  o_text     =   '';
-            if(BU.workLocation!='product_page'){
+            let  o_text         =   '';
+            if(BU.workLocation  !=  'product_page'){
                 o_text = o.text
                 if(BU.editor.agBelgeTuru == 'tek_harfli_banner' ){
                     o_text = o.agTekHarfliBannerIcinKelime
@@ -882,17 +900,6 @@ class AgPresentation{
             
             if(o instanceof fabric.Textbox){
                 if(o.agMaxLines==1){
-                    let bannerlereBakTR =''
-                    if(BU.editor.agBelgeTuru == 'tek_harfli_banner'){
-                        bannerlereBakTR = '\n<tr>'
-                                        + '  <td colspan="3">'
-                                        + '     <div class="btn btn-primary ag-bannerleri-gor pull-right">'
-                                        + '     <i class="fa fa-eye"></i>'
-                                        + '     Bannerleri Gör</div>'
-                                        + '  </td>'
-                                        + '</tr>'
-                    }
-
                     $(BU.preview_input_panel).find('.textbox')
                         .append('<tr>'
                             +'  <td style="min-width:71px;padding:0!important;padding-top:0px!important">'
@@ -912,8 +919,7 @@ class AgPresentation{
                             +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
                             +'  </td>'
-                            +'</tr>'
-                            +bannerlereBakTR)
+                            +'</tr>')
 
                 }else{
                     style           += "font-family:"+o.fontFamily+";"
@@ -965,6 +971,19 @@ class AgPresentation{
                     +'</tr>')
             }
         })
+        let bannerlereBakTR =''
+        if(BU.editor.agBelgeTuru == 'tek_harfli_banner'){
+            bannerlereBakTR = '\n<tr>'
+                            + '  <td colspan="3">'
+                            + '     <div class="btn btn-primary ag-bannerleri-gor pull-right">'
+                            + '     <i class="fa fa-eye"></i>'
+                            + '     Bannerleri Gör</div>'
+                            + '  </td>'
+                            + '</tr>'
+            $(BU.preview_input_panel).find('.cropbox').append(
+                bannerlereBakTR
+            )
+        }
     }
 }
 

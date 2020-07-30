@@ -408,6 +408,16 @@
     font-size: 20px!important;
     color:#fff!important;
 }
+
+#ag-banner-editor img{
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    display: block;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
  
 
 
