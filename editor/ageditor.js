@@ -603,6 +603,12 @@ class AgEditor {
             }
             
         }else{
+            if(prop_name == 'width'){
+                value /= this.activeCanvas.getActiveObject().scaleX
+            }
+            if(prop_name == 'height'){
+                value /= this.activeCanvas.getActiveObject().scaleY
+            }
             this.activeCanvas.getActiveObject().set(prop_name, value);
             this.activeCanvas.requestRenderAll();            
         }
@@ -616,7 +622,14 @@ class AgEditor {
             let canvas = BU.fabricCanvases[key];
             //let serialized = JSON.stringify(canvas.toJSON(BU.agJsonExportOptions));
             //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+BU.agImagePlaceHolder+"\"")
-            allCanvasesArr.push(canvas.toJSON(BU.agJsonExportOptions)) 
+            let cnv         = canvas.toJSON(BU.agJsonExportOptions)
+            $.each(cnv.objects,function(i,obj){
+                if(!obj.agSablonResmi){
+                    obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                }
+            })
+            allCanvasesArr.push(cnv) 
+            //allCanvasesArr.push(canvas.toJSON(BU.agJsonExportOptions)) 
         }
 
         let a       = document.createElement('a');
@@ -710,12 +723,7 @@ class AgEditor {
             Promise.all(Promises).then((s) => {
                 console.log("Tamam") 
                 res();
-            }); 
-
-
-
-
-
+            });
         })
     }
    
@@ -1009,6 +1017,8 @@ class AgCropper{
 
     async openForCrop(){
         $(this.modal_element).find(".crop-menu-item").show();
+        $(this.modal_element).find(".ag-crop-resim-resimlerim").show();
+        $(this.modal_element).find(".ag-crop-resim-yukle").hide();
         const userImage = document.createElement("img"); 
         if(this.imageBase64Data){
             userImage.setAttribute('src', this.imageBase64Data);
@@ -1036,7 +1046,7 @@ class AgCropper{
         $(this.modal_element).find('.modal-body').append(
                 '<div style="text-align: center;padding: 50px;">'+
                     '<p style="display: block;">Henüz hiç resminiz yok.</p>'+
-                    '<div style="display: block;" class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
+                    '<div   class="btn btn-link ag-crop-resim-yukle">Resim Yükle</div>'+
                 '</div>'
             );
 
@@ -1046,14 +1056,17 @@ class AgCropper{
                 this.editor.modal_progress.modal('show');
                 $(this.modal_element).find('.modal-body').empty();
             }
+            
+            let sayac = 0;
             $.each(localresimlerim,(i,resim)=>{
                 let img         = document.createElement("img");
                 img.setAttribute('src',resim.url)
                 img.className   ="user-image";
                 img.onload      = function(){
-                    if(i == Object.keys(localresimlerim).length-1){
+                    if(sayac == Object.keys(localresimlerim).length-1){
                         BU.editor.modal_progress.modal('hide');
                     }
+                    sayac++
                 }
                 img.onerror  = function(){
                     BU.editor.modal_progress.modal('hide'); 
@@ -1065,6 +1078,7 @@ class AgCropper{
                 $(div).append(img);
                 $(div).append('<i class="fa fa-trash" data-lcl-ctoreage-id='+i+'></i>'); 
                 $(this.modal_element).find('.modal-body').append(div);
+                
             });
         }
     }

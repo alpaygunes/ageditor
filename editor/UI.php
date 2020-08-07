@@ -220,7 +220,7 @@
                         
                     </div>
                     <div class="modal-footer"> 
-                      <button type="button" class="btn btn-secondary ag-crop-resim-crop" data-dismiss="modal">Kırp ve Kapat</button>
+                      <button type="button" class="btn btn-secondary ag-crop-resim-crop">Kırp ve Kapat</button>
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Vazgeç</button>
                     </div>
                   </div>
@@ -239,11 +239,9 @@
                       </button>
                     </div>
                     <div class="modal-body"> 
-                      <div style="width: 100%;text-align: center;padding: 25px;">
-                          <div class="spinner-border text-muted"></div>
-                          <br>
-                          İşlem devam ediyor.
-                      </div>
+                          <div class="ag-progres">
+                            Hazırlanıyor...
+                          </div>
                     </div>
                     <div class="modal-footer"> 
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>

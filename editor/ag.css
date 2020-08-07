@@ -396,11 +396,23 @@
     height: 32px;
     font-size: 24px;
     cursor: pointer;
+    right: -10px;
+    color: #cc5a5a;
+    text-shadow: 0px 0px 3px #fff;
 }
  
 .modal-footer .ag-crop-resim-crop{
     background-color: #428bca!important;
     color: #fff!important;
+}
+
+
+.ag-bannerleri-gor{
+    display: none;
+}
+
+.ag-bannerleri-gor{
+    display: none;
 }
 
 .ag-bannerleri-gor i{
@@ -418,6 +430,19 @@
     border: 1px solid #ccc;
     padding: 10px;
 }
+
+.ag-progres{
+    text-align: center;
+    padding: 25px;
+    background-image: url(progres.gif);
+    height: 250px;
+    background-repeat: no-repeat;
+    background-position-x: center;
+}
+
+
+
+ 
  
 
 
@@ -472,8 +497,8 @@
     height: auto!important;
 }
 
-.ag-cart-thum{
-    display: none!important;
+.ag-cart-thum {
+    display: none;
 }
 
 #modal-cart-image .modal-body img{

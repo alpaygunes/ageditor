@@ -224,6 +224,11 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             trgObj.agTekHarfliBannerIcinKelime = text
             text = text.charAt(0)
             agEditor.writeToText(target_id,text)
+            if(harf_sayisi){
+                $('.ag-bannerleri-gor').show()
+            }else{
+                $('.ag-bannerleri-gor').hide()
+            }
             return;
         }
 
@@ -721,7 +726,14 @@ async function saveSablonToServer() {
         let canvas = agEditor.fabricCanvases[key];
         //let serialized = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
         //serialized = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
-        allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions))
+        let cnv         = canvas.toJSON(agEditor.agJsonExportOptions)
+        $.each(cnv.objects,function(i,obj){
+            if(!obj.agSablonResmi){
+                obj.src = agBaseURL+agEditor.agImagePlaceHolder
+            }
+        })
+        allCanvasesArr.push(cnv) 
+        //allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions))
     }
     const str   = JSON.stringify(allCanvasesArr);
     const bytes = new TextEncoder().encode(str);
@@ -844,6 +856,7 @@ function switchFullScreen(){
 
 async function bannerleriGor(){
 
+    $('#modal-banner-goster .ag-progres').show();
     let harfler                 = ''
     let objects                 = agEditor.activeCanvas.getObjects()  
 
@@ -881,7 +894,7 @@ async function bannerleriGor(){
 
     $('#modal-banner-goster').modal('show')
     $('#ag-banner-editor').empty();
-    bannerEditor        = new AgEditor();
+    bannerEditor                            = new AgEditor();
     bannerEditor.editor_html_element        = $(null);
     bannerEditor.agPresentation.preview_input_panel        = $('null');
     bannerEditor.modal_progress             = $('null');
@@ -889,13 +902,13 @@ async function bannerleriGor(){
     bannerEditor.nav_html_element           = $('null');
     bannerEditor.preview_input_panel        = $('null');
     await bannerEditor._fromJSON(allCanvasesArr);
-
     
     for(let ind in bannerEditor.fabricCanvases){
         let cnvs    = bannerEditor.fabricCanvases[ind];
         let dataURI = await bannerEditor.getJPEG(300,cnvs) 
         $('#ag-banner-editor').append('<img src="'+dataURI+'"/>')
     }
+    $('#modal-banner-goster .ag-progres').hide();
 }
 
 
@@ -988,9 +1001,16 @@ async function createAndUploadAgeditorJson(){
         if (!agEditor.fabricCanvases.hasOwnProperty(key)) continue;
         let canvas      = agEditor.fabricCanvases[key];
         //let serialized  = JSON.stringify(canvas.toJSON(agEditor.agJsonExportOptions));       
-        //serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")
-        allCanvasesArr.push(canvas.toJSON(agEditor.agJsonExportOptions)) 
+        //serialized      = serialized.replace( new RegExp(/src\":\"data:image\/([a-zA-Z]*);base64,([^\"]*)\"/,"i"),"src\":\""+agBaseURL+'/'+agEditor.agImagePlaceHolder+"\"")      
+        let cnv         = canvas.toJSON(agEditor.agJsonExportOptions)
+        $.each(cnv.objects,function(i,obj){
+            if(!obj.agSablonResmi){
+                obj.src = agBaseURL+agEditor.agImagePlaceHolder
+            }
+        })
+        allCanvasesArr.push(cnv) 
     }
+
 
     const str   = JSON.stringify(allCanvasesArr);
     const bytes = new TextEncoder().encode(str);
@@ -1046,11 +1066,15 @@ async function getProductPrewievImages() {
                 $.getJSON(url, function(datas) {                     
                         let tr      = $(elms).parent().parent()
                         first_td    = $(tr).find('td')[0];
+                        $(first_td).empty();
                         $.each(datas,(i,val)=>{
                             if(i==0){return;}
                             let v = val
-                            console.log(v.agSmallImageUrl)
-                            $(first_td).append("<img class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")
+                            let gorun = ''
+                            if(i==1){
+                                gorun = "style = style:display:block!important"
+                            }
+                            $(first_td).append("<img "+gorun+" class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")
                         })
                         resolve();
                     }).error(function(xhr, ajaxOptions, thrownError) {
