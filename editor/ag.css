@@ -309,6 +309,9 @@
     border-color:unset;
     padding: 6px;
     border: 1px solid #cee5ea;
+    margin-right: 3px;
+    height: 34px;
+    width: 34px;
 }
 
 .inputs .ag-onay i{
@@ -337,6 +340,10 @@
     border-color:unset;
     padding: 6px;
     border: 1px solid #cee5ea;
+}
+
+.ag-edit-font-size-icon{
+    border: none!important; 
 }
 
 .ag-font-list{
@@ -388,6 +395,11 @@
 #modal-text-input .modal-body{
     overflow-y: unset;
     padding:24px
+}
+
+#modal-text-input .modal-body .ag-textbox{ 
+     font-size: 24px;
+     width: 95%;
 }
  
 .wrap-user-image .fa-trash{

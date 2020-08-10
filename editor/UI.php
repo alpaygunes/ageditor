@@ -344,7 +344,7 @@
                          </div>
                     </div>
                     <div class="modal-footer"> 
-                      <button type="button" class="btn btn-success ag-modal-settings-tamam-btn" data-dismiss="modal">Kaydet</button>
+                      <button type="button" class="btn btn-success ag-modal-settings-tamam-btn" data-dismiss="modal">Kapat</button>
                     </div>
                   </div>
                 </div>

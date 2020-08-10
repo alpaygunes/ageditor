@@ -13,10 +13,8 @@ var fullpage = false
 
 document.addEventListener( 'DOMContentLoaded',  async function () {
 
-    agEditor        = new AgEditor();
-    
-    getWorkedLocationAndProductId();
- 
+    agEditor        = new AgEditor();    
+    getWorkedLocationAndProductId(); 
     
     if(agEditor.workLocation =='product_page' 
         || agEditor.workLocation =='order_info_page' 
@@ -26,9 +24,26 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
                 $(agEditor.nav_html_element).hide();
             }
             $(agEditor.target_properties_panel).hide();  
-            getSablonFile().catch(()=>{ 
+
+            //tasarım şablonu yüklenmeden önce 
+            if(agEditor.workLocation =='product_page'){ 
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $("#container").offset().top
+                }, 1000);
+            }
+
+            await getSablonFile().catch(()=>{ 
                 eskiVersiondanDonustur();
             }) 
+
+            //tasarım şablonu yükledikten sonra  
+            if(agEditor.workLocation =='product_page'){ 
+                setTimeout(() => { 
+                    $([document.documentElement, document.body]).animate({
+                        scrollTop: $(".right").offset().top-50
+                    }, 1000);
+                }, 2000);
+            }
 
         if(agEditor.workLocation =='product_edit_page'){
             if(product_id == null){
@@ -42,8 +57,6 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     }else if(agEditor.workLocation =='cart_page'){
         getProductPrewievImages();
     }
-
-
 
     agEditor.refreshMainMenu()
 
@@ -270,11 +283,16 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         }
     })
 
+    $(document).on('change','.ag-textbox',function(e){
+        $(this).css('border-color','#e6e5e5')
+    })
+
     $(document).on('click','.ag-resimekle-btn',function(){
         let target_id                   = $(this).attr('data-target-id')
         agEditor.agCropper.targetObj    = agEditor.getObjectByID(target_id)
         agEditor.agCropper.show()
         agEditor.agCropper.showMyImages()
+        $(this).css('border-color','#e6e5e5')
         if(agEditor.agCropper.targetObj.agImageUrl){
             agEditor.agCropper.agImageUrl       = agEditor.agCropper.targetObj.agImageUrl;
             agEditor.agCropper.imageBase64Data  = null;
@@ -629,10 +647,16 @@ async function renderOldversionBigBGImage() {
                 }
                 let objects = agEditor.activeCanvas.getObjects();
                 $.each(objects,(i,obj)=>{ 
+                    if(koseNoktalari[model_suffix] === undefined){ 
+                        koseNoktalari[model_suffix] = [0,0]
+                    } 
+
                     let top     = obj.top - koseNoktalari[model_suffix][0]
                     obj.set('top',top)
                     let left    = obj.left- koseNoktalari[model_suffix][1]
                     obj.set('left',left)
+                    
+                    
                     agEditor.activeCanvas.requestRenderAll(); 
                 })
                 agEditor.activeCanvas.setDimensions({
