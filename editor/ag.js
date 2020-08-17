@@ -6,6 +6,7 @@
 
 
 var agBaseURL       = "https://www.partimagnet.com/ageditor"
+//var agBaseURL       = "http://partimagnet.test/ageditor"
 var agEditor;
 var ag_gorev        = '' // bg-ekle | logo-ekle
 var product_id   = null;
@@ -54,7 +55,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
                 $(agEditor.container_html_element).append(pid_bulunamadi); 
             }
         }
-    }else if(agEditor.workLocation =='cart_page'){
+    }else if(agEditor.workLocation =='cart_page' || agEditor.workLocation =='order_info'){
         getProductPrewievImages();
     }
 
@@ -409,25 +410,28 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })
 
     $(document).on('click','.ag-edit-font',function(){
-        const obj_id = $(this).attr('data-object-id')
+        const   obj_id    = $(this).attr('data-object-id')
         $('#modal-font-setting').attr('data-obj-id',obj_id)
 
         url = agBaseURL+"/editor/fonts/fonts.json"         
         let ul = '<ul>'
         $.each(agEditor.fontsJson,function (i,fv) {    
-            let _font = new FontFace(fv, 'url('+agBaseURL+'/editor/fonts/'+fv+'.ttf)');
-            let fnt = _font.load() 
+            let     text      = $("input[data-target-id='"+obj_id+"']").val()
+            let _font   = new FontFace(fv, 'url('+agBaseURL+'/editor/fonts/'+fv+'.ttf)');
+            let fnt     = _font.load() 
             fnt.then((loaded_face)=>{
                 document.fonts.add(loaded_face)
             }).catch(()=>{
                 console.log("Font yüklenemedi font adı " + fv)
             })
-            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-font="'+fv+'">'+fv+'</li>';
+            if(!text.length){
+                text = fv
+            }
+            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-font="'+fv+'">'+text+'</li>';
         }) 
         ul += '\n<ul>'
         $('#modal-font-setting .ag-font-list').html(ul);
         
-
         url     = agBaseURL+"/editor/lib/colors.json"
         $.get(url,function(colors){ 
             let cDiv    = '';
@@ -526,11 +530,16 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         obj.agBosBirak = $(this).prop("checked")        
     })
 
- 
     $(document).on('click','.ag-modal-tamam-btn',function(){
         let target_obj_id = $('#ag-input-text').attr('data-target-id')
-        $("input[data-target-id='"+target_obj_id+"']").val($('#ag-input-text').val());
-    }) 
+        if($('#ag-input-textarea').val().length){
+            target_obj_id = $('#ag-input-textarea').attr('data-target-id')
+            $("textarea[data-target-id='"+target_obj_id+"']").val($('#ag-input-textarea').val());
+            $('#ag-input-textarea').val('');
+        }else{
+            $("input[data-target-id='"+target_obj_id+"']").val($('#ag-input-text').val());
+        }
+    })
 
     // oc admin product formda agEditor tabı açılırken yeniden hesaplanmalı heigt ler
     $(document).on('click','#ag-editor-tab-link',function(){        
@@ -540,7 +549,6 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             $(this).css('height',cnv.scrollHeight+10+'px')
             totalHeight     +=  cnv.scrollHeight+10;
         })
-
         $('#ageditor').css('height',totalHeight+'px');      
     })
 
@@ -974,6 +982,8 @@ function getWorkedLocationAndProductId(){
         switchFullScreen();
     }else if(window.location.href.includes('/ageditor/?product_id=')){
         agEditor.workLocation  = 'ageditor';
+    }else if(window.location.href.includes('account/order/info&order_id=')){
+        agEditor.workLocation  = 'order_info';
     }
 }
 
@@ -1096,7 +1106,7 @@ async function getProductPrewievImages() {
                             let v = val
                             let gorun = ''
                             if(i==1){
-                                gorun = "style = style:display:block!important"
+                                gorun = 'style = "display:block!important"'
                             }
                             $(first_td).append("<img "+gorun+" class='img-thumbnail ag-cart-thum' src='"+agBaseURL+'/'+v.agSmallImageUrl+"'>")
                         })

@@ -604,6 +604,11 @@ async function  getIceriklerJSON(product_id){
             processData: false,
             type: 'POST',
             success: function(data){
+                if(data == null){
+                    console.log("Kayıtlı eski şablon bulunamadı")
+                    resolve('false');
+                    return;
+                }
                 // eğer onbellekten geldiyse baında ve sonunda ikitane çift
                 // tırkan vardır onların temizlenip tek e indirilmesi gerekli
                 var res = data.substring(0,1);

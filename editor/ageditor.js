@@ -684,7 +684,7 @@ class AgEditor {
                                         });
                                         await BU.loadFont(obj.fontFamily).then(()=>{
                                             let txt = obj.text
-                                            obj.text= " ";
+                                            obj.text= "";
                                             cnv.renderAll() 
                                             if(BU.workLocation == 'product_page'){ 
                                                 return;
@@ -887,8 +887,8 @@ class AgPresentation{
 
         $(BU.preview_input_panel).find('.inputs').empty(); 
         $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
-        let objects     = canvas.getObjects();
-        let crop_count = 0;
+        let objects         = canvas.getObjects();
+        let crop_count      = 0;
         $.each(objects,(i,o)=>{
             let style ='';
             let disabled = '';
