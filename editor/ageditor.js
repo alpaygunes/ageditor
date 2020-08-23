@@ -102,7 +102,7 @@ class AgEditor {
             this.activeCanvas.setHeight($(imgElm).get(0).naturalHeight);
             this.activeCanvas.setWidth($(imgElm).get(0).naturalWidth);
             fabric.Image.fromURL($(imgElm).attr('src'), function(oImg) {
-                BU.activeCanvas.remove(BU.getObjectByID('bg'))
+                BU.activeCanvas.remove(BU.getObjectByID('bg',BU.activeCanvas))
                 oImg.id             = "bg"
                 oImg.lockMovementX  = oImg.lockMovementY = true;
                 oImg.hasControls    = false
@@ -136,13 +136,14 @@ class AgEditor {
                 $(BU.editor_html_element).append('<div class="clear"></div');
             }
 
-            let canvas          = new fabric.Canvas(id.toString(),{backgroundColor:bgColor});
-            canvas.width        = w;
-            canvas.height       = h;
-            canvas.id           = id;
-            canvas.agSmallImageUrl='';
-            canvas.selection    = false;
-            canvas.agVersion    = "2";
+            let canvas              = new fabric.Canvas(id.toString(),{backgroundColor:bgColor,allowTouchScrolling: true});
+            canvas.width            = w;
+            canvas.height           = h;
+            canvas.id               = id;
+            canvas.agSmallImageUrl  ='';
+            canvas.selection        = false;
+            canvas.agVersion        = "2"; 
+            
 
             $('.canvas-container').css('outline','none');
             if(BU.workLocation!='product_page'){
@@ -150,7 +151,7 @@ class AgEditor {
             }
 
             canvas.on("mouse:down", (e)=>{
-                BU.agPresentation.createInputPanel(canvas);
+                //BU.agPresentation.createInputPanel(canvas);
                 $('.canvas-container').css('outline','none');
                 BU.activeCanvas = canvas;
 
@@ -168,7 +169,7 @@ class AgEditor {
                             if(e.target.agBosBirak){return;}
                             let target_id           = e.target.id
                             $(BU.target_properties_panel).hide();
-                            BU.agCropper.targetObj  = BU.getObjectByID(target_id)
+                            BU.agCropper.targetObj  = BU.getObjectByID(target_id,BU.activeCanvas)
                             BU.agCropper.show()
                             BU.agCropper.showMyImages()
                             if(e.target.agImageUrl){
@@ -187,6 +188,7 @@ class AgEditor {
                             $('#modal-text-input .ag-textarea').hide();
                             $('#modal-text-input #ag-input-text').show();
                             $('#modal-text-input #ag-input-text').attr('data-target-id',e.target.id)
+                            $('#modal-text-input #ag-input-text').attr('target-canvas-id',BU.activeCanvas.id)
                             $('#modal-text-input #ag-input-text').val(text)
                         }else{
                             $('#modal-text-input .ag-textarea').show();
@@ -205,6 +207,7 @@ class AgEditor {
     
     
                             $('#modal-text-input .ag-textarea').attr('data-target-id',e.target.id)
+                            $('#modal-text-input .ag-textarea').attr('target-canvas-id',BU.activeCanvas.id)
                             $('#modal-text-input .ag-textarea').val(text) 
                             $('#modal-text-input .ag-textarea').attr('rows',e.target.agMaxLines) 
                             $('#modal-text-input .ag-textarea').attr('style',style) 
@@ -625,7 +628,9 @@ class AgEditor {
             let cnv         = canvas.toJSON(BU.agJsonExportOptions)
             $.each(cnv.objects,function(i,obj){
                 if(!obj.agSablonResmi){
-                    obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                    if(!obj.agIsLogo){
+                        obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                    }
                 }
             })
             allCanvasesArr.push(cnv) 
@@ -641,8 +646,6 @@ class AgEditor {
 
     async _fromJSON(jsonFile){
         return new Promise((res,rej)=>{
-
-
             let BU              = this;
             $(this.editor_html_element).empty();
             this.fabricCanvases = [];
@@ -727,8 +730,8 @@ class AgEditor {
         })
     }
    
-    getObjectByID(target_id){
-        let objects = this.activeCanvas.getObjects();
+    getObjectByID(target_id,target_canvas){
+        let objects = target_canvas.getObjects();
         let obj = null;
         $.each(objects,function(i,o){
             if(o.id != undefined){
@@ -740,11 +743,22 @@ class AgEditor {
         })
         return obj;
     }
+   
+    getCanvasByID(canvas_id){ 
+        let BU = this;
+        for (var key in BU.fabricCanvases) {
+            if (!BU.fabricCanvases.hasOwnProperty(key)) continue;
+            let canvas = BU.fabricCanvases[key];
+            if(canvas.id == canvas_id){
+                return canvas;
+            }
+        }
+    }
 
-    writeToText(target_id,text){
-        let o           = this.getObjectByID(target_id);
+    writeToText(target_id,text,target_canvas){
+        let o           = this.getObjectByID(target_id,target_canvas);
         o.text          = text;
-        this.activeCanvas.renderAll(); 
+        target_canvas.renderAll(); 
     }
 
     async sunumuBaslat(){
@@ -757,7 +771,7 @@ class AgEditor {
 
         await this.agPresentation.prewiev();
         $(this.agPresentation.preview_input_panel).attr('data-canvas-id','')
-        this.agPresentation.createInputPanel(this.activeCanvas)
+        this.agPresentation.createInputPanels()
         this.refreshMainMenu();
     }
 
@@ -768,7 +782,7 @@ class AgEditor {
             bigImgSrc                       = BU.activeCanvas.imgSrc;
             BU.activeCanvas.imgSrc          = null;
         }else{
-            imgSrc                          = BU.getObjectByID('bg').getSrc();
+            imgSrc                          = BU.getObjectByID('bg',BU.activeCanvas).getSrc();
             bigImgSrc                       = imgSrc.replace("bgimages", "orginal_images");
             BU.activeCanvas.bigImgSrc       = bigImgSrc;
             BU.activeCanvas.imgSrc          = imgSrc;
@@ -788,8 +802,8 @@ class AgEditor {
                     }
                     let w0      = BU.activeCanvas.width;
                     let index   = BU.activeCanvas.getObjects()
-                                    .indexOf(BU.getObjectByID('bg'))
-                    BU.activeCanvas.remove(BU.getObjectByID('bg'))
+                                    .indexOf(BU.getObjectByID('bg',BU.activeCanvas))
+                    BU.activeCanvas.remove(BU.getObjectByID('bg',BU.activeCanvas))
                     oImg.id             = "bg"
                     oImg.lockMovementX  = oImg.lockMovementY = true;
                     oImg.hasControls    = false
@@ -871,24 +885,48 @@ class AgPresentation{
                 o.lockMovementX = o.lockMovementY = BU.presentMode;
                 o.hasControls = !BU.presentMode;
             })
+        }        
+    }
+
+    createInputPanels(){
+        for (var key in this.editor.fabricCanvases) {
+            if (!this.editor.fabricCanvases.hasOwnProperty(key)) continue;
+            let c      = this.editor.fabricCanvases[key]; 
+            this.createInputPanel(c);
         }
-        
     }
 
     createInputPanel(canvas){
-
         let BU = this;
         if(!this.presentMode){
             return;
         }
 
-        let data_canvas_id = $(BU.preview_input_panel).attr('data-canvas-id')
-        if(data_canvas_id == canvas.id)return;
+        if($("div[data-canvas-id="+canvas.id+"]").length){
+            return;
+        }
 
-        $(BU.preview_input_panel).find('.inputs').empty(); 
-        $(BU.preview_input_panel).attr('data-canvas-id',canvas.id)
+        let panelDiv    = document.createElement('div')
+        let table       = '<table class="table table-borderless inputs textbox">'
+                        + '</table>'
+                        + '<table class="table table-borderless inputs cropbox">'
+                        + '</table>'
+
+        if(Object.keys(BU.editor.fabricCanvases).length>1){
+            $(panelDiv).prepend('<div class="ag-input-header">'
+                    + ($("div[data-canvas-id]").length)  
+                    + '. Sayfa</div>');
+        }
+
+        $(panelDiv).append(table);
+        if($(window).width()>760 && BU.editor.workLocation  ==  'product_page'){
+            $(panelDiv).css("height",canvas.wrapperEl.offsetHeight)
+        }        
+ 
+        $(panelDiv).attr('data-canvas-id',canvas.id)
         let objects         = canvas.getObjects();
         let crop_count      = 0;
+
         $.each(objects,(i,o)=>{
             let style ='';
             let disabled = '';
@@ -899,7 +937,7 @@ class AgPresentation{
             }
 
             let  o_text         =   '';
-            if(BU.workLocation  !=  'product_page'){
+            if(BU.editor.workLocation  !=  'product_page'){
                 o_text = o.text
                 if(BU.editor.agBelgeTuru == 'tek_harfli_banner' ){
                     o_text = o.agTekHarfliBannerIcinKelime
@@ -908,28 +946,27 @@ class AgPresentation{
             
             if(o instanceof fabric.Textbox){
                 if(o.agMaxLines==1){
-                    $(BU.preview_input_panel).find('.textbox')
+                    $(panelDiv).find('.textbox')
                         .append('<tr>'
                             +'  <td style="padding:0px!important;padding-top:0px!important">'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font"></i> </div>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'"><i class="fa fa-font"></i> </div>'
                             +'  </td>'
                             +'  <td>'
-                            +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" placeholder="Yazı Alanı" value="'+o_text+'" '+disabled+'  data-target-id="'+o.id+'">'
+                            +'      <input type="text" style="'+style+'"  class="form-control ag-form-control ag-textbox" placeholder="Yazı Alanı" target-canvas-id="'+canvas.id+'" value="'+o_text+'" '+disabled+'  data-target-id="'+o.id+'">'
                             +'  </td>'
                             +'  <td style="min-width: 92px; padding: 0!important; padding-top: 1px!important;">'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
                             +'      <div class="btn btn-primary btn-sm ag-edit-font-size ag-edit-font-size-icon"><i class="fa fa-font"></i></div>'
-                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
+                            +'      <div class="btn btn-primary btn-sm ag-edit-font-size" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
                             +'  </td>'
                             +'</tr>'
                             +'<tr>'
                             +'  <td colspan="3">'
                             +'      <div class="checkbox" style="margin-top:0px">'
-                            +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                            +'      <label> <input type="checkbox" class="bos-birak"  target-canvas-id="'+canvas.id+'"  data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                             +'      </div>'
                             +'  </td>'
                             +'</tr>')
-
                 }else{
                     style           += "font-family:"+o.fontFamily+";"
                     style           += "font-size:"+o.fontSize*o.scaleX+"px!important;"
@@ -938,30 +975,30 @@ class AgPresentation{
                     style           += "height:"+(o.fontSize*o.agMaxLines)+"px!important;"
                     style           += "padding:0px!important;"
 
-                    let zoom        = $(BU.preview_input_panel).find('.inputs').width() / o.getScaledWidth();
+                    let zoom        = $(panelDiv).find('.inputs').width() / o.getScaledWidth();
                     let zoomstyle   = '';
                     if(zoom<1){
                         zoomstyle   = ";zoom:"+zoom
                     }
 
-                    $(BU.preview_input_panel).find('.textbox')
+                    $(panelDiv).find('.textbox')
                         .append('<tr>'
                         +'  <td style="padding:0px!important;padding-top:0px!important">'
-                        +'      <div class="btn btn-primary btn-sm ag-edit-font" data-object-id="'+o.id+'"><i class="fa fa-font" ></i> </div>'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'"><i class="fa fa-font" ></i> </div>'
                         +'  </td>'
                         +'  <td style="display:block;overflow:auto'+zoomstyle+'">'
-                        +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
+                        +'      <textarea rows="'+o.agMaxLines+'"  style="'+style+'"  target-canvas-id="'+canvas.id+'"   class="ag-form-control form-control ag-textarea"  data-target-id="'+o.id+'"  maxlength="'+o.agKarakterLimiti+'">'+o.text+'</textarea>'
                         +'  </td>'
                         +'  <td style="min-width: 60px; padding: 0!important; padding-top: 1px!important;">'
-                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'" data-val ="+"><i class="fa fa-plus"></i></div>'
                         +'      <div class="btn btn-primary btn-sm ag-edit-font-size ag-edit-font-size-icon"><i class="fa fa-font"></i></div>'
-                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
+                        +'      <div class="btn btn-primary btn-sm ag-edit-font-size" target-canvas-id="'+canvas.id+'" data-object-id="'+o.id+'" data-val ="-"><i class="fa fa-minus"></i></div>'
                         +'  </td>'
                         +'</tr>'
                         +'<tr>'
                         +'  <td colspan=3>'
                         +'      <div class="checkbox" style="margin-top:0px">'
-                        +'      <label> <input type="checkbox" class="bos-birak" data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
+                        +'      <label> <input type="checkbox" class="bos-birak" target-canvas-id="'+canvas.id+'"  data-canvas-id="'+canvas.id+'"  '+checked+' data-object-id="'+o.id+'">Yazı eklemek istemiyorum</label>'
                         +'      </div>'
                         +'  <td>'
                         +'</tr>')
@@ -970,17 +1007,18 @@ class AgPresentation{
 
             if(o instanceof fabric.Image && !o.agSablonResmi && !o.agIsLogo){
                 crop_count++;
-                $(BU.preview_input_panel).find('.cropbox')
+                $(panelDiv).find('.cropbox')
                 .append('<tr>'
                     +'   <td>'
-                    +'       <div  class="btn btn-primary  ag-resimekle-btn" data-target-id="'+o.id+'" '+disabled+'  ><i class="fa fa-camera" style="color:#fff"></i> Resim Ekle ' + crop_count +'</div>'
+                    +'       <div  class="btn btn-primary  ag-resimekle-btn"  target-canvas-id="'+canvas.id+'"  data-target-id="'+o.id+'" '+disabled+'  ><i class="fa fa-camera" style="color:#fff"></i> Resim Ekle ' + crop_count +'</div>'
                     +'       <div class="checkbox" style="margin-top:0px">'
-                    +'       <label> <input type="checkbox" class="bos-birak" id="bosbirak'+o.id+'"  '+checked+' data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
+                    +'       <label> <input type="checkbox" class="bos-birak"  target-canvas-id="'+canvas.id+'"  id="bosbirak'+o.id+'"  '+checked+' data-object-id="'+o.id+'">Resim eklemek istemiyorum</label>'
                     +'       </div>'
                     +'   </td>'
                     +'</tr>')
             }
         })
+
         let bannerlereBakTR =''
         if(BU.editor.agBelgeTuru == 'tek_harfli_banner'){
             bannerlereBakTR = '\n<tr>'
@@ -990,11 +1028,14 @@ class AgPresentation{
                             + '     Bannerleri Gör</div>'
                             + '  </td>'
                             + '</tr>'
-            $(BU.preview_input_panel).find('.cropbox').append(
+            $(panelDiv).find('.cropbox').append(
                 bannerlereBakTR
             )
         }
+
+        $(BU.preview_input_panel).append(panelDiv)
     }
+
 }
 
 

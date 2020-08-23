@@ -1,3 +1,5 @@
+
+
 var fabricObj   = {
                 version:"3.6.1",
                 agVersion:"1",
@@ -567,7 +569,7 @@ async function eskiVersiondanDonustur(){
     iceriklerJSON       = await getIceriklerJSON(product_id);
     if(iceriklerJSON!='false'){ 
         buyukZeminResmiURL = parseProductModelNo();
-        createFabricJSON(iceriklerJSON);    
+        createFabricJSON(iceriklerJSON); 
     }
 }
 
@@ -807,7 +809,8 @@ async function  createFabricJSON(iceriklerJSON){
     let allCanvasesArr          = [{'agBelgeTuru':agEditor.agBelgeTuru}]; 
     allCanvasesArr.push(fabricObj)
     //const str                   = JSON.stringify(allCanvasesArr);
-    agEditor._fromJSON(allCanvasesArr);
+    await agEditor._fromJSON(allCanvasesArr);
+    
 
     let totalHeight             = 0
     $('.canvas-container').each(function (elm) {

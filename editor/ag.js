@@ -5,14 +5,22 @@
  */
 
 
-var agBaseURL       = "https://www.partimagnet.com/ageditor"
-//var agBaseURL       = "http://partimagnet.test/ageditor"
+//var agBaseURL       = "https://www.partimagnet.com/ageditor"
+var agBaseURL       = "http://partimagnet.test/ageditor"
 var agEditor;
 var ag_gorev        = '' // bg-ekle | logo-ekle
-var product_id   = null;
-var fullpage = false
+var product_id      = null;
+var fullpage        = false
+
+if(window.location.host.search('.com')>-1){
+    agBaseURL       = "https://www.partimagnet.com/ageditor"
+}
 
 document.addEventListener( 'DOMContentLoaded',  async function () {
+
+
+
+     
 
     agEditor        = new AgEditor();    
     getWorkedLocationAndProductId(); 
@@ -34,7 +42,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             }
 
             await getSablonFile().catch(()=>{ 
-                eskiVersiondanDonustur();
+                eskiVersiondanDonustur(); 
             }) 
 
             //tasarım şablonu yükledikten sonra  
@@ -217,14 +225,20 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })
 
     $(document).on('keyup','.ag-textarea',function(e){
-        let target_id   = $(this).attr('data-target-id') 
-        agEditor.writeToText(target_id,$(this).val())
+        let target_canvas_id        = $(this).attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+        let target_id               = $(this).attr('data-target-id') 
+        agEditor.writeToText(target_id,$(this).val(),target_canvas)
     })
 
     $(document).on('keyup','.ag-textbox',function(e){
-        let target_id   = $(this).attr('data-target-id') 
-        let fbTxtObj    = agEditor.getObjectByID(target_id)
-        let text        = $(this).val(); 
+         
+        let target_canvas_id        = $(this).attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+
+        let target_obj_id           = $(this).attr('data-target-id')
+        let fbTxtObj                = agEditor.getObjectByID(target_obj_id,target_canvas)
+        let text                    = $(this).val();
 
         //eğer belge turu tek_harf banner ise font boyutunu hesaplama
         if(agEditor.agBelgeTuru == 'tek_harfli_banner'){
@@ -234,10 +248,10 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
                 harf_sayisi++;
             }
             $('#input-quantity').val(harf_sayisi)
-            let trgObj = agEditor.getObjectByID(target_id)
+            let trgObj = agEditor.getObjectByID(target_obj_id,target_canvas)
             trgObj.agTekHarfliBannerIcinKelime = text
             text = text.charAt(0)
-            agEditor.writeToText(target_id,text)
+            agEditor.writeToText(target_obj_id,text,target_canvas)
             if(harf_sayisi){
                 $('.ag-bannerleri-gor').show()
             }else{
@@ -265,7 +279,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         }
 
         $(this).val(text) 
-        agEditor.writeToText(target_id,text)
+        agEditor.writeToText(target_obj_id,text,target_canvas)
     })
 
     $(document).on('keypress','.ag-textbox',function(e){
@@ -276,9 +290,11 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         }
 
         $(this).css('border-color','#e6e5e5')
-        let target_id   = $(this).attr('data-target-id') 
-        let fbTxtObj    = agEditor.getObjectByID(target_id)
-        let text        = $(this).val();
+        let target_obj_id           = $(this).attr('data-target-id') 
+        let target_canvas_id        = $(this).attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+        let fbTxtObj                = agEditor.getObjectByID(target_obj_id,target_canvas)
+        let text                    = $(this).val();
         if(fbTxtObj.agKarakterLimiti <= text.length){
             return false;
         }
@@ -289,8 +305,10 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })
 
     $(document).on('click','.ag-resimekle-btn',function(){
-        let target_id                   = $(this).attr('data-target-id')
-        agEditor.agCropper.targetObj    = agEditor.getObjectByID(target_id)
+        let target_canvas_id        = $(this).attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+        let target_obj_id                   = $(this).attr('data-target-id')
+        agEditor.agCropper.targetObj        = agEditor.getObjectByID(target_obj_id,target_canvas)
         agEditor.agCropper.show()
         agEditor.agCropper.showMyImages()
         $(this).css('border-color','#e6e5e5')
@@ -410,7 +428,9 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     })
 
     $(document).on('click','.ag-edit-font',function(){
-        const   obj_id    = $(this).attr('data-object-id')
+        const target_canvas_id  = $(this).attr("target-canvas-id")
+        $('#modal-font-setting').attr('target-canvas-id',target_canvas_id)
+        const obj_id            = $(this).attr('data-object-id')
         $('#modal-font-setting').attr('data-obj-id',obj_id)
 
         url = agBaseURL+"/editor/fonts/fonts.json"         
@@ -427,7 +447,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             if(!text.length){
                 text = fv
             }
-            ul +='\n<li style="font-family:'+fv+'" class="ag-font" data-font="'+fv+'">'+text+'</li>';
+            ul +='\n<li  style="font-family:'+fv+'" class="ag-font" data-font="'+fv+'">'+text+'</li>';
         }) 
         ul += '\n<ul>'
         $('#modal-font-setting .ag-font-list').html(ul);
@@ -437,7 +457,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             let cDiv    = '';
             if(colors){ 
                 $.each(colors,function (i,cv) {
-                    cDiv += '\n<div class="ag-color-box" data-obj-id="'+obj_id+'" data-color = "'+cv+'" style="background-color:'+cv+'"></div>'
+                    cDiv += '\n<div class="ag-color-box"   data-obj-id="'+obj_id+'" data-color = "'+cv+'" style="background-color:'+cv+'"></div>'
                 })
             }
             $('#modal-font-setting .ag-color-list').html(cDiv);
@@ -449,7 +469,9 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     $(document).on('click','.ag-edit-font-size',function(){
         let data_val       = $(this).attr('data-val');
         let data_object_id = $(this).attr('data-object-id');
-        let obj            = agEditor.getObjectByID(data_object_id)
+        let target_canvas_id        =  $(this).attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+        let obj            = agEditor.getObjectByID(data_object_id,target_canvas)
         if(data_val == '+'){
             obj.fontSize++
             obj.top--
@@ -457,18 +479,19 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
             obj.fontSize--
             obj.top++
         }
-        agEditor.activeCanvas.requestRenderAll();
-    })
-    
+        target_canvas.requestRenderAll();
+    })    
 
     $(document).on('click','.ag-font',function(){     
         $('.ag-font').css('background-color','#fff')  
-        $(this).css('background-color','#eee')        
+        $(this).css('background-color','#eee')
+        let target_canvas_id        =  $('#modal-font-setting').attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
         let font_name    = $(this).attr('data-font')          
         let obj_id       = $('#modal-font-setting').attr('data-obj-id')
-        obj              = agEditor.getObjectByID(obj_id)
+        obj              = agEditor.getObjectByID(obj_id,target_canvas)
         obj.fontFamily   = font_name;
-        agEditor.activeCanvas.renderAll();
+        target_canvas.renderAll();
     })
 
     $(document).on('click','.ag-color-box',function(){       
@@ -476,9 +499,11 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         $(this).css('border-radius','0')  
         let color        = $(this).attr('data-color')
         let obj_id       = $('#modal-font-setting').attr('data-obj-id')
-        obj              = agEditor.getObjectByID(obj_id)
+        let target_canvas_id        =  $('#modal-font-setting').attr('target-canvas-id')
+        let target_canvas           = agEditor.getCanvasByID(target_canvas_id);
+        obj              = agEditor.getObjectByID(obj_id,target_canvas)
         obj.setColor(color);
-        agEditor.activeCanvas.renderAll();
+        target_canvas.renderAll();
      })
 
     $(agEditor.agCropper.modal_element).on('hidden.bs.modal', function () {
@@ -502,14 +527,16 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
     
     $(document).on('click','.bos-birak',function(){
         const data_object_id    = $(this).attr('data-object-id');
-        const obj               = agEditor.getObjectByID(data_object_id);
+        let target_canvas_id    = $(this).attr('target-canvas-id')
+        let target_canvas       = agEditor.getCanvasByID(target_canvas_id);
+        const obj               = agEditor.getObjectByID(data_object_id,target_canvas);
         $("[data-target-id='"+data_object_id+"']").css('border-color','#e6e5e5')
         
         if($(this).prop("checked") == true){
             if(obj instanceof fabric.Textbox){
                 obj.text = ""
             }
-            agEditor.activeCanvas.renderAll();
+            target_canvas.renderAll();
             if(obj instanceof fabric.Textbox){
                 $("[data-target-id='"+data_object_id+"']").val('')
             }
@@ -520,7 +547,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
                 obj.setSrc(agBaseURL+agEditor.agImagePlaceHolder,function () {
                     obj.width   = w
                     obj.height  = h 
-                    agEditor.activeCanvas.renderAll();
+                    target_canvas.renderAll();
                 });
                 delete obj.agImageUrl;
             }
@@ -601,8 +628,7 @@ document.addEventListener( 'DOMContentLoaded',  async function () {
         }else{
             alert("Aktif sayfa yok")
         }
-    })
-    
+    })  
     
 })//===========================   End document ready
 
@@ -644,7 +670,7 @@ async function renderOldversionBigBGImage() {
         return false; 
     }
 
-    zeminResmi  = agEditor.getObjectByID('bg').getSrc();    
+    zeminResmi  = agEditor.getObjectByID('bg',agEditor.activeCanvas).getSrc();    
     if(agEditor.activeCanvas){
         return new Promise((resolve,reject)=>{
             fabric.Image.fromURL(zeminResmi, function(oImg) {
@@ -761,7 +787,9 @@ async function saveSablonToServer() {
         let cnv         = canvas.toJSON(agEditor.agJsonExportOptions)
         $.each(cnv.objects,function(i,obj){
             if(!obj.agSablonResmi){
-                obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                if(!obj.agIsLogo){
+                    obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                }
             }
         })
         allCanvasesArr.push(cnv) 
@@ -1039,7 +1067,9 @@ async function createAndUploadAgeditorJson(){
         let cnv         = canvas.toJSON(agEditor.agJsonExportOptions)
         $.each(cnv.objects,function(i,obj){
             if(!obj.agSablonResmi){
-                obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                if(!obj.agIsLogo){
+                    obj.src = agBaseURL+agEditor.agImagePlaceHolder
+                }
             }
         })
         allCanvasesArr.push(cnv) 

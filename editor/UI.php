@@ -167,10 +167,12 @@
                   <div class="card-body">
                     <fieldset class="ag-alanseti">
                       <legend>Tasarım Yazı &amp; Resim Alanları</legend>
+                      <!--
                       <table class="table table-borderless inputs textbox">  
                       </table>
                       <table class="table table-borderless inputs cropbox">  
                       </table>
+                        -->
                     </fieldset>
                   </div>
                 </div>

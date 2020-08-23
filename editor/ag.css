@@ -4,8 +4,7 @@
     border: 1px solid #fff;
 }
 
-#ageditor{
-    margin-top: 25px;
+#ageditor{ 
     float: left;  
 }
 
@@ -325,6 +324,15 @@
     border: 1px solid #e6e5e5;
 }
 
+.ag-input-panel .ag-input-header{
+    font-size: 16px;
+    color: #6f6f6f;
+    padding: 5px;
+    border-bottom: 1px solid #b2cfd1;
+    margin-bottom: 10px;
+
+}
+
 
 
 .ag-edit-font-size{
@@ -471,6 +479,10 @@
     padding: 0!important;
 }
 
+.right #product{
+    margin-top: 0px!important;
+}
+
 .ag-alanseti{
     border: 1px solid #ccc!important;
     padding: 0;
@@ -539,3 +551,32 @@
 .ag-settings:hover{
     background-color: #e2e2e2;
 }
+
+
+ 
+  #ag-price-cerceve{
+    border: 1px solid #999999;
+    margin-top:  5px;
+  }
+
+  #ag-option-cerceve{
+    border: 1px solid #999999;
+    margin-top:  5px;
+  }
+
+  #ag-product {
+    margin-top: 10px!important;
+  }
+
+
+  @media (min-width: 760px) {
+    #product {
+      margin-top: 10px!important;
+    }
+  }
+
+  @media (max-width: 760px) {
+    #ag-option-cerceve{
+      margin-top: 16px;
+    }
+  }
